@@ -1,0 +1,54 @@
+# AWS EC2 인스턴스에 대한 SSH 연결은 보안을 위해 허용된 IP에서만 가능합니다.
+# Github Actions 에서 사용되는 IP 주소는 그 때마다 바뀌므로,
+# EC2 보안그룹에 동적으로 IP 주소를 추가했다가 삭제하는 방식으로 운영합니다.
+# 참고: https://kamrul.dev/dynamically-add-github-actions-ip-to-aws-security-group/
+
+name: CD-update server docker image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    # 실행환경: 20.04 우분투
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Get Github Actions IP address
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: Setting Github Actions' Environment Variables
+        run: |
+          echo "AWS_DEFAULT_REGION=ap-northeast-2" >> $GITHUB_ENV
+          echo "AWS_SG_NAME=PickpleResearch-Server-EC2-SG" >> $GITHUB_ENV
+
+      - name: Add Github Actions IP address to Security Group
+        run: |
+          aws ec2 authorize-security-group-ingress --group-name ${{ env.AWS_SG_NAME }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SG_IAM_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SG_IAM_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Update Docker Image and Start again
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd server
+            docker-compose pull
+            docker-compose up -d
+
+      - name: Remove Github Actions IP address from Security Group
+        run: |
+          aws ec2 revoke-security-group-ingress --group-name ${{ env.AWS_SG_NAME }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SG_IAM_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SG_IAM_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_DEFAULT_REGION }}
+        if: always()
+# 이 후 로그 확인하고 싶을 때:
+# server $ docker-compose logs -f
