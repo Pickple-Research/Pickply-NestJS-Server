@@ -21,6 +21,7 @@ import {
   GuardModule,
   PipeModule,
   FilterModule,
+  EventsModule
 } from "src/Module/Global";
 // Main Modules
 import {
@@ -121,6 +122,7 @@ import {
     GuardModule,
     PipeModule,
     FilterModule,
+    EventsModule,
 
     //* Controller & Service 형태의 일반 모듈
     AdminModule,
@@ -139,7 +141,7 @@ import {
   ],
 })
 export class AppModule implements NestModule {
-  configure() {}
+  configure() { }
   //* 전역 미들웨어 설정을 하고 싶다면 아래 주석을 이용합니다.
   // configure(consumer: MiddlewareConsumer) {
   //   consumer
