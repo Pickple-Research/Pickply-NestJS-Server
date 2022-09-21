@@ -22,7 +22,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-09-16 1330 v1.1.4 잔여 크레딧 산출 방식 변경";
+    return "2022-09-21 1033 v1.1.5 서버 이관";
   }
 
   /**
