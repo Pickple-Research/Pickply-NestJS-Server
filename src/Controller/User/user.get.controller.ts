@@ -14,19 +14,6 @@ export class UserGetController {
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
 
-  @Public()
-  @Get("alarm")
-  async getAlarm() {
-    await this.firebaseService.sendPushAlarm({
-      token:
-        "dvRBn9fCRMGZKG4tjGzyEe:APA91bHHv3wTb_-IfETusHwe6W05O7vqLjfqZv5D0pv9W1nzuWT0l1r-eVITFmrd55hVEQKhDtrfAvP5roe1BajXYNav0C73erLgNASpghseBoYWY6b6v-wJQwZgUKx8kwdc1NGDFCgV",
-      notification: {
-        title: "test",
-        body: "test",
-      },
-    });
-  }
-
   /**
    * 요청한 유저의 최근 20개 크레딧 변동내역을 반환합니다.
    * @author 현웅
