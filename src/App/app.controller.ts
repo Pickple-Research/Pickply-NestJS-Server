@@ -22,7 +22,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-09-21 1033 v1.1.5 서버 이관";
+    return "2022-09-26 1743 v1.1.6 리서치/투표 참여 시 성별 및 연령대 정보 추가, 비회원 리서치 참여 기능 추가";
   }
 
   /**

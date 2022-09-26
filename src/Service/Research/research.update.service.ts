@@ -13,13 +13,12 @@ import {
   MongoResearchDeleteService,
 } from "src/Mongo";
 import {
-  User,
   Research,
   ResearchView,
   ResearchScrap,
+  ResearchNonMemberParticipation,
   ResearchParticipation,
   CreditHistory,
-  Notification,
 } from "src/Schema";
 import { PushAlarm } from "src/Object/Type";
 import { CreditHistoryType, AlarmType } from "src/Object/Enum";
@@ -185,6 +184,36 @@ export class ResearchUpdateService {
         session,
       );
     return { updatedResearch, newResearchParticipation };
+  }
+
+  /**
+   * (비회원) 리서치에 참여합니다.
+   * 리서치 참여자 수를 증가시키고 리서치 비회원 참여 정보를 생성합니다.
+   * (Session 은 사용하지 않습니다)
+   * @return 업데이트된 리서치 정보, 생성된 리서치 비회원 참여 정보
+   * @author 현웅
+   */
+  async nonMemberParticipateResearch(param: {
+    researchId: string;
+    researchNonMemberParticipation: ResearchNonMemberParticipation;
+  }) {
+    //* 리서치 참여자 수 1 증가
+    const updateResearch = this.mongoResearchUpdateService.updateResearch({
+      researchId: param.researchId,
+      updateQuery: { $inc: { participantsNum: 1 } },
+    });
+    //* 새로운 리서치 비회원 참여 정보 생성
+    const createResearchNonMemberParticipation =
+      this.mongoResearchCreateService.createResearchNonMemberParticipation({
+        researchNonMemberParticipation: param.researchNonMemberParticipation,
+      });
+    //* 위 두 함수를 동시에 실행
+    return await Promise.all([
+      updateResearch,
+      createResearchNonMemberParticipation,
+    ]).then(([updatedResearch, newResearchNonMemberParticipation]) => {
+      return { updatedResearch, newResearchNonMemberParticipation };
+    });
   }
 
   /**
