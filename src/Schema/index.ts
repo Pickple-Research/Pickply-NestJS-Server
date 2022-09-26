@@ -12,6 +12,7 @@ export * from "./Partner/partnerProduct.schema";
 export * from "./Research/research.schema";
 export * from "./Research/researchComment.schema";
 export * from "./Research/researchCommentReport.schema";
+export * from "./Research/researchNonMemberParticipation.schema";
 export * from "./Research/researchParticipation.schema";
 export * from "./Research/researchReply.schema";
 export * from "./Research/researchReplyReport.schema";

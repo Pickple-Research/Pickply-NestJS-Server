@@ -7,16 +7,22 @@ import { Document } from "mongoose";
  */
 @Schema()
 export class ResearchParticipation {
-  @Prop({ required: true, index: true }) // 스크랩 대상 리서치 _id
+  @Prop({ required: true, index: true }) // 참여 대상 리서치 _id
   researchId: string;
 
-  @Prop({ required: true, index: true }) // 스크랩한 유저 _id
+  @Prop({ required: true, index: true }) // 참여한 유저 _id
   userId: string;
 
   @Prop({ required: true }) // 리서치 참여에 걸린 시간
   consumedTime: number;
 
-  @Prop({ required: true }) // 스크랩 일시
+  @Prop() // 성별
+  gender?: string;
+
+  @Prop() // 연령대
+  ageGroup?: string;
+
+  @Prop({ required: true }) // 참여 일시
   createdAt: string;
 }
 

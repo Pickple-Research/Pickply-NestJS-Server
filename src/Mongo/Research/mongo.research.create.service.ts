@@ -11,6 +11,8 @@ import {
   ResearchCommentDocument,
   ResearchCommentReport,
   ResearchCommentReportDocument,
+  ResearchNonMemberParticipation,
+  ResearchNonMemberParticipationDocument,
   ResearchParticipation,
   ResearchParticipationDocument,
   ResearchReply,
@@ -38,6 +40,8 @@ export class MongoResearchCreateService {
     private readonly ResearchComment: Model<ResearchCommentDocument>,
     @InjectModel(ResearchCommentReport.name)
     private readonly ResearchCommentReport: Model<ResearchCommentReportDocument>,
+    @InjectModel(ResearchNonMemberParticipation.name)
+    private readonly ResearchNonMemberParticipation: Model<ResearchNonMemberParticipationDocument>,
     @InjectModel(ResearchParticipation.name)
     private readonly ResearchParticipation: Model<ResearchParticipationDocument>,
     @InjectModel(ResearchReply.name)
@@ -168,6 +172,21 @@ export class MongoResearchCreateService {
       param.researchScrap,
     ]);
     return newResearchScrapes[0].toObject();
+  }
+
+  /**
+   * 비회원의 리서치 참여시: 비회원 리서치 참여 정보를 생성합니다.
+   * @return 생성된 비회원 리서치 참여 정보
+   * @author 현웅
+   */
+  async createResearchNonMemberParticipation(param: {
+    researchNonMemberParticipation: ResearchNonMemberParticipation;
+  }) {
+    const newResearchNonMemberParticipation =
+      await this.ResearchNonMemberParticipation.create([
+        param.researchNonMemberParticipation,
+      ]);
+    return newResearchNonMemberParticipation[0].toObject();
   }
 
   /**

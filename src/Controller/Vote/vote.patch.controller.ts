@@ -125,6 +125,8 @@ export class VotePatchController {
       userId: req.user.userId,
       voteId: body.voteId,
       selectedOptionIndexes: body.selectedOptionIndexes,
+      gender: body.gender,
+      ageGroup: body.ageGroup,
       createdAt: getCurrentISOTime(),
     };
 

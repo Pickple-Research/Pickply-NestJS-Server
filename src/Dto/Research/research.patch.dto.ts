@@ -15,6 +15,21 @@ export class ResearchInteractBodyDto {
 }
 
 /**
+ * 비회원 리서치 참여시 Body에 포함되어야 하는 정보들입니다.
+ * @author 현웅
+ */
+export class ResearchNonMemberParticipateBodyDto {
+  @IsNumber()
+  consumedTime: number;
+
+  @IsString()
+  researchId: string;
+
+  @IsString()
+  fcmToken: string;
+}
+
+/**
  * 리서치 참여시 Body에 포함되어야 하는 정보들입니다.
  * @param consumedTime 리서치 참여 소요시간
  * @param researchId 리서치 _id
@@ -35,6 +50,14 @@ export class ResearchParticiateBodyDto {
 
   @IsNumber()
   credit: number;
+
+  @IsString()
+  @IsOptional() //TODO: 추후 제거합니다.
+  gender?: string;
+
+  @IsString()
+  @IsOptional() //TODO: 추후 제거합니다.
+  ageGroup?: string;
 
   @IsString()
   @IsOptional()

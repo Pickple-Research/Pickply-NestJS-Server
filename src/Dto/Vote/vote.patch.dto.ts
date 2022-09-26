@@ -1,4 +1,4 @@
-import { IsString, IsNumber, ArrayMinSize } from "class-validator";
+import { IsString, IsNumber, ArrayMinSize, IsOptional } from "class-validator";
 import { Type } from "class-transformer";
 
 /**
@@ -24,6 +24,14 @@ export class VoteParticipateBodyDto {
   @Type(() => Number)
   @IsNumber({}, { each: true })
   selectedOptionIndexes: number[];
+
+  @IsString()
+  @IsOptional() //TODO: 추후 제거합니다.
+  gender?: string;
+
+  @IsString()
+  @IsOptional() //TODO: 추후 제거합니다.
+  ageGroup?: string;
 }
 
 /**
@@ -38,5 +46,6 @@ export class VoteEditBodyDto {
   title: string;
 
   @IsString()
-  content: string;
+  @IsOptional()
+  content?: string;
 }

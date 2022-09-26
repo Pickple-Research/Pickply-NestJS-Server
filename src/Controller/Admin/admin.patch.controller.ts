@@ -95,6 +95,20 @@ export class AdminPatchController {
   }
 
   /**
+   * 리서치를 마감시킵니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Patch("researches/close")
+  async closeResearch(@Body() body: { researchId: string }) {
+    await this.researchUpdateService.closeResearch({
+      userId: "",
+      researchId: body.researchId,
+      skipValidation: true,
+    });
+  }
+
+  /**
    * 마감 기한이 지났지만 아직 마감되지 않은 모든 리서치를 마감합니다.
    * @author 현웅
    */

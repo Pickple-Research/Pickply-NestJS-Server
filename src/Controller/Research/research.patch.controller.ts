@@ -1,13 +1,11 @@
 import { Controller, Inject, Request, Body, Patch } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
-import { UserUpdateService, ResearchUpdateService } from "src/Service";
+import { ResearchUpdateService } from "src/Service";
 import {
   MongoUserFindService,
   MongoUserCreateService,
-  MongoUserUpdateService,
   MongoResearchFindService,
-  MongoResearchUpdateService,
 } from "src/Mongo";
 import {
   Research,
@@ -15,11 +13,13 @@ import {
   ResearchScrap,
   ResearchParticipation,
   CreditHistory,
+  ResearchNonMemberParticipation,
 } from "src/Schema";
 import { JwtUserInfo } from "src/Object/Type";
 import { CreditHistoryType } from "src/Object/Enum";
 import {
   ResearchInteractBodyDto,
+  ResearchNonMemberParticipateBodyDto,
   ResearchParticiateBodyDto,
   ResearchPullupBodyDto,
   ResearchEditBodyDto,
@@ -40,7 +40,6 @@ import { NotEnoughCreditException } from "src/Exception";
 @Controller("researches")
 export class ResearchPatchController {
   constructor(
-    private readonly userUpdateService: UserUpdateService,
     private readonly researchUpdateService: ResearchUpdateService,
 
     @InjectConnection(MONGODB_USER_CONNECTION)
@@ -51,11 +50,8 @@ export class ResearchPatchController {
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
   @Inject() private readonly mongoUserCreateService: MongoUserCreateService;
-  @Inject() private readonly mongoUserUpdateService: MongoUserUpdateService;
   @Inject()
   private readonly mongoResearchFindService: MongoResearchFindService;
-  @Inject()
-  private readonly mongoResearchUpdateService: MongoResearchUpdateService;
 
   /**
    * 리서치를 조회합니다.
@@ -168,6 +164,8 @@ export class ResearchPatchController {
     const researchParticipation: ResearchParticipation = {
       researchId: body.researchId,
       userId: req.user.userId,
+      gender: body.gender,
+      ageGroup: body.ageGroup,
       consumedTime: body.consumedTime,
       createdAt: body.createdAt ? body.createdAt : currentISOTime,
     };
@@ -254,6 +252,27 @@ export class ResearchPatchController {
       );
 
     return newCreditHistory;
+  }
+
+  /**
+   * (스크리닝이 걸려있지 않은 리서치에 대해, 비회원이)
+   * 리서치에 참여합니다.
+   * @author 현웅
+   */
+  @Public()
+  @Patch("participate/public")
+  async nonMemberParticipateResearch(
+    @Body() body: ResearchNonMemberParticipateBodyDto,
+  ) {
+    const researchNonMemberParticipation: ResearchNonMemberParticipation = {
+      ...body,
+      createdAt: getCurrentISOTime(),
+    };
+
+    return await this.researchUpdateService.nonMemberParticipateResearch({
+      researchId: body.researchId,
+      researchNonMemberParticipation,
+    });
   }
 
   /**

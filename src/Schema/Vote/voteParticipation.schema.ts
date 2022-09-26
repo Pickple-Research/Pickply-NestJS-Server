@@ -16,6 +16,12 @@ export class VoteParticipation {
   @Prop({ required: true, type: [Number] }) // 선택한 선택지 index들
   selectedOptionIndexes: number[];
 
+  @Prop() // 성별
+  gender?: string;
+
+  @Prop() // 연령대
+  ageGroup?: string;
+
   @Prop({ required: true }) // 참여 일시
   createdAt: string;
 }
