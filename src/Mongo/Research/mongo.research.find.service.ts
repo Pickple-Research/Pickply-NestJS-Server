@@ -153,6 +153,28 @@ export class MongoResearchFindService {
     return;
   }
 
+  /** - 이상의 코드는 mongo.research.validate.service 로 이관 - */
+
+  /**
+   * 리서치를 원하는 조건으로 검색합니다.
+   * @author 현웅
+   */
+  async getResearches(param: {
+    filterQuery?: FilterQuery<ResearchDocument>;
+    limit?: number;
+    selectQuery?: Partial<Record<keyof Research, boolean>>;
+  }) {
+    return await this.Research.find(param.filterQuery)
+      .sort({ pulledupAt: -1 })
+      .limit(param.limit)
+      .populate({
+        path: "author",
+        model: this.ResearchUser,
+      })
+      .select(param.selectQuery)
+      .lean();
+  }
+
   /**
    * 최신 리서치를 원하는만큼 찾고 반환합니다.
    * @author 현웅

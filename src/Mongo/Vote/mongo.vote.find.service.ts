@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, FilterQuery } from "mongoose";
 import {
   Vote,
   VoteDocument,
@@ -43,6 +43,47 @@ export class MongoVoteFindService {
     @InjectModel(VoteView.name)
     private readonly VoteView: Model<VoteViewDocument>,
   ) {}
+
+  /**
+   * 주어진 조건에 맞는 투표를 모두 반환합니다.
+   * 기본적으로 _id 를 기준으로 내림차순 정렬합니다.
+   * @author 현웅
+   */
+  async getVotes(param: {
+    filterQuery?: FilterQuery<VoteDocument>;
+    selectQuery?: Partial<Record<keyof Vote, boolean>>;
+  }) {
+    const votes = await this.Vote.find(param.filterQuery)
+      .populate({ path: "author", model: this.VoteUser })
+      .select({ _id: 1, ...param.selectQuery })
+      .lean();
+    return votes.map((vote) => {
+      if (vote.category !== "GREEN_LIGHT") return vote;
+      return { ...vote, author: { ...vote.author, nickname: "익명" } };
+    });
+  }
+
+  async addVoteCommentedUserIds(voteId: string) {
+    const comments = await this.VoteComment.find({ voteId })
+      .populate([
+        {
+          path: "replies",
+          model: this.VoteReply,
+        },
+      ])
+      .sort({ _id: 1 })
+      .lean();
+    const commentedUserIds = new Set();
+    for (const comment of comments) {
+      commentedUserIds.add(comment.authorId);
+      for (const reply of comment.replies) {
+        commentedUserIds.add(reply.authorId);
+      }
+    }
+    await this.Vote.findByIdAndUpdate(voteId, {
+      $set: { commentedUserIds: Array.from(commentedUserIds) },
+    });
+  }
 
   /**
    * 비회원의 투표 참여 수를 반환합니다.
@@ -208,7 +249,7 @@ export class MongoVoteFindService {
       }
     }
     voteIdOccurrences.sort((a, b) => b.occur - a.occur);
-    return await this.getVotes(
+    return await this.getVotesByIds(
       voteIdOccurrences.slice(0, 3).map((occurence) => occurence.voteId),
     );
   }
@@ -349,7 +390,7 @@ export class MongoVoteFindService {
   }
 
   /**
-   * 투표 댓글을 모두 가져옵니다.
+   * 투표 (대)댓글을 모두 가져옵니다.
    * @author 현웅
    */
   async getVoteComments(voteId: string) {
@@ -392,26 +433,24 @@ export class MongoVoteFindService {
 
     if (!Boolean(comments.length)) return [];
 
-    const vote = await this.getVoteById(voteId, { category: true });
+    const vote = await this.getVoteById(voteId, {
+      category: true,
+      commentedUserIds: true,
+    });
     if (vote.category !== "GREEN_LIGHT") return comments;
 
-    const userIdsSet = new Set();
-    comments.forEach((comment) => {
-      userIdsSet.add(comment.authorId);
-      comment.replies.forEach((reply) => {
-        userIdsSet.add(reply.authorId);
-      });
-    });
-
-    const userIds = Array.from(userIdsSet);
     const anonymizedComments = [];
     comments.forEach((comment, commentIndex) => {
-      comment.author.nickname = `익명 ${userIds.indexOf(comment.authorId) + 1}`;
+      comment.author.nickname = `익명 ${
+        vote.commentedUserIds.indexOf(comment.authorId) + 1
+      }`;
       anonymizedComments.push(comment);
       comment.replies.forEach((reply, replyIndex) => {
         anonymizedComments[commentIndex].replies[
           replyIndex
-        ].author.nickname = `익명 ${userIds.indexOf(reply.authorId) + 1}`;
+        ].author.nickname = `익명 ${
+          vote.commentedUserIds.indexOf(reply.authorId) + 1
+        }`;
       });
     });
     return anonymizedComments;
@@ -437,7 +476,7 @@ export class MongoVoteFindService {
    * 인자로 받은 voteIds 로 투표를 모두 찾고 반환합니다.
    * @author 현웅
    */
-  async getVotes(voteIds: string[]) {
+  async getVotesByIds(voteIds: string[]) {
     const votes = await this.Vote.find({ _id: { $in: voteIds } })
       .populate({ path: "author", model: this.VoteUser })
       .lean();

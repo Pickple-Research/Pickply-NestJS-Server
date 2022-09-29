@@ -90,10 +90,10 @@ export class UserFindService {
       this.mongoResearchFindService.getResearchesById(
         researchParticipations.slice(0, 20).map((info) => info.researchId),
       );
-    const getScrappedVotes = this.mongoVoteFindService.getVotes(
+    const getScrappedVotes = this.mongoVoteFindService.getVotesByIds(
       voteScraps.slice(0, 20).map((info) => info.voteId),
     );
-    const getParticipatedVotes = this.mongoVoteFindService.getVotes(
+    const getParticipatedVotes = this.mongoVoteFindService.getVotesByIds(
       voteParticipations.slice(0, 20).map((info) => info.voteId),
     );
 

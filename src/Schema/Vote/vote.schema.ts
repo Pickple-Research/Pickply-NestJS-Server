@@ -59,8 +59,11 @@ export class Vote {
   @Prop({ type: [Number] }) // 비회원 투표 결과. 각 인덱스의 값은 투표 선택지가 얼마나 선택되었는지 알려줍니다.
   nonMemeberResult?: number[];
 
-  @Prop({ default: 0 }) // 댓글 수
+  @Prop({ default: 0 }) // (대)댓글 수
   commentsNum?: number;
+
+  @Prop({ type: [String], default: [] }) // (대)댓글을 작성한 유저 _id 목록 (익명 댓글 넘버링 작업을 할 때 사용합니다.)
+  commentedUserIds?: string[];
 
   @Prop({ default: false }) // 종료 여부. deadline이 지나기 전일지라도 사용자가 종료 가능.
   closed?: boolean;
