@@ -124,7 +124,7 @@ export class MongoUserCreateService {
 
   /**
    * @Transaction
-   * 크레딧 사용내역을 새로 만듭니다.
+   * 크레딧 사용내역을 새로 만들고 유저의 credit 총량을 업데이트 합니다.
    * @return 새로운 크레딧 변동내역
    * @author 현웅
    */
@@ -135,6 +135,11 @@ export class MongoUserCreateService {
     },
     session: ClientSession,
   ) {
+    await this.User.findByIdAndUpdate(
+      param.userId,
+      { $inc: { credit: param.creditHistory.scale } },
+      { session },
+    );
     //* 잔여 크레딧 정보를 추가한 CreditHistory 를 새로 만듭니다.
     const newCreditHistories = await this.CreditHistory.create(
       [param.creditHistory],

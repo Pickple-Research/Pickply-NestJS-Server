@@ -134,6 +134,53 @@ export class AdminPatchController {
   }
 
   /**
+   * 추가 크레딧이 걸린 리서치 중에서 마감 기한이 지났거나, 마감되었지만
+   * 크레딧이 분배되자 않은 리서치를 모두 찾아 크레딧을 분배합니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Patch("researches/distribute/all")
+  async distributeAllResearchCredits() {
+    const undistributedResearches =
+      await this.mongoResearchFindService.getResearches({
+        filterQuery: {
+          $or: [
+            {
+              $and: [
+                { deadline: { $lt: getCurrentISOTime() } },
+                { deadline: { $ne: "" } },
+                { extraCredit: { $gt: 0 } },
+                { creditDistributed: false },
+              ],
+            },
+            {
+              $and: [
+                { deadline: { $eq: "" } },
+                { closed: true },
+                { extraCredit: { $gt: 0 } },
+                { creditDistributed: false },
+              ],
+            },
+          ],
+        },
+        selectQuery: {
+          title: true,
+          extraCredit: true,
+          extraCreditReceiverNum: true,
+        },
+      });
+
+    for (const research of undistributedResearches) {
+      await this.researchUpdateService.distributeCredit({
+        researchId: research._id.toString(),
+        researchTitle: research.title,
+        extraCredit: research.extraCredit,
+        extraCreditReceiverNum: research.extraCreditReceiverNum,
+      });
+    }
+  }
+
+  /**
    * 리서치를 블락처리합니다.
    * @author 현웅
    */

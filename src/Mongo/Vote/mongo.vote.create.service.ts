@@ -145,7 +145,10 @@ export class MongoVoteCreateService {
   ) {
     const updatedVote = await this.Vote.findByIdAndUpdate(
       param.comment.voteId,
-      { $inc: { commentsNum: 1 } },
+      {
+        $inc: { commentsNum: 1 },
+        $addToSet: { commentedUserIds: param.comment.authorId },
+      },
       { session, returnOriginal: false },
     )
       .populate({
@@ -175,6 +178,8 @@ export class MongoVoteCreateService {
     if (updatedVote.category !== "GREEN_LIGHT")
       return { updatedVote, newComment: newComment.toObject() };
     const newCommentObject = newComment.toObject();
+    const commentIndex =
+      updatedVote.commentedUserIds.indexOf(param.comment.authorId) + 1;
     return {
       updatedVote: {
         ...updatedVote,
@@ -182,7 +187,10 @@ export class MongoVoteCreateService {
       },
       newComment: {
         ...newCommentObject,
-        author: { ...newCommentObject.author, nickname: "익명" },
+        author: {
+          ...newCommentObject.author,
+          nickname: `익명 ${commentIndex}`,
+        },
       },
     };
   }
@@ -196,7 +204,10 @@ export class MongoVoteCreateService {
   async createVoteReply(param: { reply: VoteReply }, session?: ClientSession) {
     const updatedVote = await this.Vote.findByIdAndUpdate(
       param.reply.voteId,
-      { $inc: { commentsNum: 1 } },
+      {
+        $inc: { commentsNum: 1 },
+        $addToSet: { commentedUserIds: param.reply.authorId },
+      },
       { session, returnOriginal: false },
     )
       .populate({
@@ -231,6 +242,8 @@ export class MongoVoteCreateService {
     if (updatedVote.category !== "GREEN_LIGHT")
       return { updatedVote, newReply: newReply.toObject() };
     const newReplyObject = newReply.toObject();
+    const replyIndex =
+      updatedVote.commentedUserIds.indexOf(param.reply.authorId) + 1;
     return {
       updatedVote: {
         ...updatedVote,
@@ -238,7 +251,7 @@ export class MongoVoteCreateService {
       },
       newReply: {
         ...newReplyObject,
-        author: { ...newReplyObject.author, nickname: "익명" },
+        author: { ...newReplyObject.author, nickname: `익명 ${replyIndex}` },
       },
     };
   }

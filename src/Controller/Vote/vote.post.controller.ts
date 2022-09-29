@@ -239,6 +239,6 @@ export class VotePostController {
    */
   @Post("mypage")
   async getMypageVotes(@Body() body: VoteMypageBodyDto) {
-    return await this.mongoVoteFindService.getVotes(body.voteIds);
+    return await this.mongoVoteFindService.getVotesByIds(body.voteIds);
   }
 }
