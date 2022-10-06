@@ -11,6 +11,7 @@ import {
   MongoResearchCreateService,
   MongoResearchUpdateService,
   MongoResearchDeleteService,
+  MongoResearchValidateService,
 } from "src/Mongo";
 import {
   Research,
@@ -59,6 +60,8 @@ export class ResearchUpdateService {
   private readonly mongoResearchUpdateService: MongoResearchUpdateService;
   @Inject()
   private readonly mongoResearchDeleteService: MongoResearchDeleteService;
+  @Inject()
+  private readonly mongoResearchValidateService: MongoResearchValidateService;
 
   /**
    * 리서치를 조회합니다.
@@ -69,7 +72,7 @@ export class ResearchUpdateService {
    */
   async viewResearch(param: { researchView: ResearchView }) {
     if (
-      await this.mongoResearchFindService.isUserAlreadyViewedResearch({
+      await this.mongoResearchValidateService.isUserAlreadyViewedResearch({
         userId: param.researchView.userId,
         researchId: param.researchView.researchId,
       })
@@ -153,7 +156,7 @@ export class ResearchUpdateService {
   ) {
     //* 유저가 이미 리서치에 참여했었는지 확인
     const checkAlreadyParticipated =
-      this.mongoResearchFindService.isUserAlreadyParticipatedResearch({
+      this.mongoResearchValidateService.isUserAlreadyParticipatedResearch({
         userId: param.researchParticipation.userId,
         researchId: param.researchId,
       });
@@ -231,7 +234,7 @@ export class ResearchUpdateService {
     session: ClientSession,
   ) {
     //* 리서치 끌올을 요청한 유저가 리서치 작성자인지 확인
-    const checkIsAuthor = this.mongoResearchFindService.isResearchAuthor({
+    const checkIsAuthor = this.mongoResearchValidateService.isResearchAuthor({
       userId: param.userId,
       researchId: param.researchId,
     });
@@ -264,7 +267,7 @@ export class ResearchUpdateService {
     session: ClientSession,
   ) {
     //* 리서치 수정을 요청한 유저가 리서치 작성자인지 확인
-    const checkIsAuthor = this.mongoResearchFindService.isResearchAuthor({
+    const checkIsAuthor = this.mongoResearchValidateService.isResearchAuthor({
       userId: param.userId,
       researchId: param.researchId,
     });
@@ -294,7 +297,7 @@ export class ResearchUpdateService {
     session?: ClientSession,
   ) {
     //* 리서치 마감을 요청한 유저가 리서치 작성자인지 확인 (skipValidation 플래그가 true인 경우 생략됩니다)
-    const checkIsAuthor = this.mongoResearchFindService.isResearchAuthor({
+    const checkIsAuthor = this.mongoResearchValidateService.isResearchAuthor({
       userId: param.userId,
       researchId: param.researchId,
       skipValidation: param.skipValidation,

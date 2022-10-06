@@ -30,7 +30,7 @@ export class UserFindService {
     const getNotifications = this.mongoUserFindService.getNotifications(
       param.userId,
     );
-    //* 리서치 조회/스크랩/참여/업로드 정보
+    //* 리서치 조회/스크랩/참여 정보 + 업로드한 리서치 정보
     const getResearchViews = this.mongoResearchFindService.getUserResearchViews(
       param.userId,
     );
@@ -39,7 +39,9 @@ export class UserFindService {
     const getResearchParticipations =
       this.mongoResearchFindService.getUserResearchParticipations(param.userId);
     const getUploadedResearches =
-      this.mongoResearchFindService.getUploadedResearches(param.userId);
+      this.mongoResearchFindService.getUploadedResearches({
+        userId: param.userId,
+      });
     //*투표 조회/스크랩/참여/업로드 정보
     const getVoteViews = this.mongoVoteFindService.getUserVoteViews(
       param.userId,
