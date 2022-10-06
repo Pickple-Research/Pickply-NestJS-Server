@@ -22,7 +22,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-09-29 1907 v1.1.7\n\n - (관리자 API) 크레딧이 분배되지 않은 리서치 일괄 분배 API 추가\n - 유저 스키마 credit 속성 복구\n - 익명 투표 대댓글 넘버링 로직 수정";
+    return "2022-10-?? ???? v1.1.8";
   }
 
   /**

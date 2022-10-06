@@ -136,10 +136,13 @@ export class UserDeleteController {
     });
 
     await tryMultiTransaction(async () => {
-      const deleteUser = this.mongoUserDeleteService.deleteUserById(
-        { userId: param.userId },
-        userSession,
-      );
+      const deleteUser = this.mongoUserDeleteService.preDeleteUser({
+        userId: param.userId,
+      });
+      // const deleteUser = this.mongoUserDeleteService.deleteUserById(
+      //   { userId: param.userId },
+      //   userSession,
+      // );
       const deleteResearchUser =
         this.mongoResearchDeleteService.deleteResearchUser(
           { userId: param.userId },

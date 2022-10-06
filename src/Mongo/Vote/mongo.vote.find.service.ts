@@ -63,28 +63,6 @@ export class MongoVoteFindService {
     });
   }
 
-  async addVoteCommentedUserIds(voteId: string) {
-    const comments = await this.VoteComment.find({ voteId })
-      .populate([
-        {
-          path: "replies",
-          model: this.VoteReply,
-        },
-      ])
-      .sort({ _id: 1 })
-      .lean();
-    const commentedUserIds = new Set();
-    for (const comment of comments) {
-      commentedUserIds.add(comment.authorId);
-      for (const reply of comment.replies) {
-        commentedUserIds.add(reply.authorId);
-      }
-    }
-    await this.Vote.findByIdAndUpdate(voteId, {
-      $set: { commentedUserIds: Array.from(commentedUserIds) },
-    });
-  }
-
   /**
    * 비회원의 투표 참여 수를 반환합니다.
    * @author 현웅
