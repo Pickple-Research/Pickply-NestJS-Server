@@ -22,7 +22,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-10-?? ???? v1.1.8";
+    return "2022-10-10 1350 v1.1.8";
   }
 
   /**
@@ -77,6 +77,7 @@ export class AppController {
     const getRecommendResearches =
       this.mongoResearchFindService.getRecommendResearches();
     const getVotes = this.mongoVoteFindService.getRecentVotes();
+    const getFixedVotes = this.mongoVoteFindService.getFixedVotes();
     const getHotVotes = this.mongoVoteFindService.getHotVotes();
     const getRecentCategoryVotes =
       this.mongoVoteFindService.getRecentCategoryVotes();
@@ -86,6 +87,7 @@ export class AppController {
       getResearches,
       getRecommendResearches,
       getVotes,
+      getFixedVotes,
       getHotVotes,
       getRecentCategoryVotes,
     ]).then(
@@ -94,6 +96,7 @@ export class AppController {
         researches,
         recommendResearches,
         votes,
+        fixedVotes,
         hotVotes,
         recentCategoryVotes,
       ]) => {
@@ -102,6 +105,7 @@ export class AppController {
           researches,
           recommendResearches,
           votes,
+          fixedVotes,
           hotVotes,
           recentCategoryVotes,
         };

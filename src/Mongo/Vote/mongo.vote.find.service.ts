@@ -64,6 +64,14 @@ export class MongoVoteFindService {
   }
 
   /**
+   * 투표 리스트 상단에 고정할 투표를 반환합니다.
+   * @author 현웅
+   */
+  async getFixedVotes() {
+    return await this.getVotesByIds(["63401fa0f08c6b7dc201b443"]);
+  }
+
+  /**
    * 비회원의 투표 참여 수를 반환합니다.
    * @author 현웅
    */
