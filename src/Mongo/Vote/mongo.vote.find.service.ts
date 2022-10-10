@@ -63,26 +63,12 @@ export class MongoVoteFindService {
     });
   }
 
-  async addVoteCommentedUserIds(voteId: string) {
-    const comments = await this.VoteComment.find({ voteId })
-      .populate([
-        {
-          path: "replies",
-          model: this.VoteReply,
-        },
-      ])
-      .sort({ _id: 1 })
-      .lean();
-    const commentedUserIds = new Set();
-    for (const comment of comments) {
-      commentedUserIds.add(comment.authorId);
-      for (const reply of comment.replies) {
-        commentedUserIds.add(reply.authorId);
-      }
-    }
-    await this.Vote.findByIdAndUpdate(voteId, {
-      $set: { commentedUserIds: Array.from(commentedUserIds) },
-    });
+  /**
+   * 투표 리스트 상단에 고정할 투표를 반환합니다.
+   * @author 현웅
+   */
+  async getFixedVotes() {
+    return await this.getVotesByIds(["63401fa0f08c6b7dc201b443"]);
   }
 
   /**

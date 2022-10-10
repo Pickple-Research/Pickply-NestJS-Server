@@ -1,8 +1,8 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { ClientSession } from "mongoose";
 import {
-  MongoResearchFindService,
   MongoResearchDeleteService,
+  MongoResearchValidateService,
 } from "src/Mongo";
 
 @Injectable()
@@ -10,9 +10,9 @@ export class ResearchDeleteService {
   constructor() {}
 
   @Inject()
-  private readonly mongoResearchFindService: MongoResearchFindService;
-  @Inject()
   private readonly mongoResearchDeleteService: MongoResearchDeleteService;
+  @Inject()
+  private readonly mongoResearchValidateService: MongoResearchValidateService;
 
   /**
    * 리서치를 삭제합니다.
@@ -24,14 +24,16 @@ export class ResearchDeleteService {
     session: ClientSession,
   ) {
     //* 리서치 삭제를 요청한 유저가 리서치 작성자인지 여부를 확인합니다.
-    const checkIsAuthor = this.mongoResearchFindService.isResearchAuthor({
+    const checkIsAuthor = this.mongoResearchValidateService.isResearchAuthor({
       userId: param.userId,
       researchId: param.researchId,
     });
 
     //* 리서치 삭제 요청 전에 리서치에 참여한 사람이 있는지 확인합니다.
     const checkAbleToDelete =
-      this.mongoResearchFindService.isAbleToDeleteResearch(param.researchId);
+      this.mongoResearchValidateService.isAbleToDeleteResearch(
+        param.researchId,
+      );
 
     //* 리서치와 관련된 모든 정보를 삭제합니다.
     const deleteResearch = this.mongoResearchDeleteService.deleteResearchById(
@@ -54,12 +56,11 @@ export class ResearchDeleteService {
     session: ClientSession,
   ) {
     //* 댓글 작성자인지 확인
-    const checkIsAuthor = this.mongoResearchFindService.isResearchCommentAuthor(
-      {
+    const checkIsAuthor =
+      this.mongoResearchValidateService.isResearchCommentAuthor({
         userId: param.userId,
         commentId: param.commentId,
-      },
-    );
+      });
     //* 댓글 삭제 (이 때, 대댓글이 추가로 달린 경우엔 deleted 플래그만 true 로 설정)
     const deleteResearchComment =
       this.mongoResearchDeleteService.deleteResearchComment(
@@ -85,10 +86,11 @@ export class ResearchDeleteService {
     session: ClientSession,
   ) {
     //* 대댓글 작성자인지 확인
-    const checkIsAuthor = this.mongoResearchFindService.isResearchReplyAuthor({
-      userId: param.userId,
-      replyId: param.replyId,
-    });
+    const checkIsAuthor =
+      this.mongoResearchValidateService.isResearchReplyAuthor({
+        userId: param.userId,
+        replyId: param.replyId,
+      });
     //* 대댓글 삭제 (이 때, 대댓글이 추가로 달린 경우엔 deleted 플래그만 true 로 설정)
     const deleteResearchReply =
       this.mongoResearchDeleteService.deleteResearchReply(

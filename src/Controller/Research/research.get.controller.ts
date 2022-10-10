@@ -18,7 +18,7 @@ export class ResearchGetController {
   @Public()
   @Get("")
   async getRecentResearches(@Query() query: { get?: number }) {
-    return await this.mongoResearchFindService.getRecentResearches(query?.get);
+    return await this.mongoResearchFindService.getRecentResearches();
   }
 
   /**
@@ -38,7 +38,9 @@ export class ResearchGetController {
   @Public()
   @Get("newer/:pulledupAt")
   async getNewerResearches(@Param("pulledupAt") pulledupAt: string) {
-    return await this.mongoResearchFindService.getNewerResearches(pulledupAt);
+    return await this.mongoResearchFindService.getNewerResearches({
+      pulledupAt,
+    });
   }
 
   /**
@@ -48,7 +50,9 @@ export class ResearchGetController {
   @Public()
   @Get("older/:pulledupAt")
   async getOlderResearches(@Param("pulledupAt") pulledupAt: string) {
-    return await this.mongoResearchFindService.getOlderResearches(pulledupAt);
+    return await this.mongoResearchFindService.getOlderResearches({
+      pulledupAt,
+    });
   }
 
   /**

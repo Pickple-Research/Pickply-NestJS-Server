@@ -19,6 +19,12 @@ export class VoteGetController {
     return await this.mongoVoteFindService.getRecentVotes();
   }
 
+  @Public()
+  @Get("fixed")
+  async getFixedVotes() {
+    return await this.mongoVoteFindService.getFixedVotes();
+  }
+
   /**
    * HOT 투표를 가져옵니다.
    * 기준은 최근 100건의 투표 참여 중 제일 많은 참여를 이끌어낸 상위 3개의 투표입니다.

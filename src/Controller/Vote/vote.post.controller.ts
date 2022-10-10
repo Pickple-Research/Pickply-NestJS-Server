@@ -22,11 +22,7 @@ import {
 } from "src/Dto";
 import { JwtUserInfo } from "src/Object/Type";
 import { AlarmType } from "src/Object/Enum";
-import {
-  tryTransaction,
-  tryMultiTransaction,
-  getCurrentISOTime,
-} from "src/Util";
+import { tryMultiTransaction, getCurrentISOTime } from "src/Util";
 import {
   MONGODB_VOTE_CONNECTION,
   NEW_COMMENT_ALRAM_TITLE,

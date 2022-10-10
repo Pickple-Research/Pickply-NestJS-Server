@@ -23,6 +23,7 @@ import {
   UserSecurity,
   UserSecurityDocument,
 } from "src/Schema";
+import { getCurrentISOTime } from "src/Util";
 
 @Injectable()
 export class MongoUserDeleteService {
@@ -86,6 +87,16 @@ export class MongoUserDeleteService {
    */
   async deleteUnauthorizedUsersById(userIds: string[]) {
     await this.UnauthorizedUser.deleteMany({ _id: { $in: userIds } });
+  }
+
+  /**
+   * 사용자 탈퇴 요청시, 곧바로 사용자 정보를 지우지 않고 deleted 플래그를 true 로 변경합니다.
+   * @author 현웅
+   */
+  async preDeleteUser(param: { userId: string }) {
+    await this.User.findByIdAndUpdate(param.userId, {
+      $set: { deleted: true, deletedAt: getCurrentISOTime() },
+    });
   }
 
   /**

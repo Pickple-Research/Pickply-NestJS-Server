@@ -6,6 +6,7 @@ import {
   MongoResearchDeleteService,
   MongoResearchFindService,
   MongoResearchUpdateService,
+  MongoResearchValidateService,
 } from "src/Mongo";
 import {
   Research,
@@ -40,6 +41,7 @@ import { MONGODB_RESEARCH_CONNECTION } from "src/Constant";
     MongoResearchDeleteService,
     MongoResearchFindService,
     MongoResearchUpdateService,
+    MongoResearchValidateService,
   ],
   imports: [
     MongooseModule.forFeature(
@@ -94,6 +96,7 @@ import { MONGODB_RESEARCH_CONNECTION } from "src/Constant";
     MongoResearchDeleteService,
     MongoResearchFindService,
     MongoResearchUpdateService,
+    MongoResearchValidateService,
   ],
 })
 export class MongoResearchModule {}
