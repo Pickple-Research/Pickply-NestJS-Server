@@ -13,6 +13,9 @@ export class CreditHistory {
   @Prop({ required: true }) // 변동 사유 (줄글)
   reason: string;
 
+  @Prop() // 참여한 리서치 _id
+  researchId?: string;
+
   @Prop({ required: true }) // 변동 타입 (ex. 리서치 등록, 리서치 참여, 리서치 끌올 ...)
   type: string;
 

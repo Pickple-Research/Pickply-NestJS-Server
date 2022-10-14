@@ -86,18 +86,30 @@ export class MongoUserFindService {
   }
 
   /**
-   * 인자로 받은 userId 를 사용하는 유저들의 정보를 반환합니다.
-   * selectQuery 를 통해 원하는 속성만 골라 반환할 수도 있습니다.
+   * 조건에 맞는 유저를 모두 검색합니다.
+   * mongo user find service 외부에서 사용하는 것을 지양합니다.
    * @author 현웅
    */
-  async getUsersById(param: {
-    userIds: string[];
+  async getUsers(param: {
+    filterQuery?: FilterQuery<UserDocument>;
     selectQuery?: Partial<Record<keyof User, boolean>>;
   }) {
-    return await this.User.find(
-      { _id: { $in: param.userIds } },
-      param.selectQuery,
-    ).lean();
+    return await this.User.find(param.filterQuery)
+      .select({ _id: true, ...param.selectQuery })
+      .lean();
+  }
+
+  /**
+   * 유저 _id 를 통해 유저 정보를 받아옵니다.
+   * @author 현웅
+   */
+  async getUserById(param: {
+    userId: string;
+    selectQuery?: Partial<Record<keyof User, boolean>>;
+  }) {
+    return await this.User.findById(param.userId)
+      .select({ _id: true, ...param.selectQuery })
+      .lean();
   }
 
   /**

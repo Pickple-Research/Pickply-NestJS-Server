@@ -200,10 +200,10 @@ export class ResearchUpdateService {
     researchId: string;
     researchNonMemberParticipation: ResearchNonMemberParticipation;
   }) {
-    //* 리서치 참여자 수 1 증가
+    //* 비회원 리서치 참여자 수 1 증가
     const updateResearch = this.mongoResearchUpdateService.updateResearch({
       researchId: param.researchId,
-      updateQuery: { $inc: { participantsNum: 1 } },
+      updateQuery: { $inc: { nonMemberParticipantsNum: 1 } },
     });
     //* 새로운 리서치 비회원 참여 정보 생성
     const createResearchNonMemberParticipation =
@@ -390,6 +390,7 @@ export class ResearchUpdateService {
         const creditHistory: CreditHistory = {
           userId,
           reason: param.researchTitle,
+          researchId: param.researchId,
           type: CreditHistoryType.WIN_RESEARCH_EXTRA_CREDIT,
           scale: param.extraCredit,
           isIncome: true,

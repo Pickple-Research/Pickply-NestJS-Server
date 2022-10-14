@@ -47,6 +47,10 @@ export enum CreditHistoryType {
   RESEARCH_PULLUP = "RESEARCH_PULLUP",
   // 리서치 추가 증정 크레딧 당첨
   WIN_RESEARCH_EXTRA_CREDIT = "WIN_RESEARCH_EXTRA_CREDIT",
+  // 리서치 크레딧 차액 보상
+  CREDIT_COMPENSATION = "CREDIT_COMPENSATION",
   // SurBay 사용자 기존 크레딧 이관
   MIGRATE = "MIGRATE",
+  // 기타
+  ETC = "ETC",
 }

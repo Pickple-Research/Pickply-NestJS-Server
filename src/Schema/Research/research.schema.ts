@@ -94,6 +94,9 @@ export class Research {
   @Prop({ default: 0 }) // 참여자 수
   participantsNum?: number;
 
+  @Prop({ default: 0 }) // 비회원 참여자 수
+  nonMemberParticipantsNum?: number;
+
   @Prop({ default: 0 }) // 댓글 수
   commentsNum?: number;
 
