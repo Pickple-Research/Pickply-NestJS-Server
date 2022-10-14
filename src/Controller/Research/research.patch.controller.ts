@@ -152,6 +152,7 @@ export class ResearchPatchController {
       const newCreditHistory = await this.participateDeletedResearch({
         userId: req.user.userId,
         userCreditBalance: creditBalance,
+        researchId: body.researchId,
         researchTitle: body.title,
         researchCredit: body.credit,
       });
@@ -173,6 +174,7 @@ export class ResearchPatchController {
     const creditHistory: CreditHistory = {
       userId: req.user.userId,
       reason: research.title,
+      researchId: body.researchId,
       type: CreditHistoryType.RESEARCH_PARTICIPATE,
       scale: research.credit,
       isIncome: true,
@@ -227,12 +229,14 @@ export class ResearchPatchController {
   async participateDeletedResearch(param: {
     userId: string;
     userCreditBalance: number;
+    researchId: string;
     researchTitle: string;
     researchCredit: number;
   }) {
     const creditHistory: CreditHistory = {
       userId: param.userId,
       reason: param.researchTitle,
+      researchId: param.researchId,
       type: CreditHistoryType.DELETED_RESEARCH_PARTICIPATE,
       scale: param.researchCredit,
       isIncome: true,

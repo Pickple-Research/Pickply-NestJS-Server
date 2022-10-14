@@ -95,6 +95,46 @@ export class AdminPatchController {
   }
 
   /**
+   * 두 명 이상의 유저들에게 크레딧을 증정합니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Patch("users/multiple/credit")
+  async giveMultipleUserCredit(
+    @Body() body: { reason: string; credit: number },
+  ) {
+    const participations =
+      await this.mongoResearchFindService.getResearchParticipations({
+        filterQuery: { researchId: "" },
+        selectQuery: { userId: true },
+      });
+    const userIds = participations.map((participation) => participation.userId);
+
+    const userSession = await this.userConnection.startSession();
+    await tryMultiTransaction(async () => {
+      for (const userId of userIds) {
+        const user = await this.mongoUserFindService.getUserById({
+          userId,
+          selectQuery: { credit: true },
+        });
+        const creditHistory: CreditHistory = {
+          userId,
+          scale: body.credit,
+          balance: user.credit + body.credit,
+          isIncome: true,
+          reason: body.reason,
+          type: "ETC",
+          createdAt: getCurrentISOTime(),
+        };
+        await this.mongoUserCreateService.createCreditHistory(
+          { userId, creditHistory },
+          userSession,
+        );
+      }
+    }, [userSession]);
+  }
+
+  /**
    * 리서치를 마감시킵니다.
    * @author 현웅
    */
