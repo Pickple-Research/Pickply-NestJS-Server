@@ -86,8 +86,8 @@ export class MongoUserFindService {
   }
 
   /**
-   * 조건에 맞는 유저를 모두 검색합니다.
-   * mongo user find service 외부에서 사용하는 것을 지양합니다.
+   * 유저를 원하는 조건으로 검색합니다.
+   * MongoUserFindService 외부에서 사용하는 것을 지양합니다.
    * @author 현웅
    */
   async getUsers(param: {

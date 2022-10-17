@@ -8,6 +8,7 @@ import {
 import { Roles } from "src/Security/Metadata";
 import { AlarmType, UserType } from "src/Object/Enum";
 import { JwtUserInfo, PushAlarm } from "src/Object/Type";
+import { TokenMessage } from "firebase-admin/lib/messaging/messaging-api";
 
 /**
  * 관리자만 사용하는 Post 컨트롤러입니다.
@@ -23,7 +24,16 @@ export class AdminPostController {
 
   @Roles(UserType.ADMIN)
   @Post("users/alarm")
-  async sendPushAlarm() {}
+  async sendPushAlarm() {
+    const alarm: TokenMessage = {
+      token: "",
+      notification: {
+        title: "",
+        body: "",
+      },
+    };
+    await this.firebaseService.sendPushAlarm(alarm);
+  }
 
   /**
    * 여러 개의 푸시 알림을 전송합니다.

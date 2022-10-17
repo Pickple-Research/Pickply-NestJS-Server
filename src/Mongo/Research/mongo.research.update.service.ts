@@ -1,12 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, ClientSession, UpdateQuery } from "mongoose";
+import { Model, ClientSession, FilterQuery, UpdateQuery } from "mongoose";
 import { ResearchNotFoundException } from "src/Exception";
 import {
   Research,
   ResearchDocument,
   ResearchComment,
   ResearchCommentDocument,
+  ResearchView,
+  ResearchViewDocument,
+  ResearchScrap,
+  ResearchScrapDocument,
   ResearchParticipation,
   ResearchParticipationDocument,
   ResearchReply,
@@ -26,6 +30,10 @@ export class MongoResearchUpdateService {
     private readonly Research: Model<ResearchDocument>,
     @InjectModel(ResearchComment.name)
     private readonly ResearchComment: Model<ResearchCommentDocument>,
+    @InjectModel(ResearchView.name)
+    private readonly ResearchView: Model<ResearchViewDocument>,
+    @InjectModel(ResearchScrap.name)
+    private readonly ResearchScrap: Model<ResearchScrapDocument>,
     @InjectModel(ResearchParticipation.name)
     private readonly ResearchParticipation: Model<ResearchParticipationDocument>,
     @InjectModel(ResearchReply.name)
@@ -70,6 +78,66 @@ export class MongoResearchUpdateService {
     }
 
     return updatedResearch;
+  }
+
+  async updateResearchViews(
+    param: {
+      filterQuery?: FilterQuery<ResearchViewDocument>;
+      updateQuery?: UpdateQuery<ResearchViewDocument>;
+    },
+    session?: ClientSession,
+  ) {
+    await this.ResearchView.updateMany(param.filterQuery, param.updateQuery, {
+      session,
+    });
+  }
+  async updateResearchScraps(
+    param: {
+      filterQuery?: FilterQuery<ResearchScrapDocument>;
+      updateQuery?: UpdateQuery<ResearchScrapDocument>;
+    },
+    session?: ClientSession,
+  ) {
+    await this.ResearchScrap.updateMany(param.filterQuery, param.updateQuery, {
+      session,
+    });
+  }
+  async updateResearchParticipations(
+    param: {
+      filterQuery?: FilterQuery<ResearchParticipationDocument>;
+      updateQuery?: UpdateQuery<ResearchParticipationDocument>;
+    },
+    session?: ClientSession,
+  ) {
+    await this.ResearchParticipation.updateMany(
+      param.filterQuery,
+      param.updateQuery,
+      { session },
+    );
+  }
+  async updateResearchComments(
+    param: {
+      filterQuery?: FilterQuery<ResearchCommentDocument>;
+      updateQuery?: UpdateQuery<ResearchCommentDocument>;
+    },
+    session?: ClientSession,
+  ) {
+    await this.ResearchComment.updateMany(
+      param.filterQuery,
+      param.updateQuery,
+      { session },
+    );
+  }
+  async updateResearchReplies(
+    param: {
+      filterQuery?: FilterQuery<ResearchReplyDocument>;
+      updateQuery?: UpdateQuery<ResearchReplyDocument>;
+    },
+    session?: ClientSession,
+  ) {
+    await this.ResearchReply.updateMany(param.filterQuery, param.updateQuery, {
+      session,
+    });
   }
 
   /**

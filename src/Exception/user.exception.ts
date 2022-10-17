@@ -50,6 +50,19 @@ export class UserNotFoundException extends Status404Exception {
 }
 
 /**
+ * 탈퇴한 유저가 로그인을 시도하는 경우 사용합니다.
+ * 기본 message: '탈퇴한 유저입니다'
+ * @author 현웅
+ */
+export class UserDeletedException extends Status404Exception {
+  constructor(newMessage?: string) {
+    super({
+      customMessage: newMessage ? newMessage : `탈퇴한 유저입니다`,
+    });
+  }
+}
+
+/**
  * 이미 데이터가 이관된 SurBay 유저가 한번 더 데이터 이관을 시도하는 경우
  * 기본 message: '데이터가 이미 이관되었습니다'
  * @author 현웅
