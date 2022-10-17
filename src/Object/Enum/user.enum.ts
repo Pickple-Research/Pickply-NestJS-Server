@@ -49,6 +49,8 @@ export enum CreditHistoryType {
   WIN_RESEARCH_EXTRA_CREDIT = "WIN_RESEARCH_EXTRA_CREDIT",
   // 리서치 크레딧 차액 보상
   CREDIT_COMPENSATION = "CREDIT_COMPENSATION",
+  // 크레딧을 통한 경품 교환
+  PRODUCT_EXCHANGE = "PRODUCT_EXCHANGE",
   // SurBay 사용자 기존 크레딧 이관
   MIGRATE = "MIGRATE",
   // 기타

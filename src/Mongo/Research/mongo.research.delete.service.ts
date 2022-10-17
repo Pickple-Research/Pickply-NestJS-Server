@@ -58,6 +58,7 @@ export class MongoResearchDeleteService {
   /**
    * @Transaction
    * 리서치를 삭제합니다.
+   * @return 삭제된 리서치 정보
    * @author 현웅
    */
   //TODO: AWS S3 오브젝트도 함께 지워야 합니다.
@@ -66,7 +67,10 @@ export class MongoResearchDeleteService {
     session: ClientSession,
   ) {
     //* 리서치 삭제
-    await this.Research.findByIdAndDelete(param.researchId, { session });
+    const deletedResearch = await this.Research.findByIdAndDelete(
+      param.researchId,
+      { session },
+    );
     //* 리서치 참여 정보 삭제
     await this.ResearchParticipation.deleteMany(
       { researchId: param.researchId },
@@ -91,7 +95,7 @@ export class MongoResearchDeleteService {
       { researchId: param.researchId },
       { session },
     );
-    return;
+    return deletedResearch;
   }
 
   /**
@@ -180,6 +184,7 @@ export class MongoResearchDeleteService {
 
   /**
    * 리서치 스크랩 취소시: 리서치 스크랩 정보를 삭제합니다.
+   * TODO: 모든 리서치 스크랩 삭제
    * @author 현웅
    */
   async deleteResearchScrap(param: { userId: string; researchId: string }) {

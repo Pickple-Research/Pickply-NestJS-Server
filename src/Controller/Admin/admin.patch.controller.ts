@@ -12,6 +12,7 @@ import {
   MongoUserCreateService,
   MongoResearchFindService,
   MongoResearchUpdateService,
+  MongoResearchDeleteService,
   MongoVoteUpdateService,
 } from "src/Mongo";
 import {
@@ -23,7 +24,10 @@ import {
 import { UserType } from "src/Object/Enum";
 import { CreditHistory } from "src/Schema";
 import { tryMultiTransaction, getCurrentISOTime } from "src/Util";
-import { MONGODB_USER_CONNECTION } from "src/Constant";
+import {
+  MONGODB_USER_CONNECTION,
+  MONGODB_RESEARCH_CONNECTION,
+} from "src/Constant";
 
 /**
  * 관리자만 사용하는 Patch 컨트롤러입니다.
@@ -38,6 +42,8 @@ export class AdminPatchController {
 
     @InjectConnection(MONGODB_USER_CONNECTION)
     private readonly userConnection: Connection,
+    @InjectConnection(MONGODB_RESEARCH_CONNECTION)
+    private readonly researchConnection: Connection,
   ) {}
 
   @Inject()
@@ -50,6 +56,8 @@ export class AdminPatchController {
   private readonly mongoResearchFindService: MongoResearchFindService;
   @Inject()
   private readonly mongoResearchUpdateService: MongoResearchUpdateService;
+  @Inject()
+  private readonly mongoResearchDeleteService: MongoResearchDeleteService;
   @Inject()
   private readonly mongoVoteUpdateService: MongoVoteUpdateService;
 
@@ -64,22 +72,22 @@ export class AdminPatchController {
   }
 
   /**
-   * 특정 유저에게 크레딧을 증정합니다.
+   * 특정 유저에게 크레딧을 증정하거나 차감합니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
   @Patch("users/credit")
   async giveCredit(
-    @Body() body: { userId: string; reason: string; credit: number },
+    @Body() body: { userId: string; reason: string; scale: number },
   ) {
     const creditBalance = await this.mongoUserFindService.getCreditBalance(
       body.userId,
     );
     const creditHistory: CreditHistory = {
       userId: body.userId,
-      scale: body.credit,
-      balance: creditBalance + body.credit,
-      isIncome: true,
+      scale: body.scale,
+      balance: creditBalance + body.scale,
+      isIncome: body.scale >= 0 ? true : false,
       reason: body.reason,
       type: "ETC",
       createdAt: getCurrentISOTime(),
@@ -95,20 +103,22 @@ export class AdminPatchController {
   }
 
   /**
-   * 두 명 이상의 유저들에게 크레딧을 증정합니다.
+   * 두 명 이상의 유저들에게 크레딧을 증정하거나 차감합니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
   @Patch("users/multiple/credit")
   async giveMultipleUserCredit(
-    @Body() body: { reason: string; credit: number },
+    @Body() body: { reason: string; scale: number },
   ) {
-    const participations =
-      await this.mongoResearchFindService.getResearchParticipations({
-        filterQuery: { researchId: "" },
-        selectQuery: { userId: true },
-      });
-    const userIds = participations.map((participation) => participation.userId);
+    // const participations =
+    //   await this.mongoResearchFindService.getResearchParticipations({
+    //     filterQuery: { researchId: "" },
+    //     selectQuery: { userId: true },
+    //   });
+    // const userIds = participations.map((participation) => participation.userId);
+
+    const userIds = [""];
 
     const userSession = await this.userConnection.startSession();
     await tryMultiTransaction(async () => {
@@ -119,11 +129,11 @@ export class AdminPatchController {
         });
         const creditHistory: CreditHistory = {
           userId,
-          scale: body.credit,
-          balance: user.credit + body.credit,
-          isIncome: true,
+          scale: body.scale,
+          balance: user.credit + body.scale,
+          isIncome: body.scale >= 0 ? true : false,
           reason: body.reason,
-          type: "ETC",
+          type: "PRODUCT_EXCHANGE",
           createdAt: getCurrentISOTime(),
         };
         await this.mongoUserCreateService.createCreditHistory(
@@ -132,6 +142,73 @@ export class AdminPatchController {
         );
       }
     }, [userSession]);
+  }
+
+  /**
+   * 리서치를 통합합니다.
+   * 조회수, 스크랩수, 참여자수, (대)댓글을 통합합니다. 이 후 기존 리서치를 삭제합니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Patch("researches/integrate")
+  async integrateResearch(
+    @Body() body: { oldResearchId: string; newResearchId: string },
+  ) {
+    const researchSession = await this.researchConnection.startSession();
+    await tryMultiTransaction(async () => {
+      await this.mongoResearchUpdateService.updateResearchViews({
+        filterQuery: { researchId: body.oldResearchId },
+        updateQuery: { $set: { researchId: body.newResearchId } },
+      });
+      await this.mongoResearchUpdateService.updateResearchScraps(
+        {
+          filterQuery: { researchId: body.oldResearchId },
+          updateQuery: { $set: { researchId: body.newResearchId } },
+        },
+        researchSession,
+      );
+      await this.mongoResearchUpdateService.updateResearchParticipations(
+        {
+          filterQuery: { researchId: body.oldResearchId },
+          updateQuery: { $set: { researchId: body.newResearchId } },
+        },
+        researchSession,
+      );
+      await this.mongoResearchUpdateService.updateResearchComments(
+        {
+          filterQuery: { researchId: body.oldResearchId },
+          updateQuery: { $set: { researchId: body.newResearchId } },
+        },
+        researchSession,
+      );
+      await this.mongoResearchUpdateService.updateResearchReplies(
+        {
+          filterQuery: { researchId: body.oldResearchId },
+          updateQuery: { $set: { researchId: body.newResearchId } },
+        },
+        researchSession,
+      );
+      //* 리서치 삭제 후 해당 내용 가져오기
+      const deletedResearch =
+        await this.mongoResearchDeleteService.deleteResearchById(
+          { researchId: body.oldResearchId },
+          researchSession,
+        );
+      //* 수치 통합
+      await this.mongoResearchUpdateService.updateResearch({
+        researchId: body.newResearchId,
+        updateQuery: {
+          $inc: {
+            viewsNum: deletedResearch.viewsNum,
+            scrapsNum: deletedResearch.scrapsNum,
+            participantsNum: deletedResearch.participantsNum,
+            nonMemberParticipantsNum: deletedResearch.nonMemberParticipantsNum,
+            commentsNum: deletedResearch.commentsNum,
+          },
+        },
+        handleAsException: true,
+      });
+    }, [researchSession]);
   }
 
   /**
