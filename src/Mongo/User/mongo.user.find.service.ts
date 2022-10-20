@@ -49,6 +49,10 @@ export class MongoUserFindService {
     private readonly UserSecurity: Model<UserSecurityDocument>,
   ) {}
 
+  // ********************************** //
+  /** 기본형 **/
+  // ********************************** //
+
   /**
    * 유저 _id 를 통해 유저 정보를 받아옵니다.
    * @author 현웅
@@ -186,7 +190,7 @@ export class MongoUserFindService {
   }
 
   // ********************************** //
-  /** 아래부터 위 함수들의 활용형입니다 **/
+  /** 활용형 **/
   // ********************************** //
 
   /**

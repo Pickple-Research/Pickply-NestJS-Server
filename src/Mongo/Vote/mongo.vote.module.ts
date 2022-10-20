@@ -4,6 +4,7 @@ import { MongoVoteFindService } from "./mongo.vote.find.service";
 import { MongoVoteCreateService } from "./mongo.vote.create.service";
 import { MongoVoteUpdateService } from "./mongo.vote.update.service";
 import { MongoVoteDeleteService } from "./mongo.vote.delete.service";
+import { MongoVoteValidateService } from "./mongo.vote.validate.service";
 import {
   Vote,
   VoteSchema,
@@ -34,6 +35,7 @@ import { MONGODB_VOTE_CONNECTION } from "src/Constant";
     MongoVoteCreateService,
     MongoVoteUpdateService,
     MongoVoteDeleteService,
+    MongoVoteValidateService,
   ],
   imports: [
     MongooseModule.forFeature(
@@ -57,6 +59,7 @@ import { MONGODB_VOTE_CONNECTION } from "src/Constant";
     MongoVoteCreateService,
     MongoVoteUpdateService,
     MongoVoteDeleteService,
+    MongoVoteValidateService,
   ],
 })
 export class MongoVoteModule {}

@@ -1,15 +1,15 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { ClientSession } from "mongoose";
-import { MongoVoteFindService, MongoVoteDeleteService } from "src/Mongo";
+import { MongoVoteDeleteService, MongoVoteValidateService } from "src/Mongo";
 
 @Injectable()
 export class VoteDeleteService {
   constructor() {}
 
   @Inject()
-  private readonly mongoVoteFindService: MongoVoteFindService;
-  @Inject()
   private readonly mongoVoteDeleteService: MongoVoteDeleteService;
+  @Inject()
+  private readonly mongoVoteValidateService: MongoVoteValidateService;
 
   /**
    * 리서치를 삭제합니다.
@@ -21,12 +21,12 @@ export class VoteDeleteService {
     session: ClientSession,
   ) {
     //* 투표 삭제를 요청한 유저가 투표 작성자인지 여부를 확인합니다.
-    const checkIsAuthor = this.mongoVoteFindService.isVoteAuthor({
+    const checkIsAuthor = this.mongoVoteValidateService.isVoteAuthor({
       userId: param.userId,
       voteId: param.voteId,
     });
     //* 투표 삭제 요청 시기를 기준으로 참여자 수가 10명 보다 적은지 확인합니다.
-    const checkAbleToDelete = this.mongoVoteFindService.isAbleToDeleteVote(
+    const checkAbleToDelete = this.mongoVoteValidateService.isAbleToDeleteVote(
       param.voteId,
     );
     //* 투표와 관련된 모든 정보를 삭제합니다.
@@ -50,7 +50,7 @@ export class VoteDeleteService {
     session: ClientSession,
   ) {
     //* 댓글 작성자인지 확인
-    const checkIsAuthor = this.mongoVoteFindService.isVoteCommentAuthor({
+    const checkIsAuthor = this.mongoVoteValidateService.isVoteCommentAuthor({
       userId: param.userId,
       commentId: param.commentId,
     });
@@ -81,7 +81,7 @@ export class VoteDeleteService {
     session: ClientSession,
   ) {
     //* 대댓글 작성자인지 확인
-    const checkIsAuthor = this.mongoVoteFindService.isVoteReplyAuthor({
+    const checkIsAuthor = this.mongoVoteValidateService.isVoteReplyAuthor({
       userId: param.userId,
       replyId: param.replyId,
     });
