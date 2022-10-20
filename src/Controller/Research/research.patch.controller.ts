@@ -128,7 +128,7 @@ export class ResearchPatchController {
     @Body() body: ResearchParticiateBodyDto,
   ) {
     //* 유저가 가진 크레딧, 리서치 정보를 가져옵니다
-    const getCreditBalance = this.mongoUserFindService.getCreditBalance(
+    const getCreditBalance = this.mongoUserFindService.getUserCreditBalance(
       req.user.userId,
     );
     const getResearch = this.mongoResearchFindService.getResearchById({
@@ -291,7 +291,7 @@ export class ResearchPatchController {
     @Body() body: ResearchPullupBodyDto,
   ) {
     //* 유저가 가진 크레딧, 리서치 정보를 가져옵니다
-    const getCreditBalance = this.mongoUserFindService.getCreditBalance(
+    const getCreditBalance = this.mongoUserFindService.getUserCreditBalance(
       req.user.userId,
     );
     const getResearch = this.mongoResearchFindService.getResearchById({
@@ -400,7 +400,7 @@ export class ResearchPatchController {
     @Body() body: ResearchEditBodyDto,
   ) {
     //* 유저가 가진 크레딧, 리서치 정보를 가져옵니다
-    const getCreditBalance = this.mongoUserFindService.getCreditBalance(
+    const getCreditBalance = this.mongoUserFindService.getUserCreditBalance(
       req.user.userId,
     );
     const getResearch = this.mongoResearchFindService.getResearchById({

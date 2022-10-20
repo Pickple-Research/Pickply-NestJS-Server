@@ -33,7 +33,7 @@ export class AuthService {
   async authenticate(email: string, password: string) {
     //* UserSecurity 정보 조회
     const userSecurity = await this.mongoUserFindService.getUserSecurityByEmail(
-      email,
+      { email, selectQuery: { password: true, salt: true } },
     );
 
     //* 주어진 비밀번호 해쉬
@@ -73,12 +73,11 @@ export class AuthService {
 
     //* userId 대신 email 이 주어진 경우 (일반 로그인)
     if ("email" in param) {
-      const user = await this.mongoUserFindService.getUser({
-        userEmail: param.email,
-        selectQuery: {},
-      });
+      const userId = await this.mongoUserFindService.getUserIdByEmail(
+        param.email,
+      );
       await this.mongoUserUpdateService.updateUserNotificationSetting({
-        userId: user._id.toString(),
+        userId,
         updateQuery: { $set: { fcmToken: param.fcmToken } },
       });
       return;
@@ -108,9 +107,10 @@ export class AuthService {
     newPassword: string;
   }) {
     //* UserSecurity 정보 조회
-    const userSecurity = await this.mongoUserFindService.getUserSecurityById(
-      param.userId,
-    );
+    const userSecurity = await this.mongoUserFindService.getUserSecurityById({
+      userId: param.userId,
+      selectQuery: { password: true, salt: true },
+    });
     //* 주어진 비밀번호 해쉬
     const hashedPassword = await this.getHashedPassword(
       param.password,
@@ -146,7 +146,6 @@ export class AuthService {
     const userId = await this.mongoUserFindService.getUserIdByEmail(
       param.email,
     );
-
     //* 이메일 전송
     const sendAuthCode = this.googleService.sendAuthCodeEmail({
       to: param.email,
@@ -177,7 +176,10 @@ export class AuthService {
   async verifyPasswordResetAuthCode(param: { email: string; code: string }) {
     //* 인증번호, 인증번호 만료시간 조회
     const userSecurity = await this.mongoUserFindService.getUserSecurityByEmail(
-      param.email,
+      {
+        email: param.email,
+        selectQuery: { authCode: true, codeExpiredAt: true },
+      },
     );
     //* 인증번호가 일치하지 않는 경우
     if (userSecurity.authCode !== param.code) {
@@ -203,7 +205,7 @@ export class AuthService {
   async resetPassword(param: { email: string; newPassword: string }) {
     //* UserSecurity 정보 조회
     const userSecurity = await this.mongoUserFindService.getUserSecurityByEmail(
-      param.email,
+      { email: param.email, selectQuery: { salt: true, verified: true } },
     );
     //* 이메일 인증이 진행되지 않은 경우
     if (!userSecurity.verified) {
@@ -226,9 +228,10 @@ export class AuthService {
    * @author 현웅
    */
   async initializePassword(userId: string) {
-    const userSecurity = await this.mongoUserFindService.getUserSecurityById(
+    const userSecurity = await this.mongoUserFindService.getUserSecurityById({
       userId,
-    );
+      selectQuery: { salt: true },
+    });
     const initializedPassword = getSalt().slice(0, 8);
     const newHashedPassword = await this.getHashedPassword(
       initializedPassword,

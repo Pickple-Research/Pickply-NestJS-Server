@@ -20,11 +20,13 @@ export class UserGetController {
    */
   @Get("credit")
   async getCreditHistories(@Request() req: { user: JwtUserInfo }) {
-    return await this.mongoUserFindService.getCreditHisories(req.user.userId);
+    return await this.mongoUserFindService.getRecentCreditHistories(
+      req.user.userId,
+    );
   }
 
   /**
-   * 요청한 유저의 크레딧 변동내역 중
+   * 요청한 유저의 크레딧 변동내역
    * 인자로 받은 크레딧 변동내역 _id 보다 더 나중에 생성된 크레딧 변동내역을 모두 가져옵니다.
    * @author 현웅
    */
@@ -61,7 +63,9 @@ export class UserGetController {
    */
   @Get("notifications")
   async getNotifications(@Request() req: { user: JwtUserInfo }) {
-    return await this.mongoUserFindService.getNotifications(req.user.userId);
+    return await this.mongoUserFindService.getRecentNotifications(
+      req.user.userId,
+    );
   }
 
   /**

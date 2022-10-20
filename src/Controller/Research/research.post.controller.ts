@@ -143,7 +143,7 @@ export class ResearchPostController {
     };
   }) {
     //* 유저가 가진 credit 을 가져옵니다
-    const creditBalance = await this.mongoUserFindService.getCreditBalance(
+    const creditBalance = await this.mongoUserFindService.getUserCreditBalance(
       param.userId,
     );
     //* 필요한 데이터 형태를 미리 만들어둡니다.

@@ -80,7 +80,7 @@ export class AdminPatchController {
   async giveCredit(
     @Body() body: { userId: string; reason: string; scale: number },
   ) {
-    const creditBalance = await this.mongoUserFindService.getCreditBalance(
+    const creditBalance = await this.mongoUserFindService.getUserCreditBalance(
       body.userId,
     );
     const creditHistory: CreditHistory = {
@@ -118,19 +118,17 @@ export class AdminPatchController {
     //   });
     // const userIds = participations.map((participation) => participation.userId);
 
-    const userIds = [""];
+    const userIds = ["6331f5eebf183c964e782bd2", "632326ef76d8650f073779c6"];
 
     const userSession = await this.userConnection.startSession();
     await tryMultiTransaction(async () => {
       for (const userId of userIds) {
-        const user = await this.mongoUserFindService.getUserById({
-          userId,
-          selectQuery: { credit: true },
-        });
+        const creditBalance =
+          await this.mongoUserFindService.getUserCreditBalance(userId);
         const creditHistory: CreditHistory = {
           userId,
           scale: body.scale,
-          balance: user.credit + body.scale,
+          balance: creditBalance + body.scale,
           isIncome: body.scale >= 0 ? true : false,
           reason: body.reason,
           type: "PRODUCT_EXCHANGE",

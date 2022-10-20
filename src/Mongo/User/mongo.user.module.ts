@@ -5,6 +5,7 @@ import {
   MongoUserDeleteService,
   MongoUserFindService,
   MongoUserUpdateService,
+  MongoUserValidateService,
 } from "src/Mongo";
 import {
   CreditHistory,
@@ -38,6 +39,7 @@ import { MONGODB_USER_CONNECTION } from "src/Constant";
     MongoUserDeleteService,
     MongoUserFindService,
     MongoUserUpdateService,
+    MongoUserValidateService,
   ],
   imports: [
     //? MongoUserModule에서 연결하고 사용할 DB와 Schema를 설정합니다.
@@ -70,6 +72,7 @@ import { MONGODB_USER_CONNECTION } from "src/Constant";
     MongoUserDeleteService,
     MongoUserFindService,
     MongoUserUpdateService,
+    MongoUserValidateService,
   ],
 })
 export class MongoUserModule {}

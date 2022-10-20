@@ -24,10 +24,9 @@ export class UserFindService {
    */
   async getUserActivities(param: { userId: string }) {
     //* 크레딧 변동내역과 알림
-    const getCreditHistories = this.mongoUserFindService.getCreditHisories(
-      param.userId,
-    );
-    const getNotifications = this.mongoUserFindService.getNotifications(
+    const getCreditHistories =
+      this.mongoUserFindService.getRecentCreditHistories(param.userId);
+    const getNotifications = this.mongoUserFindService.getRecentNotifications(
       param.userId,
     );
     //* 리서치 조회/스크랩/참여 정보 + 업로드한 리서치 정보
