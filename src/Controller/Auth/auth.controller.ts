@@ -153,6 +153,7 @@ export class AuthController {
    */
   @Post("logout")
   async logout(@Request() req: { user: JwtUserInfo }) {
+    //TODO: notificationSettings 를 업데이트하도록 변경
     return await this.mongoUserUpdateService.updateUser({
       userId: req.user.userId,
       updateQuery: { $set: { fcmToken: "" } },

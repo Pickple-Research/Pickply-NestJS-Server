@@ -55,7 +55,7 @@ export class MongoVoteFindService {
   }) {
     const votes = await this.Vote.find(param.filterQuery)
       .populate({ path: "author", model: this.VoteUser })
-      .select({ _id: 1, ...param.selectQuery })
+      .select(param.selectQuery)
       .lean();
     return votes.map((vote) => {
       if (vote.category !== "GREEN_LIGHT") return vote;

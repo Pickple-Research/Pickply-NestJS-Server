@@ -383,9 +383,8 @@ export class ResearchUpdateService {
         if (wonUserIds.length >= param.extraCreditReceiverNum) break;
 
         //* 분배 대상 유저의 크레딧 잔량을 가져옵니다.
-        const creditBalance = await this.mongoUserFindService.getCreditBalance(
-          userId,
-        );
+        const creditBalance =
+          await this.mongoUserFindService.getUserCreditBalance(userId);
         //* 크레딧 변동내역 데이터를 생성합니다.
         const creditHistory: CreditHistory = {
           userId,

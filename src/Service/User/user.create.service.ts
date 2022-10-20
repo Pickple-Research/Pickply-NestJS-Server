@@ -5,6 +5,7 @@ import {
   MongoUserFindService,
   MongoUserCreateService,
   MongoUserDeleteService,
+  MongoUserValidateService,
 } from "src/Mongo";
 import {
   Notification,
@@ -28,15 +29,15 @@ export class UserCreateService {
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
   @Inject() private readonly mongoUserCreateService: MongoUserCreateService;
   @Inject() private readonly mongoUserDeleteService: MongoUserDeleteService;
+  @Inject() private readonly mongoUserValidateService: MongoUserValidateService;
 
   async createUnauthorizedUser(
     param: { userInfo: UnauthorizedUser },
     session: ClientSession,
   ) {
     //* 해당 이메일로 가입된 정규 유저가 있는지 확인합니다.
-    const checkEmailDuplicated = this.mongoUserFindService.checkEmailDuplicated(
-      param.userInfo.email,
-    );
+    const checkEmailDuplicated =
+      this.mongoUserValidateService.checkEmailDuplicated(param.userInfo.email);
     //* 새로운 미인증 유저 데이터를 생성합니다.
     //* 이미 존재하는 경우, 데이터를 업데이트 합니다.
     const createUnauthorizedUser =
@@ -68,16 +69,19 @@ export class UserCreateService {
     session: ClientSession,
   ) {
     //* 해당 이메일로 가입된 정규 유저가 있는지 확인합니다.
-    const checkEmailDuplicated = this.mongoUserFindService.checkEmailDuplicated(
-      param.user.email,
-    );
+    const checkEmailDuplicated =
+      this.mongoUserValidateService.checkEmailDuplicated(param.user.email);
     //* 해당 닉네임으로 가입된 정규 유저가 있는지 확인합니다.
     const checkNicknameDuplicated =
-      this.mongoUserFindService.checkNicknameDuplicated(param.user.nickname);
+      this.mongoUserValidateService.checkNicknameDuplicated(
+        param.user.nickname,
+      );
     //* 이메일 인증이 완료되어 있는지 확인합니다.
-    const checkEmailAuthorized = this.mongoUserFindService.checkEmailAuthorized(
-      { email: param.user.email, skipValidation: param.skipEmailValidation },
-    );
+    const checkEmailAuthorized =
+      this.mongoUserValidateService.checkEmailAuthorized({
+        email: param.user.email,
+        skipValidation: param.skipEmailValidation,
+      });
     //* 기존의 미인증 유저 데이터를 삭제합니다.
     const deleteUnauthorizedUser =
       this.mongoUserDeleteService.deleteUnauthorizedUser(
