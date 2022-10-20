@@ -150,9 +150,12 @@ export class VoteUpdateService {
     const incQuery = {};
     param.voteParticipation.selectedOptionIndexes.forEach((optionIndex) => {
       incQuery[`result.${optionIndex}`] = 1;
+      incQuery[
+        `analytics.${optionIndex}.${param.voteParticipation.gender}.${param.voteParticipation.ageGroup}`
+      ] = 1;
     });
     //* result의 어떤 부분을 증가시킬지 설정합니다. 결과적으로 다음과 같은 쿼리를 실행시키는 것과 같은 결과를 도출합니다:
-    //* { $inc: { result.0: 1, result.1: 1 ... }
+    //* { $inc: { result.n: 1, analytics.n.MALE.TWENTY: 1, result.m: 1 ... }
 
     //* 유저가 이미 투표에 참여했었는지 확인
     const checkAlreadyParticipated =

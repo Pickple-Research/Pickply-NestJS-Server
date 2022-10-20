@@ -6,8 +6,6 @@ import {
   VoteDocument,
   VoteComment,
   VoteCommentDocument,
-  VoteParticipation,
-  VoteParticipationDocument,
   VoteReply,
   VoteReplyDocument,
   VoteUser,
@@ -21,15 +19,18 @@ export class MongoVoteUpdateService {
     @InjectModel(Vote.name) private readonly Vote: Model<VoteDocument>,
     @InjectModel(VoteComment.name)
     private readonly VoteComment: Model<VoteCommentDocument>,
-    @InjectModel(VoteParticipation.name)
-    private readonly VoteParticipation: Model<VoteParticipationDocument>,
     @InjectModel(VoteReply.name)
     private readonly VoteReply: Model<VoteReplyDocument>,
     @InjectModel(VoteUser.name)
     private readonly VoteUser: Model<VoteUserDocument>,
   ) {}
 
+  // ********************************** //
+  /** 기본형 **/
+  // ********************************** //
+
   /**
+   * TODO: 활용형으로 분산시킵니다
    * @Transaction
    * 투표 정보를 업데이트합니다.
    * @return 업데이트된 투표 정보
@@ -63,7 +64,6 @@ export class MongoVoteUpdateService {
       else return null;
     }
 
-    // return updatedVote;
     //! 그린라이트 투표는 게시자를 익명으로 바꿔서 반환합니다.
     if (updatedVote.category !== "GREEN_LIGHT") return updatedVote;
     return {
@@ -71,6 +71,10 @@ export class MongoVoteUpdateService {
       author: { ...updatedVote.author, nickname: "익명" },
     };
   }
+
+  // ********************************** //
+  /** 활용형 **/
+  // ********************************** //
 
   /**
    * 투표 댓글을 블락처리합니다.

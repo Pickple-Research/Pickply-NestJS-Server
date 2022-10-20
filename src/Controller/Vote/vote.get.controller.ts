@@ -1,5 +1,5 @@
 import { Controller, Inject, Request, Param, Get } from "@nestjs/common";
-import { MongoVoteFindService } from "src/Mongo";
+import { MongoVoteFindService, MongoVoteStandardizeService } from "src/Mongo";
 import { JwtUserInfo } from "src/Object/Type";
 import { Public } from "src/Security/Metadata";
 
@@ -8,6 +8,8 @@ export class VoteGetController {
   constructor() {}
 
   @Inject() private readonly mongoVoteFindService: MongoVoteFindService;
+  @Inject()
+  private readonly mongoVoteStandardizeService: MongoVoteStandardizeService;
 
   /**
    * 최신 투표를 가져옵니다.

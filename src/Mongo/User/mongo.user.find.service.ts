@@ -104,6 +104,22 @@ export class MongoUserFindService {
   }
 
   /**
+   * 크레딧 변동 내역을 원하는 조건으로 검색합니다.
+   * @author 현웅
+   */
+  async getCreditHistories(param: {
+    filterQuery?: FilterQuery<CreditHistoryDocument>;
+    selectQuery?: Partial<Record<keyof CreditHistory, boolean>>;
+    limit?: number;
+  }) {
+    return await this.CreditHistory.find(param.filterQuery)
+      .select(param.selectQuery)
+      .sort({ _id: -1 })
+      .limit(param.limit)
+      .lean();
+  }
+
+  /**
    * 특정 유저의 알림 설정 정보를 가져옵니다.
    * @author 현웅
    */
@@ -125,6 +141,19 @@ export class MongoUserFindService {
     selectQuery?: Partial<Record<keyof UserNotificationSetting, boolean>>;
   }) {
     return await this.UserNotificationSetting.find(param.filterQuery)
+      .select(param.selectQuery)
+      .lean();
+  }
+
+  /**
+   * 특정 유저의 특성 정보를 가져옵니다.
+   * @author 현웅
+   */
+  async getUserPropertyById(param: {
+    userId: string;
+    selectQuery?: Partial<Record<keyof UserProperty, boolean>>;
+  }) {
+    return await this.UserProperty.findById(param.userId)
       .select(param.selectQuery)
       .lean();
   }
@@ -167,22 +196,6 @@ export class MongoUserFindService {
     limit?: number;
   }) {
     return await this.Notification.find(param.filterQuery)
-      .select(param.selectQuery)
-      .sort({ _id: -1 })
-      .limit(param.limit)
-      .lean();
-  }
-
-  /**
-   * 크레딧 변동 내역을 원하는 조건으로 검색합니다.
-   * @author 현웅
-   */
-  async getCreditHistories(param: {
-    filterQuery?: FilterQuery<CreditHistoryDocument>;
-    selectQuery?: Partial<Record<keyof CreditHistory, boolean>>;
-    limit?: number;
-  }) {
-    return await this.CreditHistory.find(param.filterQuery)
       .select(param.selectQuery)
       .sort({ _id: -1 })
       .limit(param.limit)

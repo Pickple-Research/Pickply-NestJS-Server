@@ -1,8 +1,8 @@
-import { Controller, Inject, Request, Body, Patch } from "@nestjs/common";
+import { Controller, Request, Body, Patch, Inject } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import { VoteUpdateService } from "src/Service";
-import { MongoUserUpdateService, MongoVoteUpdateService } from "src/Mongo";
+import { MongoUserFindService } from "src/Mongo";
 import { VoteView, VoteScrap, VoteParticipation } from "src/Schema";
 import { Public } from "src/Security/Metadata";
 import {
@@ -11,7 +11,7 @@ import {
   VoteEditBodyDto,
 } from "src/Dto";
 import { JwtUserInfo } from "src/Object/Type";
-import { getCurrentISOTime, tryMultiTransaction } from "src/Util";
+import { getCurrentISOTime, getAgeGroup, tryMultiTransaction } from "src/Util";
 import { MONGODB_VOTE_CONNECTION } from "src/Constant";
 
 @Controller("votes")
@@ -24,9 +24,7 @@ export class VotePatchController {
   ) {}
 
   @Inject()
-  private readonly mongoUserUpdateService: MongoUserUpdateService;
-  @Inject()
-  private readonly mongoVoteUpdateService: MongoVoteUpdateService;
+  private readonly mongoUserFindService: MongoUserFindService;
 
   /**
    * @Transaction
@@ -120,13 +118,30 @@ export class VotePatchController {
     @Request() req: { user: JwtUserInfo },
     @Body() body: VoteParticipateBodyDto,
   ) {
+    //* 낮은 버전의 앱에서 투표에 참여해 나이와 성별이 전달되지 않은 경우,
+    //* UserProperty 를 찾아 나이와 성별 정보를 추가합니다.
+    //TODO: 나중에는 필수 property 로 바꾸고 에러를 반환해야 합니다.
+    let gender: string, ageGroup: string;
+
+    if (!body.gender || !body.ageGroup) {
+      const userProperty = await this.mongoUserFindService.getUserPropertyById({
+        userId: req.user.userId,
+        selectQuery: {
+          gender: true,
+          birthday: true,
+        },
+      });
+      gender = userProperty.gender;
+      ageGroup = getAgeGroup(userProperty.birthday);
+    }
+
     //* 투표 참여 정보
     const voteParticipation: VoteParticipation = {
       userId: req.user.userId,
       voteId: body.voteId,
       selectedOptionIndexes: body.selectedOptionIndexes,
-      gender: body.gender,
-      ageGroup: body.ageGroup,
+      gender: body.gender ? body.gender : gender,
+      ageGroup: body.ageGroup ? body.ageGroup : ageGroup,
       createdAt: getCurrentISOTime(),
     };
 

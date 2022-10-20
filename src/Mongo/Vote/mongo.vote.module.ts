@@ -5,6 +5,7 @@ import { MongoVoteCreateService } from "./mongo.vote.create.service";
 import { MongoVoteUpdateService } from "./mongo.vote.update.service";
 import { MongoVoteDeleteService } from "./mongo.vote.delete.service";
 import { MongoVoteValidateService } from "./mongo.vote.validate.service";
+import { MongoVoteStandardizeService } from "./mongo.vote.standardize.service";
 import {
   Vote,
   VoteSchema,
@@ -26,8 +27,10 @@ import {
   VoteUserSchema,
   VoteView,
   VoteViewSchema,
+  UserProperty,
+  UserPropertySchema,
 } from "src/Schema";
-import { MONGODB_VOTE_CONNECTION } from "src/Constant";
+import { MONGODB_VOTE_CONNECTION, MONGODB_USER_CONNECTION } from "src/Constant";
 
 @Module({
   providers: [
@@ -36,6 +39,7 @@ import { MONGODB_VOTE_CONNECTION } from "src/Constant";
     MongoVoteUpdateService,
     MongoVoteDeleteService,
     MongoVoteValidateService,
+    MongoVoteStandardizeService,
   ],
   imports: [
     MongooseModule.forFeature(
@@ -53,6 +57,10 @@ import { MONGODB_VOTE_CONNECTION } from "src/Constant";
       ],
       MONGODB_VOTE_CONNECTION,
     ),
+    MongooseModule.forFeature(
+      [{ name: UserProperty.name, schema: UserPropertySchema }],
+      MONGODB_USER_CONNECTION,
+    ),
   ],
   exports: [
     MongoVoteFindService,
@@ -60,6 +68,7 @@ import { MONGODB_VOTE_CONNECTION } from "src/Constant";
     MongoVoteUpdateService,
     MongoVoteDeleteService,
     MongoVoteValidateService,
+    MongoVoteStandardizeService,
   ],
 })
 export class MongoVoteModule {}
