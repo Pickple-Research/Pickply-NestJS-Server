@@ -37,6 +37,10 @@ export class MongoResearchFindService {
     private readonly ResearchView: Model<ResearchViewDocument>,
   ) {}
 
+  // ********************************** //
+  /** 기본형 **/
+  // ********************************** //
+
   /**
    * 리서치를 원하는 조건으로 검색합니다.
    * 반복되는 populate, lean 문구의 중복 사용을 줄이기 위해 MongoResearchFindService 내부적으로 사용되는 함수로, 외부에서 사용하는 것은 지양합니다.
@@ -171,7 +175,9 @@ export class MongoResearchFindService {
       .lean();
   }
 
-  /**  ** 이하 함수들은 위 기본 형태의 활용형입니다 **  **/
+  // ********************************** //
+  /** 활용형 **/
+  // ********************************** //
 
   /** 최신 리서치를 20개 찾고 반환합니다. */
   async getRecentResearches() {

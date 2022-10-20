@@ -1,10 +1,10 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { ClientSession } from "mongoose";
 import {
-  MongoVoteFindService,
   MongoVoteCreateService,
   MongoVoteUpdateService,
   MongoVoteDeleteService,
+  MongoVoteValidateService,
 } from "src/Mongo";
 import { Vote, VoteView, VoteScrap, VoteParticipation } from "src/Schema";
 
@@ -13,13 +13,13 @@ export class VoteUpdateService {
   constructor() {}
 
   @Inject()
-  private readonly mongoVoteFindService: MongoVoteFindService;
-  @Inject()
   private readonly mongoVoteCreateService: MongoVoteCreateService;
   @Inject()
   private readonly mongoVoteUpdateService: MongoVoteUpdateService;
   @Inject()
   private readonly mongoVoteDeleteService: MongoVoteDeleteService;
+  @Inject()
+  private readonly mongoVoteValidateService: MongoVoteValidateService;
 
   /**
    * 투표를 조회합니다.
@@ -30,7 +30,7 @@ export class VoteUpdateService {
    */
   async viewVote(param: { voteView: VoteView }) {
     if (
-      await this.mongoVoteFindService.isUserAlreadyViewedVote({
+      await this.mongoVoteValidateService.isUserAlreadyViewedVote({
         userId: param.voteView.userId,
         voteId: param.voteView.voteId,
       })
@@ -112,10 +112,11 @@ export class VoteUpdateService {
     });
 
     //* 선택지 index가 유효한 범위 내에 있는지 확인
-    const checkIndexesValid = this.mongoVoteFindService.isOptionIndexesValid(
-      param.voteId,
-      param.selectedOptionIndexes,
-    );
+    const checkIndexesValid =
+      this.mongoVoteValidateService.isOptionIndexesValid(
+        param.voteId,
+        param.selectedOptionIndexes,
+      );
     //* 비회원 투표 참여자 수 1 증가, 비회원 투표 결과값 반영
     const updateVote = this.mongoVoteUpdateService.updateVote(
       {
@@ -155,15 +156,16 @@ export class VoteUpdateService {
 
     //* 유저가 이미 투표에 참여했었는지 확인
     const checkAlreadyParticipated =
-      this.mongoVoteFindService.isUserAlreadyParticipatedVote({
+      this.mongoVoteValidateService.isUserAlreadyParticipatedVote({
         userId: param.voteParticipation.userId,
         voteId: param.voteId,
       });
     //* 선택지 index가 유효한 범위 내에 있는지 확인
-    const checkIndexesValid = this.mongoVoteFindService.isOptionIndexesValid(
-      param.voteId,
-      param.voteParticipation.selectedOptionIndexes,
-    );
+    const checkIndexesValid =
+      this.mongoVoteValidateService.isOptionIndexesValid(
+        param.voteId,
+        param.voteParticipation.selectedOptionIndexes,
+      );
     //* 투표 참여자 수 1 증가, 투표 결과값 반영
     const updateVote = this.mongoVoteUpdateService.updateVote(
       {
@@ -204,7 +206,7 @@ export class VoteUpdateService {
     param: { userId: string; voteId: string },
     session: ClientSession,
   ) {
-    const checkIsAuthor = this.mongoVoteFindService.isVoteAuthor({
+    const checkIsAuthor = this.mongoVoteValidateService.isVoteAuthor({
       userId: param.userId,
       voteId: param.voteId,
     });
@@ -234,7 +236,7 @@ export class VoteUpdateService {
     session: ClientSession,
   ) {
     //* 투표 수정을 요청한 유저가 투표 작성자인지 확인
-    const checkIsAuthor = this.mongoVoteFindService.isVoteAuthor({
+    const checkIsAuthor = this.mongoVoteValidateService.isVoteAuthor({
       userId: param.userId,
       voteId: param.voteId,
     });

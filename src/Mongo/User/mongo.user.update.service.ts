@@ -46,42 +46,6 @@ export class MongoUserUpdateService {
   ) {}
 
   /**
-   * 인자로 받은 이메일을 사용하는 미인증 유저의 인증번호와
-   * 인자로 받은 인증번호가 일치하는지 확인합니다.
-   * 인증번호가 일치하지 않거나 인증번호가 만료되었다면 에러를 일으킵니다.
-   * 인증번호가 일치하면 인증 여부를 true로 변경합니다.
-   * @author 현웅
-   */
-  async verifyUnauthorizedUserCode(param: { email: string; code: string }) {
-    const unauthorizedUser = await this.UnauthorizedUser.findOne({
-      email: param.email,
-    })
-      .select({ authorizationCode: 1, codeExpiredAt: 1 })
-      .lean();
-
-    //* 해당 이메일을 사용하는 유저가 없거나, 인증번호가 일치하지 않는 경우
-    if (
-      !unauthorizedUser ||
-      unauthorizedUser.authorizationCode !== param.code
-    ) {
-      throw new WrongAuthorizationCodeException();
-    }
-
-    //* 인증번호 유효기간이 만료된 경우
-    if (didDatePassed(unauthorizedUser.codeExpiredAt)) {
-      throw new AuthCodeExpiredException();
-    }
-
-    //TODO: #QUERY-EFFICIENCY 한번의 DB 검색으로 끝낼 수 있는 방법 없나?
-    //* 인증번호가 일치하는 경우
-    await this.UnauthorizedUser.findOneAndUpdate(
-      { email: param.email },
-      { $set: { authorized: true } },
-    );
-    return;
-  }
-
-  /**
    * User 스키마에 해당하는 값들을 업데이트하고 반환합니다.
    * @return 업데이트된 User 도큐먼트
    * @author 현웅
@@ -162,6 +126,42 @@ export class MongoUserUpdateService {
     await this.UserRelation.findByIdAndUpdate(param.userId, {
       $addToSet: { blockedUserIds: param.blockedUserId },
     });
+  }
+
+  /**
+   * 인자로 받은 이메일을 사용하는 미인증 유저의 인증번호와
+   * 인자로 받은 인증번호가 일치하는지 확인합니다.
+   * 인증번호가 일치하지 않거나 인증번호가 만료되었다면 에러를 일으킵니다.
+   * 인증번호가 일치하면 인증 여부를 true로 변경합니다.
+   * @author 현웅
+   */
+  async verifyUnauthorizedUserCode(param: { email: string; code: string }) {
+    const unauthorizedUser = await this.UnauthorizedUser.findOne({
+      email: param.email,
+    })
+      .select({ authorizationCode: 1, codeExpiredAt: 1 })
+      .lean();
+
+    //* 해당 이메일을 사용하는 유저가 없거나, 인증번호가 일치하지 않는 경우
+    if (
+      !unauthorizedUser ||
+      unauthorizedUser.authorizationCode !== param.code
+    ) {
+      throw new WrongAuthorizationCodeException();
+    }
+
+    //* 인증번호 유효기간이 만료된 경우
+    if (didDatePassed(unauthorizedUser.codeExpiredAt)) {
+      throw new AuthCodeExpiredException();
+    }
+
+    //TODO: #QUERY-EFFICIENCY 한번의 DB 검색으로 끝낼 수 있는 방법 없나?
+    //* 인증번호가 일치하는 경우
+    await this.UnauthorizedUser.findOneAndUpdate(
+      { email: param.email },
+      { $set: { authorized: true } },
+    );
+    return;
   }
 
   async followPartner(
