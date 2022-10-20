@@ -63,6 +63,11 @@ export class VotePostController {
       authorId: req.user.userId,
       result: Array(body.options.length).fill(0),
       nonMemeberResult: Array(body.options.length).fill(0),
+      //* 투표 결과 통계 분석을 위한 property 추가
+      analytics: Array(body.options.length).fill({
+        MALE: {},
+        FEMALE: {},
+      }),
       createdAt: getCurrentISOTime(),
     };
 

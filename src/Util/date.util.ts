@@ -91,3 +91,52 @@ export function getFutureDateFromGivenDate(
   newDate.setDate(newDate.getDate() + days);
   return newDate.toISOString();
 }
+
+/**
+ * @AppSync
+ * 인자로 받은 연도에 태어난 사람의 나이를 반환합니다.
+ * @author 현웅
+ */
+export function getAge(birthday: string | Date) {
+  const date = new Date(birthday);
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+  const now = new Date();
+  const nowYear = now.getFullYear();
+  const nowMonth = now.getMonth();
+  const nowDay = now.getDate();
+
+  let age = nowYear - year;
+
+  if (nowMonth < month || (nowMonth === month && nowDay < day)) {
+    age--;
+  }
+
+  return age;
+}
+
+/**
+ * @AppSync
+ * 인자로 받은 연도에 태어난 사람의 나이대를 반환합니다.
+ * @author 현웅
+ */
+export function getAgeGroup(birthday: string | Date) {
+  const age = getAge(birthday);
+  switch (true) {
+    case age < 20:
+      return "TEEN";
+    case age < 30:
+      return "TWENTY";
+    case age < 40:
+      return "THIRTY";
+    case age < 50:
+      return "FOURTY";
+    case age < 60:
+      return "FIFTY";
+    case age < 70:
+      return "SIXTY";
+    default:
+      return "SEVENTY";
+  }
+}

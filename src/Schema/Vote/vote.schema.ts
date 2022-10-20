@@ -1,7 +1,12 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Schema as MongooseSchema } from "mongoose";
 import { VoteUser } from "./voteUser.schema";
-import { VoteOption, VoteOptionSchema } from "./Embedded";
+import {
+  VoteOption,
+  VoteOptionSchema,
+  VoteAnalytics,
+  VoteAnalyticsSchema,
+} from "./Embedded";
 
 /**
  * 투표 기본 정보 스키마입니다.
@@ -59,6 +64,9 @@ export class Vote {
   @Prop({ type: [Number] }) // 비회원 투표 결과. 각 인덱스의 값은 투표 선택지가 얼마나 선택되었는지 알려줍니다.
   nonMemeberResult?: number[];
 
+  @Prop({ type: [VoteAnalyticsSchema], default: [] })
+  analytics?: VoteAnalytics[];
+
   @Prop({ default: 0 }) // (대)댓글 수
   commentsNum?: number;
 
@@ -76,6 +84,12 @@ export class Vote {
 
   @Prop({ default: false }) // (신고 등으로 인한) 블락 여부
   blocked?: boolean;
+
+  @Prop() // 해당 투표에 걸린 이벤트
+  eventName?: string;
+
+  @Prop() // 해당 투표에 걸린 이벤트 크레딧 규모
+  eventCredit?: number;
 }
 
 export const VoteSchema = SchemaFactory.createForClass(Vote);
