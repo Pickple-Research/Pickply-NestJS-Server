@@ -271,7 +271,12 @@ export class MongoUserFindService {
    * @author 현웅
    */
   async getUserByNickname(nickname: string) {
-    return await this.getUsers({ filterQuery: { nickname } });
+    const users = await this.getUsers({
+      filterQuery: { nickname },
+      selectQuery: { nickname: true },
+    });
+    if (users.length === 0) return null;
+    return users;
   }
 
   /**
