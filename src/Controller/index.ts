@@ -5,6 +5,7 @@
  */
 
 //Admin
+export * from "./Admin/admin.get.controller";
 export * from "./Admin/admin.patch.controller";
 export * from "./Admin/admin.post.controller";
 

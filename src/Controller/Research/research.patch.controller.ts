@@ -438,7 +438,11 @@ export class ResearchPatchController {
       return await this.editResearchWithExtraCredit({
         userId: req.user.userId,
         researchId: body.researchId,
-        research: body,
+        research: {
+          ...body,
+          creditDistributed:
+            body.extraCredit === 0 || body.extraCreditReceiverNum === 0,
+        },
         creditHistory,
       });
     }

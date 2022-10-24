@@ -211,7 +211,10 @@ export class MongoUserFindService {
    * @author 현웅
    */
   async getUserIdByEmail(email: string) {
-    const user = await this.getUserByEmail({ email });
+    const user = await this.getUserByEmail({
+      email,
+      selectQuery: { email: true },
+    });
     return user._id.toString();
   }
 
