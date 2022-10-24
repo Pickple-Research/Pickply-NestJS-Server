@@ -12,7 +12,7 @@ import {
 import { getAgeGroup } from "src/Util";
 
 /**
- * 투표 관련 스키마를 일괄적으로 변경할 때 사용하는 서비스입니다.
+ * 투표 관련 정보를 일괄적으로 변경할 때 사용하는 서비스입니다.
  * @author 현웅
  */
 @Injectable()
@@ -24,6 +24,35 @@ export class MongoVoteStandardizeService {
     @InjectModel(VoteParticipation.name)
     private readonly VoteParticipation: Model<VoteParticipationDocument>,
   ) {}
+
+  async standardize() {}
+
+  /**
+   * v1.1.12) 투표 통계 분석 결과 추가
+   * @author 현웅
+   */
+  async addVoteAnalyticsData() {
+    await this.VoteParticipation.find()
+      .select({
+        voteId: true,
+        selectedOptionIndexes: true,
+        gender: true,
+        ageGroup: true,
+      })
+      .then((participations) => {
+        participations.forEach((participation) => {
+          const incQuery = {};
+          participation.selectedOptionIndexes.forEach((optionIndex) => {
+            incQuery[
+              `analytics.${optionIndex}.${participation.gender}.${participation.ageGroup}`
+            ] = 1;
+          });
+          this.Vote.findByIdAndUpdate(participation.voteId, {
+            $inc: incQuery,
+          }).exec();
+        });
+      });
+  }
 
   /**
    * v1.1.11) 투표 참여 정보에 사용자 특성 추가

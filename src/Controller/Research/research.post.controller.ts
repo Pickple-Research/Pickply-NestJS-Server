@@ -168,6 +168,8 @@ export class ResearchPostController {
       credit: ACHEIVE_CREDIT_PER_MINUTE(param.body.estimatedTime),
       pulledupAt: currentTime,
       createdAt: currentTime,
+      creditDistributed:
+        param.body.extraCredit === 0 || param.body.extraCreditReceiverNum === 0,
     };
     //* CreditHistory 정보
     const creditHistory: CreditHistory = {

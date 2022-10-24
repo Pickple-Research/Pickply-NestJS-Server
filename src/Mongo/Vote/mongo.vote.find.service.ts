@@ -221,7 +221,7 @@ export class MongoVoteFindService {
   async getRecentCategoryVotes() {
     const votes = await Promise.all(
       AllVoteCategory.map((category) => {
-        return this.Vote.findOne({ category })
+        return this.Vote.findOne({ category, hidden: false, blocked: false })
           .sort({ _id: -1 })
           .populate({ path: "author", model: this.VoteUser })
           .lean();
