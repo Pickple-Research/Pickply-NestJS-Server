@@ -2,13 +2,19 @@ import { Controller, Request, Body, Patch, Inject } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import { VoteUpdateService } from "src/Service";
-import { MongoUserFindService } from "src/Mongo";
-import { VoteView, VoteScrap, VoteParticipation } from "src/Schema";
+import { MongoUserFindService, MongoVoteUpdateService } from "src/Mongo";
+import {
+  VoteView,
+  VoteScrap,
+  VoteParticipation,
+  VoteNonMemberParticipation,
+} from "src/Schema";
 import { Public } from "src/Security/Metadata";
 import {
   VoteInteractBodyDto,
-  VoteParticipateBodyDto,
+  VoteParticipateBodyDtoOld,
   VoteEditBodyDto,
+  VoteParticipationUpdateBodyDto,
 } from "src/Dto";
 import { JwtUserInfo } from "src/Object/Type";
 import { getCurrentISOTime, getAgeGroup, tryMultiTransaction } from "src/Util";
@@ -25,6 +31,8 @@ export class VotePatchController {
 
   @Inject()
   private readonly mongoUserFindService: MongoUserFindService;
+  @Inject()
+  private readonly mongoVoteUpdateService: MongoVoteUpdateService;
 
   /**
    * @Transaction
@@ -108,6 +116,51 @@ export class VotePatchController {
   }
 
   /**
+   * 투표 참여 정보를 업데이트합니다:
+   * 투표에 참여하지 않고 투표 결과 통계만 조회한 후
+   * 해당 투표에 참여하는 경우 사용합니다.
+   * @return 업데이트된 투표 정보
+   * @author 현웅
+   */
+  @Patch("participation")
+  async addVoteParticipation(@Body() body: VoteParticipationUpdateBodyDto) {
+    const voteSession = await this.voteConnection.startSession();
+
+    const incQuery = {};
+    body.selectedOptionIndexes.forEach((optionIndex) => {
+      incQuery[`result.${optionIndex}`] = 1;
+      incQuery[`analytics.${optionIndex}.${body.gender}.${body.ageGroup}`] = 1;
+    });
+
+    return await tryMultiTransaction(async () => {
+      //* 투표 정보를 업데이트합니다.
+      const updateVote = this.mongoVoteUpdateService.updateVote(
+        {
+          voteId: body.voteId,
+          updateQuery: { $inc: { participantsNum: 1, ...incQuery } },
+        },
+        voteSession,
+      );
+      //* 투표 참여 정보를 업데이트합니다. (세션을 사용하지 않습니다.)
+      const updateVoteParticipation =
+        this.mongoVoteUpdateService.updateVoteParticipationById({
+          voteParticipationId: body.voteParticipationId,
+          updateQuery: {
+            $set: { selectedOptionIndexes: body.selectedOptionIndexes },
+          },
+        });
+      //* 위 두 함수를 동시에 실행합니다.
+      return await Promise.all([updateVote, updateVoteParticipation]).then(
+        ([updatedVote, _]) => {
+          return updatedVote;
+        },
+      );
+    }, [voteSession]);
+  }
+
+  /**
+   * @deprecated #DELETE-AT-YEAR-END - Post 요청으로 이관되었습니다
+   *
    * @Transaction
    * 투표에 참여합니다.
    * @return 업데이트된 투표 정보, 생성된 투표 참여 정보
@@ -116,7 +169,7 @@ export class VotePatchController {
   @Patch("participate")
   async participateVote(
     @Request() req: { user: JwtUserInfo },
-    @Body() body: VoteParticipateBodyDto,
+    @Body() body: VoteParticipateBodyDtoOld,
   ) {
     //* 낮은 버전의 앱에서 투표에 참여해 나이와 성별이 전달되지 않은 경우,
     //* UserProperty 를 찾아 나이와 성별 정보를 추가합니다.
@@ -158,23 +211,32 @@ export class VotePatchController {
   }
 
   /**
+   * @deprecated #DELETE-AT-YEAR-END - Post 요청으로 이관되었습니다
+   *
    * (비회원) 투표에 참여합니다.
    * @return 업데이트된 투표 정보
    * @author 현웅
    */
   @Public()
   @Patch("participate/public")
-  async nonMemberParticipateVote(@Body() body: VoteParticipateBodyDto) {
+  async nonMemberParticipateVote(@Body() body: VoteParticipateBodyDtoOld) {
     const voteSession = await this.voteConnection.startSession();
 
+    const voteNonMemberParticipation: VoteNonMemberParticipation = {
+      voteId: body.voteId,
+      selectedOptionIndexes: body.selectedOptionIndexes,
+      createdAt: getCurrentISOTime(),
+    };
+
     return await tryMultiTransaction(async () => {
-      const updatedVote = await this.voteUpdateService.nonMemberParticipateVote(
-        {
-          voteId: body.voteId,
-          selectedOptionIndexes: body.selectedOptionIndexes,
-        },
-        voteSession,
-      );
+      const { updatedVote } =
+        await this.voteUpdateService.nonMemberParticipateVote(
+          {
+            voteId: body.voteId,
+            voteNonMemberParticipation,
+          },
+          voteSession,
+        );
       return updatedVote;
     }, [voteSession]);
   }

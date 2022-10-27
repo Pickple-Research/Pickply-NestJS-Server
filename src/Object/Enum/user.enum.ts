@@ -31,6 +31,7 @@ export enum AccountType {
 }
 
 /**
+ * @AppSync
  * 크레딧 변동 사유
  * @author 현웅
  */
@@ -49,6 +50,8 @@ export enum CreditHistoryType {
   WIN_RESEARCH_EXTRA_CREDIT = "WIN_RESEARCH_EXTRA_CREDIT",
   // 리서치 크레딧 차액 보상
   CREDIT_COMPENSATION = "CREDIT_COMPENSATION",
+  // 투표 참여 없이 투표 결과 통계 조회
+  INQUIRE_VOTE_STAT = "INQUIRE_VOTE_STAT",
   // 크레딧을 통한 경품 교환
   PRODUCT_EXCHANGE = "PRODUCT_EXCHANGE",
   // SurBay 사용자 기존 크레딧 이관

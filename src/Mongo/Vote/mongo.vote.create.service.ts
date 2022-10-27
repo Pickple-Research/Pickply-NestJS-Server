@@ -8,6 +8,8 @@ import {
   VoteCommentDocument,
   VoteCommentReport,
   VoteCommentReportDocument,
+  VoteNonMemberParticipation,
+  VoteNonMemberParticipationDocument,
   VoteParticipation,
   VoteParticipationDocument,
   VoteReply,
@@ -34,6 +36,8 @@ export class MongoVoteCreateService {
     private readonly VoteComment: Model<VoteCommentDocument>,
     @InjectModel(VoteCommentReport.name)
     private readonly VoteCommentReport: Model<VoteCommentReportDocument>,
+    @InjectModel(VoteNonMemberParticipation.name)
+    private readonly VoteNonMemberParticipation: Model<VoteNonMemberParticipationDocument>,
     @InjectModel(VoteParticipation.name)
     private readonly VoteParticipation: Model<VoteParticipationDocument>,
     @InjectModel(VoteReply.name)
@@ -116,17 +120,32 @@ export class MongoVoteCreateService {
   }
 
   /**
-   * 투표 참여시: 투표 참여 정보를 만듭니다.
+   * 투표 참여시 or 투표에 참여하지 않고 투표 결과 통계 분석을 볼 때:
+   * 투표 참여 정보를 만듭니다.
    * @return 생성된 투표 참여 정보
    * @author 현웅
    */
   async createVoteParticipation(
-    param: {
-      voteParticipation: VoteParticipation;
-    },
+    param: { voteParticipation: VoteParticipation },
     session: ClientSession,
   ) {
     const newVoteParticipations = await this.VoteParticipation.create(
+      [param.voteParticipation],
+      { session },
+    );
+    return newVoteParticipations[0].toObject();
+  }
+
+  /**
+   * 비회원 투표 참여 정보를 만듭니다.
+   * @return 생성된 비회원 투표 참여 정보
+   * @author 현웅
+   */
+  async createVoteNonMemberParticipation(
+    param: { voteParticipation: VoteNonMemberParticipation },
+    session: ClientSession,
+  ) {
+    const newVoteParticipations = await this.VoteNonMemberParticipation.create(
       [param.voteParticipation],
       { session },
     );

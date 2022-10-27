@@ -10,7 +10,7 @@ export class ResearchNonMemberParticipation {
   @Prop({ required: true, index: true }) // 참여 대상 리서치 _id
   researchId: string;
 
-  @Prop({ required: true, index: true }) // 참여한 유저 fcmToken
+  @Prop({ required: true }) // 참여한 유저 fcmToken
   fcmToken: string;
 
   @Prop({ required: true }) // 리서치 참여에 걸린 시간

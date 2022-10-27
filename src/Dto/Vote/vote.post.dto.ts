@@ -1,5 +1,6 @@
 import {
   IsString,
+  IsNumber,
   IsArray,
   IsOptional,
   ValidateNested,
@@ -37,6 +38,66 @@ export class VoteCreateBodyDto {
 
   @IsBoolean()
   allowMultiChoice: boolean;
+}
+
+/**
+ * 투표 참여시 Body에 포함되어야 하는 정보들
+ * @param selectedOptions 선택한 투표 선택지 index 배열
+ * @author 현웅
+ */
+export class VoteParticipateBodyDto {
+  @IsString()
+  voteId: string;
+
+  /** 최소 하나 이상의 숫자 배열 */
+  @ArrayMinSize(1)
+  @Type(() => Number)
+  @IsNumber({}, { each: true })
+  selectedOptionIndexes: number[];
+
+  @IsString()
+  gender: string;
+
+  @IsString()
+  ageGroup: string;
+}
+
+/**
+ * 비회원 투표 참여시 Body에 포함되어야 하는 정보들
+ * @author 현웅
+ */
+export class VoteNonMemberParticipateBodyDto {
+  @IsString()
+  voteId: string;
+
+  /** 최소 하나 이상의 숫자 배열 */
+  @ArrayMinSize(1)
+  @Type(() => Number)
+  @IsNumber({}, { each: true })
+  selectedOptionIndexes: number[];
+
+  @IsString() // TODO: 추후 삭제
+  @IsOptional()
+  fcmToken?: string;
+}
+
+/**
+ * 투표에 참여하지 않고 통계 분석 결과를 확인할 때 Body 에 포함되어야 하는 정보들
+ * @param
+ * @author 현웅
+ */
+export class VoteRevealStatisticsBodyDto {
+  @IsString()
+  voteId: string;
+
+  @IsString()
+  voteTitle: string;
+
+  @IsString()
+  gender: string;
+
+  @IsString()
+  ageGroup: string;
 }
 
 /**

@@ -1,18 +1,24 @@
-import { Controller, Inject, Request, Param, Body, Post } from "@nestjs/common";
+import { Controller, Inject, Request, Body, Post } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import {
   Notification,
   Vote,
+  VoteNonMemberParticipation,
+  VoteParticipation,
   VoteComment,
   VoteReply,
   VoteCommentReport,
   VoteReplyReport,
+  CreditHistory,
 } from "src/Schema";
-import { UserCreateService } from "src/Service";
+import { UserCreateService, VoteUpdateService } from "src/Service";
 import { MongoVoteFindService, MongoVoteCreateService } from "src/Mongo";
 import {
   VoteCreateBodyDto,
+  VoteParticipateBodyDto,
+  VoteNonMemberParticipateBodyDto,
+  VoteRevealStatisticsBodyDto,
   VoteCommentCreateBodyDto,
   VoteReplyCreateBodyDto,
   VoteReportBodyDto,
@@ -20,10 +26,12 @@ import {
   VoteReplyReportBodyDto,
   VoteMypageBodyDto,
 } from "src/Dto";
+import { Public } from "src/Security/Metadata";
 import { JwtUserInfo } from "src/Object/Type";
-import { AlarmType } from "src/Object/Enum";
+import { AlarmType, CreditHistoryType } from "src/Object/Enum";
 import { tryMultiTransaction, getCurrentISOTime } from "src/Util";
 import {
+  MONGODB_USER_CONNECTION,
   MONGODB_VOTE_CONNECTION,
   NEW_COMMENT_ALRAM_TITLE,
   NEW_COMMENT_ALRAM_CONTENT,
@@ -35,7 +43,10 @@ import {
 export class VotePostController {
   constructor(
     private readonly userCreateService: UserCreateService,
+    private readonly voteUpdateService: VoteUpdateService,
 
+    @InjectConnection(MONGODB_USER_CONNECTION)
+    private readonly userConnection: Connection,
     @InjectConnection(MONGODB_VOTE_CONNECTION)
     private readonly voteConnection: Connection,
   ) {}
@@ -78,6 +89,127 @@ export class VotePostController {
       );
       return newVote;
     }, [voteSession]);
+  }
+
+  /**
+   * @Transaction
+   * 투표에 참여합니다.
+   * @return 업데이트된 투표 정보, 생성된 투표 참여 정보
+   * @author 현웅
+   */
+  @Post("participate")
+  async participateVote(
+    @Request() req: { user: JwtUserInfo },
+    @Body() body: VoteParticipateBodyDto,
+  ) {
+    //* 투표 참여 정보
+    const voteParticipation: VoteParticipation = {
+      userId: req.user.userId,
+      voteId: body.voteId,
+      selectedOptionIndexes: body.selectedOptionIndexes,
+      gender: body.gender,
+      ageGroup: body.ageGroup,
+      createdAt: getCurrentISOTime(),
+    };
+
+    const voteSession = await this.voteConnection.startSession();
+
+    return await tryMultiTransaction(async () => {
+      const { updatedVote, newVoteParticipation } =
+        await this.voteUpdateService.participateVote(
+          { voteId: body.voteId, voteParticipation },
+          voteSession,
+        );
+      return { updatedVote, newVoteParticipation };
+    }, [voteSession]);
+  }
+
+  /**
+   * (비회원) 투표에 참여합니다.
+   * @return 업데이트된 투표 정보, 생성된 비회원 투표 참여 정보
+   * @author 현웅
+   */
+  @Public()
+  @Post("participate/public")
+  async nonMemberParticipateVote(
+    @Body() body: VoteNonMemberParticipateBodyDto,
+  ) {
+    const voteSession = await this.voteConnection.startSession();
+
+    const voteNonMemberParticipation: VoteNonMemberParticipation = {
+      voteId: body.voteId,
+      selectedOptionIndexes: body.selectedOptionIndexes,
+      fcmToken: body.fcmToken,
+      createdAt: getCurrentISOTime(),
+    };
+
+    return await tryMultiTransaction(async () => {
+      const { updatedVote, newVoteNonMemberParticipation } =
+        await this.voteUpdateService.nonMemberParticipateVote(
+          {
+            voteId: body.voteId,
+            voteNonMemberParticipation,
+          },
+          voteSession,
+        );
+      return { updatedVote, newVoteNonMemberParticipation };
+    }, [voteSession]);
+  }
+
+  /**
+   * 투표에 참여하지 않은 상태에서 투표 결과 통계 분석을 확인합니다.
+   * 선택지 index 배열이 빈 리스트인 투표 참여 데이터와
+   * 크레딧 사용 내역을 생성합니다.
+   * @return 생성된 투표 참여 정보, 생성된 크레딧 사용내역 정보
+   * @author 현웅
+   */
+  @Public()
+  @Post("stat") // abbr. statistics
+  async getVoteStatistics(
+    @Request() req: { user: JwtUserInfo },
+    @Body() body: VoteRevealStatisticsBodyDto,
+  ) {
+    const userSession = await this.userConnection.startSession();
+    const voteSession = await this.voteConnection.startSession();
+
+    const currentISOTime = getCurrentISOTime();
+
+    const voteParticipation: VoteParticipation = {
+      userId: req.user.userId,
+      voteId: body.voteId,
+      selectedOptionIndexes: [],
+      gender: body.gender,
+      ageGroup: body.ageGroup,
+      createdAt: currentISOTime,
+    };
+
+    const creditHistory: Omit<CreditHistory, "balance"> = {
+      userId: req.user.userId,
+      reason: body.voteTitle,
+      type: CreditHistoryType.INQUIRE_VOTE_STAT,
+      scale: -1,
+      isIncome: false,
+      createdAt: currentISOTime,
+    };
+
+    return await tryMultiTransaction(async () => {
+      const createVoteParticipation =
+        this.mongoVoteCreateService.createVoteParticipation(
+          { voteParticipation },
+          voteSession,
+        );
+      const createCreditHistory = this.userCreateService.createCreditHistory(
+        { userId: req.user.userId, creditHistory },
+        userSession,
+      );
+
+      return await Promise.all([
+        createVoteParticipation,
+        createCreditHistory,
+      ]).then(([newVoteParticipation, newCreditHistory]) => {
+        return { newVoteParticipation, newCreditHistory };
+      });
+    }, [userSession, voteSession]);
   }
 
   /**

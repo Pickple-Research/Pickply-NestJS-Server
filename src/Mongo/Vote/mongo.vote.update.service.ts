@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, ClientSession, UpdateQuery } from "mongoose";
+import { Model, ClientSession, FilterQuery, UpdateQuery } from "mongoose";
 import {
   Vote,
   VoteDocument,
+  VoteParticipation,
+  VoteParticipationDocument,
   VoteComment,
   VoteCommentDocument,
   VoteReply,
@@ -17,6 +19,8 @@ import { VoteNotFoundException } from "src/Exception";
 export class MongoVoteUpdateService {
   constructor(
     @InjectModel(Vote.name) private readonly Vote: Model<VoteDocument>,
+    @InjectModel(VoteParticipation.name)
+    private readonly VoteParticipation: Model<VoteParticipationDocument>,
     @InjectModel(VoteComment.name)
     private readonly VoteComment: Model<VoteCommentDocument>,
     @InjectModel(VoteReply.name)
@@ -70,6 +74,25 @@ export class MongoVoteUpdateService {
       ...updatedVote,
       author: { ...updatedVote.author, nickname: "익명" },
     };
+  }
+
+  /**
+   * 특정 투표 참여 정보를 업데이트합니다.
+   * @author 현웅
+   */
+  async updateVoteParticipationById(
+    param: {
+      voteParticipationId: string;
+      updateQuery?: UpdateQuery<VoteParticipationDocument>;
+    },
+    session?: ClientSession,
+  ) {
+    await this.VoteParticipation.findByIdAndUpdate(
+      param.voteParticipationId,
+      param.updateQuery,
+      { session, returnOriginal: false },
+    ).lean();
+    return;
   }
 
   // ********************************** //

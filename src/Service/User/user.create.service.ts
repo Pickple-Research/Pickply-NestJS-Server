@@ -4,10 +4,12 @@ import { FirebaseService } from "src/Firebase";
 import {
   MongoUserFindService,
   MongoUserCreateService,
+  MongoUserUpdateService,
   MongoUserDeleteService,
   MongoUserValidateService,
 } from "src/Mongo";
 import {
+  CreditHistory,
   Notification,
   UnauthorizedUser,
   User,
@@ -17,6 +19,7 @@ import {
   UserSecurity,
 } from "src/Schema";
 import { PushAlarm } from "src/Object/Type";
+import { NotEnoughCreditException } from "src/Exception";
 
 /**
  * 유저를 생성하는 서비스입니다.
@@ -28,6 +31,7 @@ export class UserCreateService {
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
   @Inject() private readonly mongoUserCreateService: MongoUserCreateService;
+  @Inject() private readonly mongoUserUpdateService: MongoUserUpdateService;
   @Inject() private readonly mongoUserDeleteService: MongoUserDeleteService;
   @Inject() private readonly mongoUserValidateService: MongoUserValidateService;
 
@@ -105,6 +109,43 @@ export class UserCreateService {
         userProperty: param.userProperty,
         userSecurity: param.userSecurity,
       },
+      session,
+    );
+  }
+
+  /**
+   * 사용자의 크레딧을 갱신하고 크레딧 사용내역을 만듭니다.
+   * 이 때, 갱신된 사용자 크레딧이 음수가 되는 경우 에러를 발생시킵니다.
+   * @author 현웅
+   */
+  async createCreditHistory(
+    param: {
+      userId: string;
+      creditHistory: Omit<CreditHistory, "balance">;
+    },
+    session: ClientSession,
+  ) {
+    //* 사용자의 크레딧을 갱신합니다.
+    const updatedUser = await this.mongoUserUpdateService.updateUser(
+      {
+        userId: param.userId,
+        updateQuery: { $inc: { credit: param.creditHistory.scale } },
+      },
+      session,
+    );
+
+    //* 갱신된 사용자의 크레딧이 음수가 되는 경우 에러를 발생시킵니다.
+    if (updatedUser.credit < 0) throw new NotEnoughCreditException();
+
+    //* 그렇지 않은 경우, 크레딧 사용내역을 만듭니다.
+    const creditHistory: CreditHistory = {
+      ...param.creditHistory,
+      balance: updatedUser.credit,
+    };
+
+    //* 크레딧 사용내역을 만들고 반환합니다.
+    return await this.mongoUserCreateService.createCreditHistories(
+      { creditHistories: [creditHistory] },
       session,
     );
   }

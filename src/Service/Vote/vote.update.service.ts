@@ -6,7 +6,13 @@ import {
   MongoVoteDeleteService,
   MongoVoteValidateService,
 } from "src/Mongo";
-import { Vote, VoteView, VoteScrap, VoteParticipation } from "src/Schema";
+import {
+  Vote,
+  VoteView,
+  VoteScrap,
+  VoteParticipation,
+  VoteNonMemberParticipation,
+} from "src/Schema";
 
 @Injectable()
 export class VoteUpdateService {
@@ -99,23 +105,29 @@ export class VoteUpdateService {
 
   /**
    * (비회원) 투표에 참여합니다.
+   * @return 업데이트된 투표 정보, 생성된 비회원 투표 참여 정보
    * @author 현웅
    */
   async nonMemberParticipateVote(
-    param: { voteId: string; selectedOptionIndexes: number[] },
+    param: {
+      voteId: string;
+      voteNonMemberParticipation: VoteNonMemberParticipation;
+    },
     session: ClientSession,
   ) {
     //* 비회원 투표 결과값을 반영하는 $inc 쿼리를 동적으로 생성합니다.
     const incQuery = {};
-    param.selectedOptionIndexes.forEach((optionIndex) => {
-      incQuery[`nonMemeberResult.${optionIndex}`] = 1;
-    });
+    param.voteNonMemberParticipation.selectedOptionIndexes.forEach(
+      (optionIndex) => {
+        incQuery[`nonMemeberResult.${optionIndex}`] = 1;
+      },
+    );
 
     //* 선택지 index가 유효한 범위 내에 있는지 확인
     const checkIndexesValid =
       this.mongoVoteValidateService.isOptionIndexesValid(
         param.voteId,
-        param.selectedOptionIndexes,
+        param.voteNonMemberParticipation.selectedOptionIndexes,
       );
     //* 비회원 투표 참여자 수 1 증가, 비회원 투표 결과값 반영
     const updateVote = this.mongoVoteUpdateService.updateVote(
@@ -126,11 +138,20 @@ export class VoteUpdateService {
       session,
     );
     //* 위 두 함수를 동시에 실행
-    return await Promise.all([checkIndexesValid, updateVote]).then(
+    const updatedVote = await Promise.all([checkIndexesValid, updateVote]).then(
       ([_, updatedVote]) => {
         return updatedVote;
       },
     );
+
+    //* 새로운 비회원 투표 참여 정보 생성
+    const newVoteNonMemberParticipation =
+      await this.mongoVoteCreateService.createVoteNonMemberParticipation(
+        { voteParticipation: param.voteNonMemberParticipation },
+        session,
+      );
+
+    return { updatedVote, newVoteNonMemberParticipation };
   }
 
   /**
