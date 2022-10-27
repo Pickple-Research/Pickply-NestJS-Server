@@ -41,13 +41,15 @@ export class AdminPostController {
    */
   @Roles(UserType.ADMIN)
   @Post("users/multiple/alarm")
-  async sendMultiplePushAlarm(@Body() body: {}) {
+  async sendMultiplePushAlarm(@Body() body: { researchId?: string }) {
     const participations =
       await this.mongoResearchFindService.getResearchParticipations({
-        filterQuery: { researchId: "" },
+        filterQuery: { researchId: body.researchId },
         selectQuery: { userId: true },
       });
     const userIds = participations.map((participation) => participation.userId);
+    console.log(userIds);
+
     const notificationSettings =
       await this.mongoUserFindService.getUserNotificationSettings({
         filterQuery: { _id: { $in: userIds } },

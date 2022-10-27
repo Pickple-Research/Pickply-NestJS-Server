@@ -42,6 +42,7 @@ export * from "./User/userSecurity.schema";
 export * from "./Vote/vote.schema";
 export * from "./Vote/voteComment.schema";
 export * from "./Vote/voteCommentReport.schema";
+export * from "./Vote/voteNonMemberParticipation.schema";
 export * from "./Vote/voteParticipation.schema";
 export * from "./Vote/voteReply.schema";
 export * from "./Vote/voteReplyReport.schema";

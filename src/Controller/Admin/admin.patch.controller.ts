@@ -94,7 +94,7 @@ export class AdminPatchController {
       scale: body.scale,
       balance: creditBalance + body.scale,
       isIncome: body.scale >= 0 ? true : false,
-      reason: body.reason,
+      reason: body.reason, // "(관리자) 리서치 업로드 비용 지원"
       type: body.type, // "PRODUCT_EXCHANGE"
       createdAt: getCurrentISOTime(),
     };
@@ -117,22 +117,31 @@ export class AdminPatchController {
   async giveMultipleUserCredit(
     @Body()
     body: {
-      userIds: string[];
+      userIds?: string[];
+      researchId?: string;
       scale: number;
       reason: string;
       type: string;
     },
   ) {
-    // const participations =
-    //   await this.mongoResearchFindService.getResearchParticipations({
-    //     filterQuery: { researchId: "" },
-    //     selectQuery: { userId: true },
-    //   });
-    // const userIds = participations.map((participation) => participation.userId);
+    let userIds: string[] = [];
+
+    if (body.researchId) {
+      const participations =
+        await this.mongoResearchFindService.getResearchParticipations({
+          filterQuery: { researchId: body.researchId },
+          selectQuery: { userId: true },
+        });
+      userIds = participations.map((participation) => participation.userId);
+    } else {
+      userIds = body.userIds;
+    }
+
+    console.log(userIds);
 
     const userSession = await this.userConnection.startSession();
     await tryMultiTransaction(async () => {
-      for (const userId of body.userIds) {
+      for (const userId of userIds) {
         const creditBalance =
           await this.mongoUserFindService.getUserCreditBalance(userId);
         const creditHistory: CreditHistory = {
@@ -141,7 +150,7 @@ export class AdminPatchController {
           balance: creditBalance + body.scale,
           isIncome: body.scale >= 0 ? true : false,
           reason: body.reason,
-          type: body.type, // "PRODUCT_EXCHANGE"
+          type: body.type, // "PRODUCT_EXCHANGE" "CREDIT_COMPENSATION"
           createdAt: getCurrentISOTime(),
         };
         await this.mongoUserCreateService.createCreditHistory(

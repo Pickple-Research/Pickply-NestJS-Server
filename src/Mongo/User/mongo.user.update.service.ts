@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, ClientSession, UpdateQuery } from "mongoose";
+import { Model, ClientSession, FilterQuery, UpdateQuery } from "mongoose";
 import {
   Notification,
   NotificationDocument,
@@ -54,21 +54,41 @@ export class MongoUserUpdateService {
     param:
       | { userId: string; updateQuery: UpdateQuery<UserDocument> }
       | { userEmail: string; updateQuery: UpdateQuery<UserDocument> },
+    session?: ClientSession,
   ) {
     if ("userId" in param) {
       return await this.User.findByIdAndUpdate(
         param.userId,
         param.updateQuery,
-        { returnOriginal: false },
-      );
+        { session, returnOriginal: false },
+      ).lean();
     }
     if ("userEmail" in param) {
       return await this.User.findOneAndUpdate(
         { email: param.userEmail },
         param.updateQuery,
-        { returnOriginal: false },
-      );
+        { session, returnOriginal: false },
+      ).lean();
     }
+  }
+
+  /**
+   * 복수의 유저를 업데이트하고 반환합니다.
+   * @author 현웅
+   */
+  async updateMultipleUsers(
+    param: {
+      filterQuery?: FilterQuery<UserDocument>;
+      updateQuery?: UpdateQuery<UserDocument>;
+      selectQuery?: Partial<Record<keyof User, boolean>>;
+    },
+    session?: ClientSession,
+  ) {
+    return await this.User.updateMany(param.filterQuery, param.updateQuery, {
+      session,
+    })
+      .select(param.selectQuery)
+      .lean();
   }
 
   /**
