@@ -25,6 +25,7 @@ export * from "./Partner/mongo.partner.module";
 export * from "./Research/mongo.research.create.service";
 export * from "./Research/mongo.research.delete.service";
 export * from "./Research/mongo.research.find.service";
+export * from "./Research/mongo.research.standardize.service";
 export * from "./Research/mongo.research.update.service";
 export * from "./Research/mongo.research.validate.service";
 export * from "./Research/mongo.research.module";

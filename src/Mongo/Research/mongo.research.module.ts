@@ -5,6 +5,7 @@ import {
   MongoResearchCreateService,
   MongoResearchDeleteService,
   MongoResearchFindService,
+  MongoResearchStandardizeService,
   MongoResearchUpdateService,
   MongoResearchValidateService,
 } from "src/Mongo";
@@ -40,6 +41,7 @@ import { MONGODB_RESEARCH_CONNECTION } from "src/Constant";
     MongoResearchCreateService,
     MongoResearchDeleteService,
     MongoResearchFindService,
+    MongoResearchStandardizeService,
     MongoResearchUpdateService,
     MongoResearchValidateService,
   ],
@@ -95,6 +97,7 @@ import { MONGODB_RESEARCH_CONNECTION } from "src/Constant";
     MongoResearchCreateService,
     MongoResearchDeleteService,
     MongoResearchFindService,
+    MongoResearchStandardizeService,
     MongoResearchUpdateService,
     MongoResearchValidateService,
   ],
