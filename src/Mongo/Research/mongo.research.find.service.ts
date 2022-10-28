@@ -140,7 +140,10 @@ export class MongoResearchFindService {
    * @author 현웅
    */
   async getUserResearchViews(userId: string) {
-    return await this.ResearchView.find({ userId }).sort({ _id: -1 }).lean();
+    return await this.ResearchView.find({ userId })
+      .sort({ _id: -1 })
+      .select({ researchId: true })
+      .lean();
   }
 
   /**
@@ -148,7 +151,10 @@ export class MongoResearchFindService {
    * @author 현웅
    */
   async getUserResearchScraps(userId: string) {
-    return await this.ResearchScrap.find({ userId }).sort({ _id: -1 }).lean();
+    return await this.ResearchScrap.find({ userId })
+      .sort({ _id: -1 })
+      .select({ researchId: true })
+      .lean();
   }
 
   /**
@@ -158,6 +164,7 @@ export class MongoResearchFindService {
   async getUserResearchParticipations(userId: string) {
     return await this.ResearchParticipation.find({ userId })
       .sort({ _id: -1 })
+      .select({ researchId: true })
       .lean();
   }
 

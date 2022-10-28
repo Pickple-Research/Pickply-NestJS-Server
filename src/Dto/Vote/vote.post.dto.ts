@@ -82,10 +82,9 @@ export class VoteNonMemberParticipateBodyDto {
 
 /**
  * 투표에 참여하지 않고 통계 분석 결과를 확인할 때 Body 에 포함되어야 하는 정보들
- * @param
  * @author 현웅
  */
-export class InquireVoteStatisticsBodyDto {
+export class VoteStatTicketCreateBodyDto {
   @IsString()
   voteId: string;
 
