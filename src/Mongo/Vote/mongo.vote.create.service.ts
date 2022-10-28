@@ -20,6 +20,8 @@ import {
   VoteReportDocument,
   VoteScrap,
   VoteScrapDocument,
+  VoteStatTicket,
+  VoteStatTicketDocument,
   VoteUser,
   VoteUserDocument,
   VoteView,
@@ -48,6 +50,8 @@ export class MongoVoteCreateService {
     private readonly VoteReport: Model<VoteReportDocument>,
     @InjectModel(VoteScrap.name)
     private readonly VoteScrap: Model<VoteScrapDocument>,
+    @InjectModel(VoteStatTicket.name)
+    private readonly VoteStatTicket: Model<VoteStatTicketDocument>,
     @InjectModel(VoteUser.name)
     private readonly VoteUser: Model<VoteUserDocument>,
     @InjectModel(VoteView.name)
@@ -150,6 +154,23 @@ export class MongoVoteCreateService {
       { session },
     );
     return newVoteParticipations[0].toObject();
+  }
+
+  /**
+   * 크레딧을 사용하지 않고 투표 결과 통계 분석을 볼 때:
+   * 투표 결과 통계 조회권을 만듭니다.
+   * @return 생성된 투표 결과 통계 조회권 정보
+   * @author 현웅
+   */
+  async createVoteStatTicket(
+    param: { voteStatTicket: VoteStatTicket },
+    session: ClientSession,
+  ) {
+    const newVoteStatTickets = await this.VoteStatTicket.create(
+      [param.voteStatTicket],
+      { session },
+    );
+    return newVoteStatTickets[0].toObject();
   }
 
   /**

@@ -12,6 +12,8 @@ import {
   VoteReplyDocument,
   VoteScrap,
   VoteScrapDocument,
+  VoteStatTicket,
+  VoteStatTicketDocument,
   VoteUser,
   VoteUserDocument,
   VoteView,
@@ -32,6 +34,8 @@ export class MongoVoteFindService {
     private readonly VoteReply: Model<VoteReplyDocument>,
     @InjectModel(VoteScrap.name)
     private readonly VoteScrap: Model<VoteScrapDocument>,
+    @InjectModel(VoteStatTicket.name)
+    private readonly VoteStatTicket: Model<VoteStatTicketDocument>,
     @InjectModel(VoteUser.name)
     private readonly VoteUser: Model<VoteUserDocument>,
     @InjectModel(VoteView.name)
@@ -169,6 +173,22 @@ export class MongoVoteFindService {
     limit?: number;
   }) {
     return await this.VoteScrap.find(param.filterQuery)
+      .select(param.selectQuery)
+      .sort({ _id: -1 })
+      .limit(param.limit)
+      .lean();
+  }
+
+  /**
+   * 투표 결과 통계 조회권 정보를 원하는 조건으로 검색합니다.
+   * @author 현웅
+   */
+  async getVoteStatTickets(param: {
+    filterQuery?: FilterQuery<VoteStatTicketDocument>;
+    selectQuery?: Partial<Record<keyof VoteStatTicket, boolean>>;
+    limit?: number;
+  }) {
+    return await this.VoteStatTicket.find(param.filterQuery)
       .select(param.selectQuery)
       .sort({ _id: -1 })
       .limit(param.limit)
@@ -395,11 +415,25 @@ export class MongoVoteFindService {
   }
 
   /**
+   * 특정 유저가 가진 투표 결과 통계 조회권을 모두 가져옵니다.
+   * @author 현웅
+   */
+  async getUserVoteStatTickets(userId: string) {
+    return await this.getVoteStatTickets({
+      filterQuery: { userId },
+      selectQuery: { voteId: true },
+    });
+  }
+
+  /**
    * 특정 유저가 참여한 투표 참여 정보를 모두 가져옵니다.
    * @author 현웅
    */
   async getUserVoteParticipations(userId: string) {
-    return await this.getVoteParticipations({ filterQuery: { userId } });
+    return await this.getVoteParticipations({
+      filterQuery: { userId },
+      selectQuery: { voteId: true, selectedOptionIndexes: true },
+    });
   }
 
   /**

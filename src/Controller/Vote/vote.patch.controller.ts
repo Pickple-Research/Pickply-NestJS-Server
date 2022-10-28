@@ -116,49 +116,6 @@ export class VotePatchController {
   }
 
   /**
-   * 투표 참여 정보를 업데이트합니다:
-   * 투표에 참여하지 않고 투표 결과 통계만 조회한 후
-   * 해당 투표에 참여하는 경우 사용합니다.
-   * @return 업데이트된 투표 정보
-   * @author 현웅
-   */
-  @Patch("participation")
-  async addVoteParticipation(@Body() body: VoteParticipationUpdateBodyDto) {
-    const voteSession = await this.voteConnection.startSession();
-
-    const incQuery = {};
-    body.selectedOptionIndexes.forEach((optionIndex) => {
-      incQuery[`result.${optionIndex}`] = 1;
-      incQuery[`analytics.${optionIndex}.${body.gender}.${body.ageGroup}`] = 1;
-    });
-
-    return await tryMultiTransaction(async () => {
-      //* 투표 정보를 업데이트합니다.
-      const updateVote = this.mongoVoteUpdateService.updateVote(
-        {
-          voteId: body.voteId,
-          updateQuery: { $inc: { participantsNum: 1, ...incQuery } },
-        },
-        voteSession,
-      );
-      //* 투표 참여 정보를 업데이트합니다. (세션을 사용하지 않습니다.)
-      const updateVoteParticipation =
-        this.mongoVoteUpdateService.updateVoteParticipationById({
-          voteParticipationId: body.voteParticipationId,
-          updateQuery: {
-            $set: { selectedOptionIndexes: body.selectedOptionIndexes },
-          },
-        });
-      //* 위 두 함수를 동시에 실행합니다.
-      return await Promise.all([updateVote, updateVoteParticipation]).then(
-        ([updatedVote, _]) => {
-          return updatedVote;
-        },
-      );
-    }, [voteSession]);
-  }
-
-  /**
    * @deprecated #DELETE-AT-YEAR-END - Post 요청으로 이관되었습니다
    *
    * @Transaction

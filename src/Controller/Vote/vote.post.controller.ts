@@ -11,6 +11,7 @@ import {
   VoteCommentReport,
   VoteReplyReport,
   CreditHistory,
+  VoteStatTicket,
 } from "src/Schema";
 import { UserCreateService, VoteUpdateService } from "src/Service";
 import { MongoVoteFindService, MongoVoteCreateService } from "src/Mongo";
@@ -18,7 +19,7 @@ import {
   VoteCreateBodyDto,
   VoteParticipateBodyDto,
   VoteNonMemberParticipateBodyDto,
-  InquireVoteStatisticsBodyDto,
+  VoteStatTicketCreateBodyDto,
   VoteCommentCreateBodyDto,
   VoteReplyCreateBodyDto,
   VoteReportBodyDto,
@@ -158,25 +159,24 @@ export class VotePostController {
 
   /**
    * 투표에 참여하지 않은 상태에서 투표 결과 통계 분석을 확인합니다.
-   * 선택지 index 배열이 빈 리스트인 투표 참여 데이터와
-   * 크레딧 사용 내역을 생성합니다.
-   * @return 생성된 투표 참여 정보, 생성된 크레딧 사용내역 정보
+   * 투표 결과 통계 조회권과 크레딧 사용 내역을 생성합니다.
+   * @return 생성된 투표 결과 통계 조회권 정보, 생성된 크레딧 사용내역 정보
    * @author 현웅
    */
   @Post("stat") // abbr. statistics
   async getVoteStatistics(
     @Request() req: { user: JwtUserInfo },
-    @Body() body: InquireVoteStatisticsBodyDto,
+    @Body() body: VoteStatTicketCreateBodyDto,
   ) {
     const userSession = await this.userConnection.startSession();
     const voteSession = await this.voteConnection.startSession();
 
     const currentISOTime = getCurrentISOTime();
 
-    const voteParticipation: VoteParticipation = {
-      userId: req.user.userId,
+    const voteStatTicket: VoteStatTicket = {
       voteId: body.voteId,
-      selectedOptionIndexes: [],
+      voteTitle: body.voteTitle,
+      userId: req.user.userId,
       gender: body.gender,
       ageGroup: body.ageGroup,
       createdAt: currentISOTime,
@@ -192,9 +192,9 @@ export class VotePostController {
     };
 
     return await tryMultiTransaction(async () => {
-      const createVoteParticipation =
-        this.mongoVoteCreateService.createVoteParticipation(
-          { voteParticipation },
+      const createVoteStatTicket =
+        this.mongoVoteCreateService.createVoteStatTicket(
+          { voteStatTicket },
           voteSession,
         );
       const createCreditHistory = this.userCreateService.createCreditHistory(
@@ -203,10 +203,10 @@ export class VotePostController {
       );
 
       return await Promise.all([
-        createVoteParticipation,
+        createVoteStatTicket,
         createCreditHistory,
-      ]).then(([newVoteParticipation, newCreditHistory]) => {
-        return { newVoteParticipation, newCreditHistory };
+      ]).then(([newVoteStatTicket, newCreditHistory]) => {
+        return { newVoteStatTicket, newCreditHistory };
       });
     }, [userSession, voteSession]);
   }

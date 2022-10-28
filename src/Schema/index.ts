@@ -48,6 +48,7 @@ export * from "./Vote/voteReply.schema";
 export * from "./Vote/voteReplyReport.schema";
 export * from "./Vote/voteReport.schema";
 export * from "./Vote/voteScrap.schema";
+export * from "./Vote/voteStatTicket.schema";
 export * from "./Vote/voteUser.schema";
 export * from "./Vote/voteView.schema";
 export * from "./Vote/Embedded";

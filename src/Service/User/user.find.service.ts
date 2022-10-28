@@ -16,7 +16,7 @@ export class UserFindService {
   /**
    * 로그인 시 실행됩니다. 아래 정보들을 찾아서 반환합니다:
    * 1. 유저의 크레딧 사용내역, 유저 알림, (CreditHistories, Notifications)
-   * 2. 리서치 조회/스크랩/참여 정보, 투표 조회/스크랩/참여 정보,
+   * 2. 리서치 조회/스크랩/참여 정보, 투표 조회/스크랩/결과 통계 조회권/참여 정보,
    *   (ResearchScraps, ResearchParticipations, VoteScraps, VoteParticipations)
    * 3. 스크랩/참여한 리서치와 투표의 실제 정보 (2. 정보를 바탕으로 검색)
    * 4. 유저가 업로드한 리서치와 투표 정보
@@ -41,11 +41,14 @@ export class UserFindService {
       this.mongoResearchFindService.getUploadedResearches({
         userId: param.userId,
       });
-    //*투표 조회/스크랩/참여/업로드 정보
+    //* 투표 조회/스크랩/투표 결과 통계 조회권/참여/업로드 정보
     const getVoteViews = this.mongoVoteFindService.getUserVoteViews(
       param.userId,
     );
     const getVoteScraps = this.mongoVoteFindService.getUserVoteScraps(
+      param.userId,
+    );
+    const getVoteStatTickets = this.mongoVoteFindService.getUserVoteStatTickets(
       param.userId,
     );
     const getVoteParticipations =
@@ -65,6 +68,7 @@ export class UserFindService {
 
       voteViews,
       voteScraps,
+      voteStatTickets,
       voteParticipations,
       uploadedVotes,
     ] = await Promise.all([
@@ -78,10 +82,12 @@ export class UserFindService {
 
       getVoteViews,
       getVoteScraps,
+      getVoteStatTickets,
       getVoteParticipations,
       getUploadedVotes,
     ]);
 
+    //TODO: 이 부분 나중에 지웁니다.
     //* ResearchScraps, ResearchParticipations, VoteScraps, VoteParticipations 는 실제 정보로 다시 반환
     const getScrappedResearches =
       this.mongoResearchFindService.getResearchesById(
@@ -125,6 +131,7 @@ export class UserFindService {
 
       voteViews,
       voteScraps,
+      voteStatTickets,
       voteParticipations,
       scrappedVotes,
       participatedVotes,
