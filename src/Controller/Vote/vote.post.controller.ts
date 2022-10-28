@@ -18,7 +18,7 @@ import {
   VoteCreateBodyDto,
   VoteParticipateBodyDto,
   VoteNonMemberParticipateBodyDto,
-  VoteRevealStatisticsBodyDto,
+  InquireVoteStatisticsBodyDto,
   VoteCommentCreateBodyDto,
   VoteReplyCreateBodyDto,
   VoteReportBodyDto,
@@ -167,7 +167,7 @@ export class VotePostController {
   @Post("stat") // abbr. statistics
   async getVoteStatistics(
     @Request() req: { user: JwtUserInfo },
-    @Body() body: VoteRevealStatisticsBodyDto,
+    @Body() body: InquireVoteStatisticsBodyDto,
   ) {
     const userSession = await this.userConnection.startSession();
     const voteSession = await this.voteConnection.startSession();

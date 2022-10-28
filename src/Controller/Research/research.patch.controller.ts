@@ -311,12 +311,19 @@ export class ResearchPatchController {
       return { creditBalance, previousResearch };
     });
 
+    /** 추가 증정 크레딧을 추가한 경우 필요한 크레딧 */
+    const getExtraCredit = () => {
+      //* 단순 끌올인 경우엔 추가 증정 크레딧 데이터가 주어지지 않으므로 0 을 반환
+      if (!Boolean(body.extraCredit) || !Boolean(body.extraCreditReceiverNum))
+        return 0;
+      return (
+        body.extraCreditReceiverNum * body.extraCredit -
+        previousResearch.extraCreditReceiverNum * previousResearch.extraCredit
+      );
+    };
+
     //* 리서치 끌올에 필요한 크레딧 계산
-    const requiredCredit =
-      RESEARCH_PULLUP_CREDIT +
-      ((body.extraCredit ? body.extraCredit : 0) *
-        (body.extraCreditReceiverNum ? body.extraCreditReceiverNum : 0) -
-        previousResearch.extraCreditReceiverNum * previousResearch.extraCredit);
+    const requiredCredit = RESEARCH_PULLUP_CREDIT + getExtraCredit();
 
     //* 리서치 끌올을 위한 크레딧이 부족한 경우: 에러
     if (creditBalance < requiredCredit) throw new NotEnoughCreditException();
