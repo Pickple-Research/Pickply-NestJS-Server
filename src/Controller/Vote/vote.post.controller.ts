@@ -163,7 +163,6 @@ export class VotePostController {
    * @return 생성된 투표 참여 정보, 생성된 크레딧 사용내역 정보
    * @author 현웅
    */
-  @Public()
   @Post("stat") // abbr. statistics
   async getVoteStatistics(
     @Request() req: { user: JwtUserInfo },

@@ -1,6 +1,9 @@
 import { Controller, Inject, Get } from "@nestjs/common";
 import { Roles } from "src/Security/Metadata";
-import { MongoVoteStandardizeService } from "src/Mongo";
+import {
+  MongoResearchStandardizeService,
+  MongoVoteStandardizeService,
+} from "src/Mongo";
 import { UserType } from "src/Object/Enum";
 
 /**
@@ -13,7 +16,19 @@ export class AdminGetController {
   constructor() {}
 
   @Inject()
+  private readonly mongoResearchStandardizeService: MongoResearchStandardizeService;
+  @Inject()
   private readonly mongoVoteStandardizeService: MongoVoteStandardizeService;
+
+  /**
+   * 리서치 관련 정보를 일괄적으로 변경합니다. 그 때마다 맞춰서 사용합니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Get("researches/standardize")
+  async standardizeResearchesData() {
+    await this.mongoResearchStandardizeService.standardize();
+  }
 
   /**
    * 투표 관련 정보를 일괄적으로 변경합니다. 그 때마다 맞춰서 사용합니다.

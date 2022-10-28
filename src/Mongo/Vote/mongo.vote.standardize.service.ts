@@ -25,7 +25,9 @@ export class MongoVoteStandardizeService {
     private readonly VoteParticipation: Model<VoteParticipationDocument>,
   ) {}
 
-  async standardize() {}
+  async standardize() {
+    // await this.
+  }
 
   /**
    * v1.1.12) 투표 통계 분석 결과 추가

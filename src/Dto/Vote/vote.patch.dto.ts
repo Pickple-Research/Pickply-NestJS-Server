@@ -71,8 +71,8 @@ export class VoteParticipationUpdateBodyDto {
   selectedOptionIndexes: number[];
 
   @IsString()
-  gender?: string;
+  gender: string;
 
   @IsString()
-  ageGroup?: string;
+  ageGroup: string;
 }
