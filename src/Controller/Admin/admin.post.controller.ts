@@ -22,15 +22,28 @@ export class AdminPostController {
   @Inject() private readonly mongoUserUpdateService: MongoUserUpdateService;
   @Inject() private readonly mongoResearchFindService: MongoResearchFindService;
 
+  /**
+   * 특정 유저에게 푸시 알림을 전송합니다.
+   * @author 현웅
+   */
   @Roles(UserType.ADMIN)
   @Post("users/alarm")
-  async sendPushAlarm() {
+  async sendPushAlarm(
+    @Body()
+    body: {
+      token: string;
+      title: string;
+      body: string;
+      data: Record<string, string>;
+    },
+  ) {
     const alarm: TokenMessage = {
-      token: "",
+      token: body.token,
       notification: {
-        title: "",
-        body: "",
+        title: body.title,
+        body: body.body,
       },
+      data: body.data,
     };
     await this.firebaseService.sendPushAlarm(alarm);
   }

@@ -76,8 +76,7 @@ export class VoteNonMemberParticipateBodyDto {
   @IsNumber({}, { each: true })
   selectedOptionIndexes: number[];
 
-  @IsString() // TODO: 추후 삭제
-  @IsOptional()
+  @IsString()
   fcmToken?: string;
 }
 
@@ -86,7 +85,7 @@ export class VoteNonMemberParticipateBodyDto {
  * @param
  * @author 현웅
  */
-export class VoteRevealStatisticsBodyDto {
+export class InquireVoteStatisticsBodyDto {
   @IsString()
   voteId: string;
 

@@ -22,7 +22,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-10-27 1843 v1.1.13";
+    return "2022-10-28 1319 v1.1.13 HOT FIX";
   }
 
   /**
@@ -44,7 +44,10 @@ export class AppController {
   async appConstant() {
     return {
       service: {
-        APP_RECENT_VERSION: "1.1.9",
+        APP_RECENT_VERSION: {
+          version: "1.1.9",
+          forceUpdate: false,
+        },
 
         CONTACT_EMAIL: "contact@r2c.company",
         WEB_SERVICE_URL: "https://pickply.com",
