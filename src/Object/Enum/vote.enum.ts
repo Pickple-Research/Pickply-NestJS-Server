@@ -1,4 +1,5 @@
 /**
+ * @AppSync
  * 투표 카테고리 종류
  * @author 현웅
  */
@@ -8,6 +9,9 @@ export enum VoteCategory {
   UNIV_STUDENT = "UNIV_STUDENT",
   POST_GRAD_STUDENT = "POST_GRAD_STUDENT",
   STARTUP = "STARTUP",
+  OFFICE_WORKER = "OFFICE_WORKER",
+  SPORTS = "SPORTS",
+  ISSUE = "ISSUE",
   ETC = "ETC",
 }
 

@@ -29,8 +29,8 @@ import { getCurrentISOTime, tryMultiTransaction } from "src/Util";
 import {
   MONGODB_USER_CONNECTION,
   MONGODB_RESEARCH_CONNECTION,
-  RESEARCH_PULLUP_CREDIT,
 } from "src/Constant";
+import { RESEARCH_PULLUP_CREDIT } from "src/Constant/App";
 import { NotEnoughCreditException } from "src/Exception";
 
 /**
