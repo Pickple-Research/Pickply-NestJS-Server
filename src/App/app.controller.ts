@@ -6,6 +6,12 @@ import {
   MongoResearchFindService,
   MongoVoteFindService,
 } from "src/Mongo";
+import {
+  appCompanyConstants,
+  appResearchConstant,
+  appServiceConstant,
+  appVoteConstant,
+} from "src/Constant/App";
 
 @Controller("")
 export class AppController {
@@ -22,7 +28,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-10-28 2226 v1.1.14";
+    return "2022-10-29 1854 v1.1.14";
   }
 
   /**
@@ -43,58 +49,10 @@ export class AppController {
   @Get("constants")
   async appConstant() {
     return {
-      service: {
-        APP_RECENT_VERSION: {
-          version: "1.1.9",
-          forceUpdate: false,
-        },
-
-        CONTACT_EMAIL: "contact@r2c.company",
-        WEB_SERVICE_URL: "https://pickply.com",
-        GOOGLE_PLAY_STORE_URL:
-          "https://play.google.com/store/apps/details?id=com.pickpleresearch&hl=ko",
-        APPLE_APP_STORE_URL:
-          "https://apps.apple.com/kr/app/pickply/id1640390682",
-
-        KAKAO_CHAT_URL: "http://pf.kakao.com/_xkDElxj/chat",
-
-        SERVICE_TERMS:
-          "https://docs.google.com/document/d/e/2PACX-1vRODbIfrzgcjFLgTRfN3Gtkjlb_t8XW2eBPK-8ANFTyoRFhbOrAYzx6mTY7nSYq5Q/pub?embedded=true",
-        PRIVACY_TERMS:
-          "https://docs.google.com/document/d/e/2PACX-1vQ9pknYh_aZVLQZNuAydAqAgLXQIaPqjIWvMaVw77TSwB_LEi3U31OAGLkdZEM8tA/pub?embedded=true",
-      },
-
-      research: {
-        foamDatas: [
-          {
-            foamName: "구글폼",
-            baseURLs: ["https://forms.gle", "https://docs.google.com"],
-            injectedJS: this.googleDocsCompleteDetector,
-            closedURLs: ["/closedform"],
-          },
-          {
-            foamName: "네이버폼",
-            baseURLs: ["https://naver.me", "https://form.office.naver.com"],
-            injectedJS: this.naverDocsCompleteDetector,
-            closedURLs: [],
-          },
-          {
-            foamName: "모아폼",
-            baseURLs: ["https://moaform.com", "https://surveyl.ink"],
-            injectedJS: this.moaFoamCompleteDetector,
-            closedURLs: ["/closed", "/not_found"],
-          },
-        ],
-      },
-
-      company: {
-        companyName: "(주)알투씨컴퍼니",
-        representative: "김동호",
-        personalInformationProtectionOfficer: "김동호",
-        address:
-          "서울특별시 서대문구 연세로2다길 11-3, 203호 (청년창업꿈터 A동)",
-        registrationNumber: "479-88-02430",
-      },
+      service: appServiceConstant,
+      research: appResearchConstant,
+      vote: appVoteConstant,
+      company: appCompanyConstants,
     };
   }
 
