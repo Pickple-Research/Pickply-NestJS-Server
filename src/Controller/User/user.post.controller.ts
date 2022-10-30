@@ -125,6 +125,7 @@ export class UserPostController {
       month: body.birthMonth,
       day: body.birthDay,
     });
+    const currentISOTime = getCurrentISOTime();
 
     if (birthday === null) throw new NotValidBirthdayException();
 
@@ -133,7 +134,7 @@ export class UserPostController {
       accountType: AccountType.EMAIL,
       email: body.email,
       nickname: body.nickname,
-      createdAt: getCurrentISOTime(),
+      createdAt: currentISOTime,
     };
     const userNotificationSetting: UserNotificationSetting = {
       appPush: body.agreeReceiveServiceInfo,
@@ -185,8 +186,33 @@ export class UserPostController {
         voteSession,
       );
 
-      //* ResearchUser, VoteUser 데이터를 한꺼번에 생성합니다.
-      await Promise.all([createResearchUser, createVoteUser]);
+      //* 이 때, 회원가입 이벤트로 유입된 유저인 경우, 크레딧 사용내역을 같이 생성합니다.
+      if (body.signupEvent && body.signupEventCredit) {
+        //* 회원가입 이벤트로 유입된 유저인 경우, 크레딧 사용내역도 같이 생성합니다.
+        const signupEventCreditHistory: CreditHistory = {
+          userId: newUser._id,
+          reason: body.signupEvent,
+          scale: body.signupEventCredit,
+          balance: body.signupEventCredit,
+          type: CreditHistoryType.SIGNUP_EVENT,
+          isIncome: true,
+          createdAt: currentISOTime,
+        };
+        const createCreditHistory = this.userCreateService.createCreditHistory(
+          { userId: newUser._id, creditHistory: signupEventCreditHistory },
+          userSession,
+        );
+
+        await Promise.all([
+          createCreditHistory,
+          createResearchUser,
+          createVoteUser,
+        ]);
+      } else {
+        //* 그렇지 않은 경우에는 ResearchUser 와 VoteUser 만 생성합니다.
+        await Promise.all([createResearchUser, createVoteUser]);
+      }
+      return;
     }, [userSession, researchSession, voteSession]);
   }
 

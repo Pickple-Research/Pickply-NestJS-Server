@@ -36,6 +36,8 @@ export enum AccountType {
  * @author 현웅
  */
 export enum CreditHistoryType {
+  // 회원가입 유도 이벤트
+  SIGNUP_EVENT = "SIGNUP_EVENT",
   // 리서치 참여
   RESEARCH_PARTICIPATE = "RESEARCH_PARTICIPATE",
   // 삭제된 리서치에 참여

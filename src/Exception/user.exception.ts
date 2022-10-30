@@ -11,6 +11,16 @@ export class NotValidBirthdayException extends Status400Exception {
 }
 
 /**
+ * 회원가입 시 인자로 받은 이메일이 유효한 형식이 아닐 경우 사용합니다.
+ * @author 현웅
+ */
+export class NotValidEmailException extends Status400Exception {
+  constructor() {
+    super({ customMessage: "유효한 이메일 형식이 아닙니다" });
+  }
+}
+
+/**
  * 유저 본인이 아닌 사람이 유저 탈퇴를 요청한 경우 사용합니다.
  * 기본 message: '권한이 없습니다'
  * @author 현웅

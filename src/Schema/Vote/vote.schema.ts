@@ -85,8 +85,11 @@ export class Vote {
   @Prop({ default: false }) // (신고 등으로 인한) 블락 여부
   blocked?: boolean;
 
-  @Prop() // 해당 투표에 걸린 이벤트
-  eventName?: string;
+  @Prop() // 해당 투표에 걸린 비회원 유저 대상 이벤트명
+  nonMemberEvent?: string;
+
+  @Prop() // 투표에 걸린 이벤트 모달에서 보여줄 내용
+  eventContent?: string;
 
   @Prop() // 해당 투표에 걸린 이벤트 크레딧 규모
   eventCredit?: number;
