@@ -78,4 +78,13 @@ export class EmailUserSignupBodyDto {
   /** 서비스 정보 수신 동의 여부 */
   @IsBoolean()
   agreeReceiveServiceInfo: boolean;
+
+  /** 이벤트를 통해 유입된 경우 포함되는 정보들 */
+  @IsString()
+  @IsOptional()
+  signupEvent?: string;
+
+  @IsNumber()
+  @IsOptional()
+  signupEventCredit?: number;
 }
