@@ -4,8 +4,10 @@ import * as winston from "winston";
 /**
  * CORS 허용 주소들
  * @author 현웅
+ * @add 승원
  */
 export const CORS_ORIGINS = [
+  "https://pickply.com",//홈페이지 도메인 추가
   "https://pickpleresearch.com",
   "https://r2c-pickpleresearch.web.app",
   "https://r2c-pickpleresearch.firebaseapp.com",
@@ -36,48 +38,48 @@ export const healthCheckUrl = "/health";
  * @author 현웅
  */
 export const WINSTON_LOG_CONSOLE_OPTION: winston.transports.ConsoleTransportOptions =
-  {
-    level: "info",
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      nestWinstonModuleUtilities.format.nestLike("Server", {
-        prettyPrint: true,
-      }),
-    ),
-  };
+{
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    nestWinstonModuleUtilities.format.nestLike("Server", {
+      prettyPrint: true,
+    }),
+  ),
+};
 
 /**
  * 파일에 남기는 winston log 형태를 지정 (일반 로그)
  * @author 현웅
  */
 export const WINSTON_COMMON_LOG_FILE_OPTION: winston.transports.FileTransportOptions =
-  {
-    filename: "logs/common.log", // 위치: ./logs/common.log
-    level: "info", // 로그 조건: error, warn, info 레벨
-    format: winston.format.combine(
-      winston.format.timestamp({
-        format: "YYYY-MM-DD hh:mm:ss",
-      }),
-      winston.format.json(),
-    ),
-    maxFiles: 20, // 최대 파일 갯수: 20개
-    maxsize: 1024 * 1024 * 16, // 각 파일 최대 크기: 16MB
-  };
+{
+  filename: "logs/common.log", // 위치: ./logs/common.log
+  level: "info", // 로그 조건: error, warn, info 레벨
+  format: winston.format.combine(
+    winston.format.timestamp({
+      format: "YYYY-MM-DD hh:mm:ss",
+    }),
+    winston.format.json(),
+  ),
+  maxFiles: 20, // 최대 파일 갯수: 20개
+  maxsize: 1024 * 1024 * 16, // 각 파일 최대 크기: 16MB
+};
 
 /**
  * 파일에 남기는 winston log 형태를 지정 (에러 로그)
  * @author 현웅
  */
 export const WINSTON_ERROR_LOG_FILE_OPTION: winston.transports.FileTransportOptions =
-  {
-    filename: "logs/error.log", // 위치: ./logs/error.log
-    level: "error", // 로그 조건: error레벨만
-    format: winston.format.combine(
-      winston.format.timestamp({
-        format: "YYYY-MM-DD hh:mm:ss",
-      }),
-      winston.format.json(),
-    ),
-    maxFiles: 10, // 최대 파일 갯수: 10개
-    maxsize: 1024 * 1024 * 16, // 각 파일 최대 크기: 16MB
-  };
+{
+  filename: "logs/error.log", // 위치: ./logs/error.log
+  level: "error", // 로그 조건: error레벨만
+  format: winston.format.combine(
+    winston.format.timestamp({
+      format: "YYYY-MM-DD hh:mm:ss",
+    }),
+    winston.format.json(),
+  ),
+  maxFiles: 10, // 최대 파일 갯수: 10개
+  maxsize: 1024 * 1024 * 16, // 각 파일 최대 크기: 16MB
+};
