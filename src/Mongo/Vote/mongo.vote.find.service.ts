@@ -40,7 +40,7 @@ export class MongoVoteFindService {
     private readonly VoteUser: Model<VoteUserDocument>,
     @InjectModel(VoteView.name)
     private readonly VoteView: Model<VoteViewDocument>,
-  ) {}
+  ) { }
 
   // ********************************** //
   /** Analytics용 **/
@@ -91,6 +91,62 @@ export class MongoVoteFindService {
   // ********************************** //
   /** 기본형 **/
   // ********************************** //
+
+
+  /**
+   * 
+   * @author 승원
+   * https://jaehun2841.github.io/2019/02/24/2019-02-24-mongodb-2/#addField
+   */
+  async getResultNumber() {
+
+    return await this.Vote.aggregate([
+      {
+        $addFields: {
+          totalMemberResult: { $sum: "$result" },//회원이 투표한 결과 더해서 저장
+          totalNonMemberResult: { $sum: "$nonMemeberResult" }//비회원이 투표한 결과 더해서 저장
+        }
+      },
+      {
+        $addFields: {
+          totalResult:
+            { $add: ["$totalMemberResult", "$totalNonMemberResult"] }//회원, 비회원 투표 결과 더해서 저장
+        }
+      },
+
+      {
+        $group: {
+          _id: null,
+          resultNumber: {
+            $sum: "$totalResult"//모든 투표 결과 더해서 반환
+          }
+        }
+      }]
+    )
+
+    // return await this.Vote.aggregate([
+
+    //   {
+    //     $addFields: {
+    //       totalResult:
+    //       {
+    //         $add: ["$participantsNum", "$nonMemberParticipantsNum"]
+    //       }
+    //     }
+    //   },
+
+    //   {
+    //     $group: {
+    //       _id: null,
+    //       resultNumber: {
+    //         $sum: "$totalResult"
+    //       }
+    //     }
+    //   }
+
+    // ])
+
+  }
 
   /**
    * 투표를 원하는 조건으로 검색합니다.
@@ -322,15 +378,13 @@ export class MongoVoteFindService {
     //! 그린라이트 투표는 게시자를 익명으로 바꿔서 반환합니다.
     const anonymizedComments = [];
     comments.forEach((comment, commentIndex) => {
-      comment.author.nickname = `익명 ${
-        vote.commentedUserIds.indexOf(comment.authorId) + 1
-      }`;
+      comment.author.nickname = `익명 ${vote.commentedUserIds.indexOf(comment.authorId) + 1
+        }`;
       anonymizedComments.push(comment);
       comment.replies.forEach((reply, replyIndex) => {
         anonymizedComments[commentIndex].replies[
           replyIndex
-        ].author.nickname = `익명 ${
-          vote.commentedUserIds.indexOf(reply.authorId) + 1
+        ].author.nickname = `익명 ${vote.commentedUserIds.indexOf(reply.authorId) + 1
         }`;
       });
     });

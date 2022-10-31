@@ -1,15 +1,31 @@
 import { Controller, Inject, Request, Param, Get } from "@nestjs/common";
+import { get } from "http";
 import { MongoVoteFindService, MongoVoteStandardizeService } from "src/Mongo";
 import { JwtUserInfo } from "src/Object/Type";
 import { Public } from "src/Security/Metadata";
 
 @Controller("votes")
 export class VoteGetController {
-  constructor() {}
+  constructor() { }
 
   @Inject() private readonly mongoVoteFindService: MongoVoteFindService;
   @Inject()
   private readonly mongoVoteStandardizeService: MongoVoteStandardizeService;
+
+  /**
+   * 
+   * 투표 숫자를 모두 더해서 반환합니다(중복 포함)
+   *회원+비회원
+   * @author 승원
+   *
+   */
+  @Public()
+  @Get("result/number")
+  async getResultNumber() {
+
+    return await this.mongoVoteFindService.getResultNumber();
+
+  }
 
   /**
    * 최신 투표를 가져옵니다.
