@@ -29,9 +29,9 @@ export class ResearchGetController {
  */
   @Public()
   @Get("number")
-  async getVoteNumber() {
+  async getResearchNumber() {
 
-    return await this.mongoResearchFindService.getVoteNumber();
+    return await this.mongoResearchFindService.getResearchNumber();
 
   }
 

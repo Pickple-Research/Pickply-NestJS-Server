@@ -46,7 +46,7 @@ export class MongoResearchFindService {
    * 
    * @author 승원
    */
-  async getVoteNumber() {
+  async getResearchNumber() {
 
     return (await this.Research.find()).length
 
