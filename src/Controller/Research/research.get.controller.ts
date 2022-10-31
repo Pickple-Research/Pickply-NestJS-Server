@@ -6,9 +6,21 @@ import { ResearchNotFoundException } from "src/Exception";
 
 @Controller("researches")
 export class ResearchGetController {
-  constructor() {}
+  constructor() { }
 
   @Inject() private readonly mongoResearchFindService: MongoResearchFindService;
+
+  /**
+ * @author 승원
+ * 
+ */
+  @Public()
+  @Get("participants/number")
+  async getParticipantsNumber() {
+
+    return await this.mongoResearchFindService.getParticipantsNumber();
+
+  }
 
   /**
    * pulledupAt을 기준으로 최신 리서치를 원하는만큼 찾고 반환합니다.
