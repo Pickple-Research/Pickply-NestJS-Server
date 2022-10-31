@@ -41,6 +41,17 @@ export class MongoResearchFindService {
   /** 기본형 **/
   // ********************************** //
 
+
+  /**
+   * 
+   * @author 승원
+   */
+  async getVoteNumber() {
+
+    return (await this.Research.find()).length
+
+  }
+
   /**
    * @author 승원
    * 리서치에 참여한 사람의 숫자를 모두 더해서 반환
