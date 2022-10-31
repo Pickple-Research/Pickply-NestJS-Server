@@ -10,9 +10,17 @@ export class UserGetController {
   constructor(
     private readonly userFindService: UserFindService,
     private readonly firebaseService: FirebaseService,
-  ) {}
+  ) { }
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
+
+  @Public()
+  @Get("number")
+  async getUsersNumber() {
+
+    return await this.mongoUserFindService.getUsersNumber()
+
+  }
 
   /**
    * 요청한 유저의 최근 20개 크레딧 변동내역을 반환합니다.
@@ -113,3 +121,6 @@ export class UserGetController {
     return true;
   }
 }
+
+
+

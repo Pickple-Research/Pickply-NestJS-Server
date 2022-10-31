@@ -47,11 +47,26 @@ export class MongoUserFindService {
     private readonly UserRelation: Model<UserRelationDocument>,
     @InjectModel(UserSecurity.name)
     private readonly UserSecurity: Model<UserSecurityDocument>,
-  ) {}
+  ) { }
 
   // ********************************** //
   /** 기본형 **/
   // ********************************** //
+
+  /**
+   * 유저 숫자를 받아옵니다
+   * @author 승원
+   */
+
+  async getUsersNumber() {
+
+    const number = (await this.User.find()).length
+
+    console.log(number)
+
+    return number
+
+  }
 
   /**
    * 유저 _id 를 통해 유저 정보를 받아옵니다.
