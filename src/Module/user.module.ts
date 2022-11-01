@@ -8,6 +8,7 @@ import {
 } from "src/Controller";
 import { FirebaseService } from "src/Firebase";
 import { GoogleService } from "src/Google";
+import { SensService } from "src/NCP";//승원 추가
 import {
   AuthService,
   UserCreateService,
@@ -36,6 +37,7 @@ import {
   providers: [
     FirebaseService,
     GoogleService,
+    SensService,//ncp sens 
     AuthService,
     UserCreateService,
     UserFindService,
@@ -54,4 +56,4 @@ import {
     }),
   ],
 })
-export class UserModule {}
+export class UserModule { }
