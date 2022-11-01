@@ -6,25 +6,22 @@ import { Public } from "src/Security/Metadata";
 
 @Controller("votes")
 export class VoteGetController {
-  constructor() { }
+  constructor() {}
 
   @Inject() private readonly mongoVoteFindService: MongoVoteFindService;
   @Inject()
   private readonly mongoVoteStandardizeService: MongoVoteStandardizeService;
 
   /**
-   * 
    * 투표 숫자를 모두 더해서 반환합니다(중복 포함)
-   *회원+비회원
+   * 회원 + 비회원
    * @author 승원
-   *
+   * @modify 현웅
    */
   @Public()
   @Get("result/number")
   async getResultNumber() {
-
     return await this.mongoVoteFindService.getResultNumber();
-
   }
 
   /**

@@ -54,13 +54,28 @@ export class AdminPostController {
    */
   @Roles(UserType.ADMIN)
   @Post("users/multiple/alarm")
-  async sendMultiplePushAlarm(@Body() body: { researchId?: string }) {
-    const participations =
-      await this.mongoResearchFindService.getResearchParticipations({
-        filterQuery: { researchId: body.researchId },
-        selectQuery: { userId: true },
-      });
-    const userIds = participations.map((participation) => participation.userId);
+  async sendMultiplePushAlarm(
+    @Body()
+    body: {
+      userIds?: string[];
+      researchId?: string;
+      title?: string;
+      body?: string;
+    },
+  ) {
+    let userIds: string[] = [];
+
+    if (body.userIds) {
+      userIds = body.userIds;
+    } else if (body.researchId) {
+      const participations =
+        await this.mongoResearchFindService.getResearchParticipations({
+          filterQuery: { researchId: body.researchId },
+          selectQuery: { userId: true },
+        });
+      userIds = participations.map((participation) => participation.userId);
+    }
+
     console.log(userIds);
 
     const notificationSettings =
@@ -74,14 +89,14 @@ export class AdminPostController {
       pushAlarms.push({
         token: notificationSetting.fcmToken,
         notification: {
-          title: "추가 크레딧 지급",
-          body: "리서치 참여에 대한 누락 크레딧이 지급되었어요.",
+          title: body.title, // "추가 크레딧 지급"
+          body: body.body, // "리서치 참여에 대한 누락 크레딧이 지급되었어요."
         },
         data: {
           notificationId: "",
           type: AlarmType.WIN_EXTRA_CREDIT,
           detail: "",
-          researchId: "",
+          researchId: body.researchId,
         },
       });
     });
