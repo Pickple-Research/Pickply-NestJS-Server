@@ -40,6 +40,7 @@ import {
   MONGODB_VOTE_CONNECTION,
   MONGODB_SURBAY_CONNECTION,
 } from "src/Constant";
+import { SensService } from "src/NCP";
 
 /**
  * 유저 계정을 만드는 Controller입니다.
@@ -48,6 +49,7 @@ import {
 @Controller("users")
 export class UserPostController {
   constructor(
+    private readonly sensService: SensService,
     private readonly googleService: GoogleService,
     private readonly authService: AuthService,
     private readonly userCreateService: UserCreateService,
@@ -60,7 +62,7 @@ export class UserPostController {
     private readonly voteConnection: Connection,
     @InjectConnection(MONGODB_SURBAY_CONNECTION)
     private readonly surBayConnection: Connection,
-  ) {}
+  ) { }
 
   @Inject()
   private readonly mongoUserCreateService: MongoUserCreateService;
@@ -68,6 +70,19 @@ export class UserPostController {
   private readonly mongoResearchCreateService: MongoResearchCreateService;
   @Inject() private readonly mongoVoteCreateService: MongoVoteCreateService;
   @Inject() private readonly mongoSurBayService: MongoSurBayService;
+
+  /**
+   * @author 승원
+   * sens를 이용해서 sms 보내기
+   * 
+   */
+  @Public()
+  @Post("sens")
+  async sendMessage(@Body('phoneNumber') phoneNumber: string, @Body('name') name: string) {
+    return await this.sensService.sendSMS(phoneNumber, name)
+  }
+
+
 
   /**
    * 이메일을 이용하여 회원가입을 시도하는 미인증 유저 데이터를 생성합니다.
