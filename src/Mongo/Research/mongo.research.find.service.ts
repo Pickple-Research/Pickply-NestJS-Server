@@ -8,6 +8,8 @@ import {
   ResearchCommentDocument,
   ResearchParticipation,
   ResearchParticipationDocument,
+  ResearchNonMemberParticipation,
+  ResearchNonMemberParticipationDocument,
   ResearchReply,
   ResearchReplyDocument,
   ResearchScrap,
@@ -27,6 +29,8 @@ export class MongoResearchFindService {
     private readonly ResearchComment: Model<ResearchCommentDocument>,
     @InjectModel(ResearchParticipation.name)
     private readonly ResearchParticipation: Model<ResearchParticipationDocument>,
+    @InjectModel(ResearchNonMemberParticipation.name)
+    private readonly ResearchNonMemberParticipation: Model<ResearchNonMemberParticipationDocument>,
     @InjectModel(ResearchReply.name)
     private readonly ResearchReply: Model<ResearchReplyDocument>,
     @InjectModel(ResearchScrap.name)
@@ -35,53 +39,36 @@ export class MongoResearchFindService {
     private readonly ResearchUser: Model<ResearchUserDocument>,
     @InjectModel(ResearchView.name)
     private readonly ResearchView: Model<ResearchViewDocument>,
-  ) { }
+  ) {}
 
   // ********************************** //
   /** 기본형 **/
   // ********************************** //
 
-
   /**
-   * 
+   *
    * @author 승원
    */
   async getResearchNumber() {
-
-    return (await this.Research.find()).length
-
+    return await this.Research.count();
   }
 
   /**
-   * @author 승원
    * 리서치에 참여한 사람의 숫자를 모두 더해서 반환
+   * @author 승원
+   * @modify 현웅
    */
 
   async getParticipantsNumber() {
-
-    // const researchList = await this.Research.find();
-
-    // let totalParticipantsNumber = 0;
-
-    // for (let idx in researchList) {
-
-    //   totalParticipantsNumber += researchList[idx].participantsNum
-
-    // }
-
-    // return totalParticipantsNumber
-
-    return await this.Research.aggregate([
+    const totalParticipantsNumber =
+      (await this.ResearchParticipation.count()) +
+      (await this.ResearchNonMemberParticipation.count());
+    return [
       {
-        $group: {
-          _id: null,
-          totalParticipantsNumber: {
-            $sum: "$participantsNum"//모든 투표 결과 더해서 반환
-          }
-        }
-      }
-    ])
-
+        _id: null,
+        totalParticipantsNumber,
+      },
+    ];
   }
 
   /**

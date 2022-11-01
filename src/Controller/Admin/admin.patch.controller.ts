@@ -124,8 +124,10 @@ export class AdminPatchController {
       type: string;
     },
   ) {
+    //* 유저를 직접 지정하는 경우
     let userIds: string[] = [];
 
+    //* 특정 리서치 참여자들에게 주는 경우
     if (body.researchId) {
       const participations =
         await this.mongoResearchFindService.getResearchParticipations({
@@ -149,7 +151,7 @@ export class AdminPatchController {
           scale: body.scale,
           balance: creditBalance + body.scale,
           isIncome: body.scale >= 0 ? true : false,
-          reason: body.reason,
+          reason: body.reason, // (교환한 상품명) "리서치 참여에 대한 누락 크레딧 지급"
           type: body.type, // "PRODUCT_EXCHANGE" "CREDIT_COMPENSATION"
           createdAt: getCurrentISOTime(),
         };
