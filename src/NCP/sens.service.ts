@@ -1,4 +1,4 @@
-import { InternalServerErrorException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
@@ -54,7 +54,7 @@ export class SensService {
             contentType: 'COMM',
             countryCode: '82',
             from: this.config.get('NCP_NUMBER'), // 발신자 번호
-            content: `${name}님 안녕하세요~! 픽플리입니다. https://pickpleresearch.page.link/web`,
+            content: `${name}님 안녕하세요~! 픽플리입니다. \n https://pickpleresearch.page.link/web`,
             messages: [
                 {
                     to: phoneNumber, // 수신자 번호
@@ -69,20 +69,38 @@ export class SensService {
                 'x-ncp-apigw-signature-v2': this.makeSignature(),
             },
         };
-        axios.post(`https://sens.apigw.ntruss.com/sms/v2/services/${process.env.NCP_SERVICE_ID}/messages`,
-            body,
-            options)
-            .then(async (res) => {
-                // 성공 이벤트
-                console.log(res.data)
-                return res.data
-                // console.log(res)
-            })
-            .catch((err) => {
-                console.error(err.response.data);
-                throw new InternalServerErrorException();
-            });
+        // axios.post(`https://sens.apigw.ntruss.com/sms/v2/services/${process.env.NCP_SERVICE_ID}/messages`,
+        //     body,
+        //     options)
+        //     .then(async (res) => {
+        //         // 성공 이벤트
+        //         console.log(res.data)
+        //         res.data?.statusCode;
+        //         // console.log(res)
+        //     })
+        //     .catch((err) => {
+        //         console.error(err.response.data);
+        //         throw new InternalServerErrorException();
 
-        //return "성공";
+        //         return (err.response.data)
+        //     });
+
+        // return {
+        //     data: {
+        //         statusCode: '202'
+        //     }
+        // }
+
+        try {
+            const { data } = await axios.post(`https://sens.apigw.ntruss.com/sms/v2/services/${process.env.NCP_SERVICE_ID}/messages`, body, options)
+            return data
+        } catch (err) {
+            console.error(err.response.data);
+            return err.response.data
+            //throw new InternalServerErrorException();
+        }
+
+
+
     }
 }
