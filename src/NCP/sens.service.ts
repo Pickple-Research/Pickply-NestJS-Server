@@ -49,7 +49,7 @@ export class SensService {
 
   async sendSMS(phoneNumber: string, name: string): Promise<any> {
     const body = {
-      type: "SMS",
+      type: "LMS",
       contentType: "COMM",
       countryCode: "82",
       from: this.config.get("NCP_NUMBER"), // 발신자 번호
