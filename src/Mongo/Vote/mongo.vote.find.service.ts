@@ -257,7 +257,7 @@ export class MongoVoteFindService {
    * @author 현웅
    */
   async getFixedVotes() {
-    return await this.getVotesByIds(["63401fa0f08c6b7dc201b443"]);
+    return await this.getVotesByIds(["635a34ea0e7ad79254ab99fe"]);
   }
 
   /**
