@@ -164,6 +164,11 @@ export class ResearchPostController {
     //* 새로운 리서치 정보
     const research: Research = {
       ...param.body,
+      //TODO: 추후 앱단에서 수정
+      //? 왜 이렇게 하나요?: 구글 폼을 이용해 리서치를 진행할 때 로그인을 요구하는 리서치인 경우 리서치 마감 감지를 못합니다. (이유는 불명)
+      link: param.body.link.startsWith("https://accounts.google.com")
+        ? param.body.link
+        : param.body.originalLink,
       authorId: param.userId,
       credit: ACHEIVE_CREDIT_PER_MINUTE(param.body.estimatedTime),
       pulledupAt: currentTime,
