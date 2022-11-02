@@ -237,7 +237,8 @@ export class MongoResearchFindService {
     });
     const researches = await this.getResearches({
       filterQuery: {
-        // 마감일이 존재하고 마감되지 않은 리서치만 뽑은 후
+        // 마감일이 존재하고 숨기거나 마감되지 않은 리서치만 뽑은 후
+        hidden: false,
         closed: false,
         deadline: { $gt: new Date().toISOString() },
       },
