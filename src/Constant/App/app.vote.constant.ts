@@ -7,11 +7,11 @@ import { EnumValueWithName } from "src/Object/Type";
  * @author 현웅
  */
 type VoteConstant = {
-  voteCategoies: EnumValueWithName[];
+  voteCategories: EnumValueWithName[];
 };
 
 export const appVoteConstant: VoteConstant = {
-  voteCategoies: [
+  voteCategories: [
     { value: VoteCategory.GREEN_LIGHT, displayName: "연애" },
     { value: VoteCategory.COORDI, displayName: "패션/코디" },
     { value: VoteCategory.ISSUE, displayName: "이슈/트렌드" },
