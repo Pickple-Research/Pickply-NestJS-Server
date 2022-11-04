@@ -10,6 +10,7 @@ import {
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import { SlackService } from "src/Slack";
 import { UserCreateService, ResearchUpdateService } from "src/Service";
 import {
   Research,
@@ -66,6 +67,8 @@ export class ResearchPostController {
     private readonly researchConnection: Connection,
   ) {}
 
+  @Inject()
+  private readonly slackService: SlackService;
   @Inject()
   private readonly mongoUserFindService: MongoUserFindService;
   @Inject()
@@ -191,39 +194,49 @@ export class ResearchPostController {
     const userSession = await this.userConnection.startSession();
     const researchSession = await this.researchConnection.startSession();
 
-    return await tryMultiTransaction(async () => {
-      //* 리서치 데이터를 만듭니다
-      const createNewResearch = this.mongoResearchCreateService.createResearch(
-        { research, files: param.files },
-        researchSession,
-      );
+    const { newResearch, newCreditHistory } =
+      await tryMultiTransaction(async () => {
+        //* 리서치 데이터를 만듭니다
+        const createNewResearch =
+          this.mongoResearchCreateService.createResearch(
+            { research, files: param.files },
+            researchSession,
+          );
 
-      //* CreditHistory 정보를 User DB 에 반영합니다.
-      const createNewCreditHistory =
-        this.mongoUserCreateService.createCreditHistory(
-          { userId: param.userId, creditHistory },
-          userSession,
-        );
+        //* CreditHistory 정보를 User DB 에 반영합니다.
+        const createNewCreditHistory =
+          this.mongoUserCreateService.createCreditHistory(
+            { userId: param.userId, creditHistory },
+            userSession,
+          );
 
-      const { newResearch, newCreditHistory } = await Promise.all([
-        createNewResearch,
-        createNewCreditHistory,
-      ]).then(([newResearch, newCreditHistory]) => {
+        const { newResearch, newCreditHistory } = await Promise.all([
+          createNewResearch,
+          createNewCreditHistory,
+        ]).then(([newResearch, newCreditHistory]) => {
+          return { newResearch, newCreditHistory };
+        });
+
+        //TODO: 서버에서 같은 Container 를 두 개 돌리고 있기 때문에, 해당 부분이 처리되기 전까지는 일단 구동되지 않게 합니다.
+        // //* 이 때, 리서치에 마감일이 설정되어 있는 경우
+        // //* ScheduleRegistry 에 리서치 자동 마감 CronJob 을 등록합니다.
+        // if (Boolean(newResearch.deadline)) {
+        //   this.researchUpdateService.addResearchAutoCloseCronJob({
+        //     researchId: newResearch._id,
+        //     deadline: newResearch.deadline,
+        //   });
+        // }
+
         return { newResearch, newCreditHistory };
-      });
+      }, [userSession, researchSession]);
 
-      //TODO: 서버에서 같은 Container 를 두 개 돌리고 있기 때문에, 해당 부분이 처리되기 전까지는 일단 구동되지 않게 합니다.
-      // //* 이 때, 리서치에 마감일이 설정되어 있는 경우
-      // //* ScheduleRegistry 에 리서치 자동 마감 CronJob 을 등록합니다.
-      // if (Boolean(newResearch.deadline)) {
-      //   this.researchUpdateService.addResearchAutoCloseCronJob({
-      //     researchId: newResearch._id,
-      //     deadline: newResearch.deadline,
-      //   });
-      // }
+    //* 리서치가 성공적으로 생성된 경우, Slack 운영 채널에 메세지를 보냅니다.
+    //* (응답에 영향을 주지 않도록 await 을 사용하지 않습니다.)
+    this.slackService.sendMessageToSlackOperationChannel({
+      message: `새로운 리서치가 업로드 되었습니다: ${newResearch.title}`,
+    });
 
-      return { newResearch, newCreditHistory };
-    }, [userSession, researchSession]);
+    return { newResearch, newCreditHistory };
   }
 
   /**
