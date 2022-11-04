@@ -47,7 +47,7 @@ export class MongoUserFindService {
     private readonly UserRelation: Model<UserRelationDocument>,
     @InjectModel(UserSecurity.name)
     private readonly UserSecurity: Model<UserSecurityDocument>,
-  ) { }
+  ) {}
 
   // ********************************** //
   /** 기본형 **/
@@ -59,13 +59,7 @@ export class MongoUserFindService {
    */
 
   async getUsersNumber() {
-
-    const number = (await this.User.find()).length
-
-    console.log(number)
-
-    return number
-
+    return await this.User.count();
   }
 
   /**
@@ -174,6 +168,19 @@ export class MongoUserFindService {
   }
 
   /**
+   * 유저 특성 정보를 원하는 조건으로 가져옵니다.
+   * @author 현웅
+   */
+  async getUserProperties(param: {
+    filterQuery?: FilterQuery<UserPropertyDocument>;
+    selectQuery?: Partial<Record<keyof UserProperty, boolean>>;
+  }) {
+    return await this.UserProperty.find(param.filterQuery)
+      .select(param.selectQuery)
+      .lean();
+  }
+
+  /**
    * 특정 유저의 보안 정보를 가져옵니다.
    * @author 현웅
    */
@@ -230,6 +237,7 @@ export class MongoUserFindService {
       email,
       selectQuery: { email: true },
     });
+    if (!user) throw new UserNotFoundException();
     return user._id.toString();
   }
 

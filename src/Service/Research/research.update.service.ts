@@ -383,6 +383,7 @@ export class ResearchUpdateService {
         if (wonUserIds.length >= param.extraCreditReceiverNum) break;
 
         //* 분배 대상 유저의 크레딧 잔량을 가져옵니다.
+        //TODO: 크레딧 잔량을 한꺼번에 가져오도록 변경
         const creditBalance =
           await this.mongoUserFindService.getUserCreditBalance(userId);
         //* 크레딧 변동내역 데이터를 생성합니다.
@@ -435,7 +436,7 @@ export class ResearchUpdateService {
 
     //* fcmToken 이 존재하고 (로그아웃 하지 않은 유저),
     //* appPush 및 winExtraCredit 이 설정된 유저에게만 보낼 푸시알림 리스트를 만듭니다.
-    //TODO: 알림 한꺼번에 만들고 푸시알리도 한꺼번에 보내는 방식으로 변경
+    //TODO: 알림 한꺼번에 만들고 푸시알림도 한꺼번에 보내는 방식으로 변경
     for (const setting of notificationSettings) {
       const notification = await this.mongoUserCreateService.createNotification(
         {

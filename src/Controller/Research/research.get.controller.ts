@@ -1,4 +1,5 @@
 import { Controller, Inject, Request, Query, Param, Get } from "@nestjs/common";
+import { ResearchFindService } from "src/Service";
 import { MongoResearchFindService } from "src/Mongo";
 import { JwtUserInfo } from "src/Object/Type";
 import { Public } from "src/Security/Metadata";
@@ -6,33 +7,28 @@ import { ResearchNotFoundException } from "src/Exception";
 
 @Controller("researches")
 export class ResearchGetController {
-  constructor() { }
+  constructor(private readonly researchFindService: ResearchFindService) {}
 
   @Inject() private readonly mongoResearchFindService: MongoResearchFindService;
 
   /**
- * @author 승원
- * 
- */
+   * 총 리서치 참여 숫자를 반환합니다.
+   * @author 승원
+   */
   @Public()
   @Get("participants/number")
   async getParticipantsNumber() {
-
     return await this.mongoResearchFindService.getParticipantsNumber();
-
   }
 
-
   /**
- * @author 승원
- * 진행된 리서치 숫자 반환
- */
+   * 업로드된 리서치 숫자를 반환합니다
+   * @author 승원
+   */
   @Public()
   @Get("number")
   async getResearchNumber() {
-
     return await this.mongoResearchFindService.getResearchNumber();
-
   }
 
   /**
