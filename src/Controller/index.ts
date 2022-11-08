@@ -5,9 +5,17 @@
  */
 
 //Admin
-export * from "./Admin/admin.get.controller";
-export * from "./Admin/admin.patch.controller";
-export * from "./Admin/admin.post.controller";
+export * from "./Admin/Auth/admin.auth.controller";
+
+export * from "./Admin/Research/admin.research.get.controller";
+export * from "./Admin/Research/admin.research.patch.controller";
+export * from "./Admin/Research/admin.research.post.controller";
+
+export * from "./Admin/User/admin.user.patch.controller";
+export * from "./Admin/User/admin.user.post.controller";
+
+export * from "./Admin/Vote/admin.vote.get.controller";
+export * from "./Admin/Vote/admin.vote.patch.controller";
 
 //Auth
 export * from "./Auth/auth.controller";

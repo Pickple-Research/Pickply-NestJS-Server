@@ -7,45 +7,37 @@ import {
   MongoUserFindService,
   MongoUserCreateService,
   MongoResearchFindService,
-  MongoResearchCreateService,
 } from "src/Mongo";
 import { Roles } from "src/Security/Metadata";
-import { AlarmType, CreditHistoryType, UserType } from "src/Object/Enum";
+import { AlarmType, UserType } from "src/Object/Enum";
 import { PushAlarm } from "src/Object/Type";
-import {
-  MONGODB_USER_CONNECTION,
-  MONGODB_RESEARCH_CONNECTION,
-} from "src/Constant";
-import { getCurrentISOTime, getAgeGroup, tryMultiTransaction } from "src/Util";
-import { CreditHistory, ResearchParticipation } from "src/Schema";
+import { MONGODB_USER_CONNECTION } from "src/Constant";
+import { getCurrentISOTime, tryMultiTransaction } from "src/Util";
+import { CreditHistory } from "src/Schema";
 
 /**
- * 관리자만 사용하는 Post 컨트롤러입니다.
+ * 관리자만 사용하는 유저 관련 Post 컨트롤러입니다.
  * @author 현웅
  */
-@Controller("admin")
-export class AdminPostController {
+@Controller("admin/users")
+export class AdminUserPostController {
   constructor(
     private readonly firebaseService: FirebaseService,
 
     @InjectConnection(MONGODB_USER_CONNECTION)
     private readonly userConnection: Connection,
-    @InjectConnection(MONGODB_RESEARCH_CONNECTION)
-    private readonly researchConnection: Connection,
   ) {}
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
   @Inject() private readonly mongoUserCreateService: MongoUserCreateService;
   @Inject() private readonly mongoResearchFindService: MongoResearchFindService;
-  @Inject()
-  private readonly mongoResearchCreateService: MongoResearchCreateService;
 
   /**
    * 특정 유저에게 푸시 알림을 전송합니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Post("users/alarm")
+  @Post("alarm")
   async sendPushAlarm(
     @Body()
     body: {
@@ -71,7 +63,7 @@ export class AdminPostController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Post("users/multiple/alarm")
+  @Post("multiple/alarm")
   async sendMultiplePushAlarm(
     @Body()
     body: {
@@ -123,70 +115,99 @@ export class AdminPostController {
   }
 
   /**
-   * (리서치 참여 버그가 생겨 반영이 되지 않은 경우 사용)
-   * 리서치 참여 정보와 크레딧 사용내역을 생성합니다.
+   * 특정 유저에게 크레딧을 증정하거나 차감합니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Post("researches/participations")
-  async makeResearchParticipations(
-    @Body() body: { userIds: string[]; researchId: string },
+  @Post("credit")
+  async giveCredit(
+    @Body()
+    body: {
+      userId: string;
+      scale: number;
+      reason: string;
+      type: string;
+    },
   ) {
+    const creditBalance = await this.mongoUserFindService.getUserCreditBalance(
+      body.userId,
+    );
+    const creditHistory: CreditHistory = {
+      userId: body.userId,
+      scale: body.scale,
+      balance: creditBalance + body.scale,
+      isIncome: body.scale >= 0 ? true : false,
+      reason: body.reason, // "(관리자) 리서치 업로드 비용 지원"
+      type: body.type, // "PRODUCT_EXCHANGE"
+      createdAt: getCurrentISOTime(),
+    };
+
     const userSession = await this.userConnection.startSession();
-    const researchSession = await this.researchConnection.startSession();
+    await tryMultiTransaction(async () => {
+      await this.mongoUserCreateService.createCreditHistory(
+        { userId: body.userId, creditHistory },
+        userSession,
+      );
+    }, [userSession]);
+  }
+
+  /**
+   * 두 명 이상의 유저들에게 크레딧을 증정하거나 차감합니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Post("multiple/credit")
+  async giveMultipleUserCredit(
+    @Body()
+    body: {
+      userIds?: string[];
+      researchId?: string;
+      scale: number;
+      reason: string;
+      type: string;
+    },
+  ) {
+    //* 유저를 직접 지정하는 경우
+    let userIds: string[] = [];
+
+    //* 특정 리서치 참여자들에게 주는 경우
+    if (body.researchId) {
+      const participations =
+        await this.mongoResearchFindService.getResearchParticipations({
+          filterQuery: { researchId: body.researchId },
+          selectQuery: { userId: true },
+        });
+      userIds = participations.map((participation) => participation.userId);
+    } else {
+      userIds = body.userIds;
+    }
+
+    console.log(userIds.length);
 
     const currentISOTime = getCurrentISOTime();
-
     const users = await this.mongoUserFindService.getUsers({
-      filterQuery: { _id: { $in: body.userIds } },
+      filterQuery: { _id: { $in: userIds } },
       selectQuery: { credit: true },
     });
-    const userProperties = await this.mongoUserFindService.getUserProperties({
-      filterQuery: { _id: { $in: body.userIds } },
-      selectQuery: { gender: true, birthday: true },
-    });
-    const research = await this.mongoResearchFindService.getResearchById({
-      researchId: body.researchId,
-      selectQuery: { title: true, credit: true },
-    });
-
     const creditHistories: CreditHistory[] = users.map((user) => ({
       userId: user._id,
-      researchId: research._id,
-      type: CreditHistoryType.RESEARCH_PARTICIPATE,
-      reason: research.title,
-      scale: research.credit,
-      balance: user.credit + research.credit,
-      isIncome: true,
+      researchId: body.researchId,
+      scale: body.scale,
+      balance: user.credit + body.scale,
+      isIncome: body.scale >= 0 ? true : false,
+      reason: body.reason, // (교환한 상품명) / "리서치 참여에 대한 누락 크레딧 지급" / "(관리자) 리서치 업로드 크레딧 지원"
+      type: body.type, // "PRODUCT_EXCHANGE" / "CREDIT_COMPENSATION" / "ETC"
       createdAt: currentISOTime,
     }));
-    const researchParticipations: ResearchParticipation[] = userProperties.map(
-      (userProperty) => ({
-        userId: userProperty._id,
-        researchId: body.researchId,
-        consumedTime: 0,
-        createdAt: currentISOTime,
-        gender: userProperty.gender,
-        ageGroup: getAgeGroup(userProperty.birthday),
-      }),
-    );
 
-    //? 이렇게 하면 transaction 에러가 납니다. 왜??
-    // await tryMultiTransaction(async () => {
-    //   console.log("start transaction");
-    //   await this.mongoUserCreateService.createCreditHistories(
-    //     { creditHistories },
-    //     userSession,
-    //   );
-    //   console.log("creditHistories created");
-    //   await this.mongoResearchCreateService.createResearchParticipations(
-    //     { researchParticipations },
-    //     researchSession,
-    //   );
-    //   console.log("researchParticipations created");
-    //   return;
-    // }, [userSession, researchSession]);
-
-    return;
+    const userSession = await this.userConnection.startSession();
+    await tryMultiTransaction(async () => {
+      for (const creditHistory of creditHistories) {
+        await this.mongoUserCreateService.createCreditHistory(
+          { userId: creditHistory.userId, creditHistory },
+          userSession,
+        );
+      }
+    }, [userSession]);
   }
 }

@@ -2,166 +2,40 @@ import { Controller, Inject, Body, Patch } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import { Roles } from "src/Security/Metadata";
+import { ResearchUpdateService } from "src/Service";
 import {
-  AdminUpdateService,
-  AuthService,
-  ResearchUpdateService,
-} from "src/Service";
-import {
-  MongoUserFindService,
-  MongoUserCreateService,
   MongoResearchFindService,
   MongoResearchUpdateService,
   MongoResearchDeleteService,
-  MongoVoteUpdateService,
 } from "src/Mongo";
 import {
   ResearchBlockBodyDto,
-  VoteBlockBodyDto,
   CommentBlockBodyDto,
   ReplyBlockBodyDto,
 } from "src/Dto";
 import { UserType } from "src/Object/Enum";
-import { CreditHistory } from "src/Schema";
 import { tryMultiTransaction, getCurrentISOTime } from "src/Util";
-import {
-  MONGODB_USER_CONNECTION,
-  MONGODB_RESEARCH_CONNECTION,
-} from "src/Constant";
+import { MONGODB_RESEARCH_CONNECTION } from "src/Constant";
 
 /**
- * 관리자만 사용하는 Patch 컨트롤러입니다.
- * 리서치 일괄마감, 리서치 및 투표 (대)댓글 블락 처리 등을 처리할 수 있습니다.
+ * 관리자만 사용하는, 리서치 정보 수정 관련 컨트롤러입니다.
  * @author 현웅
  */
-@Controller("admin")
-export class AdminPatchController {
+@Controller("admin/researches")
+export class AdminResearchPatchController {
   constructor(
-    private readonly adminUpdateService: AdminUpdateService,
     private readonly researchUpdateService: ResearchUpdateService,
 
-    @InjectConnection(MONGODB_USER_CONNECTION)
-    private readonly userConnection: Connection,
     @InjectConnection(MONGODB_RESEARCH_CONNECTION)
     private readonly researchConnection: Connection,
   ) {}
 
-  @Inject()
-  private readonly authService: AuthService;
-  @Inject()
-  private readonly mongoUserFindService: MongoUserFindService;
-  @Inject()
-  private readonly mongoUserCreateService: MongoUserCreateService;
   @Inject()
   private readonly mongoResearchFindService: MongoResearchFindService;
   @Inject()
   private readonly mongoResearchUpdateService: MongoResearchUpdateService;
   @Inject()
   private readonly mongoResearchDeleteService: MongoResearchDeleteService;
-  @Inject()
-  private readonly mongoVoteUpdateService: MongoVoteUpdateService;
-
-  /**
-   * 특정 유저의 비밀번호를 초기화합니다.
-   * @author 현웅
-   */
-  @Roles(UserType.ADMIN)
-  @Patch("users/password/initialize")
-  async initializeUserPassword(@Body() body: { userId: string }) {
-    await this.authService.initializePassword(body.userId);
-  }
-
-  /**
-   * 특정 유저에게 크레딧을 증정하거나 차감합니다.
-   * @author 현웅
-   */
-  @Roles(UserType.ADMIN)
-  @Patch("users/credit")
-  async giveCredit(
-    @Body()
-    body: {
-      userId: string;
-      scale: number;
-      reason: string;
-      type: string;
-    },
-  ) {
-    const creditBalance = await this.mongoUserFindService.getUserCreditBalance(
-      body.userId,
-    );
-    const creditHistory: CreditHistory = {
-      userId: body.userId,
-      scale: body.scale,
-      balance: creditBalance + body.scale,
-      isIncome: body.scale >= 0 ? true : false,
-      reason: body.reason, // "(관리자) 리서치 업로드 비용 지원"
-      type: body.type, // "PRODUCT_EXCHANGE"
-      createdAt: getCurrentISOTime(),
-    };
-
-    const userSession = await this.userConnection.startSession();
-    await tryMultiTransaction(async () => {
-      await this.mongoUserCreateService.createCreditHistory(
-        { userId: body.userId, creditHistory },
-        userSession,
-      );
-    }, [userSession]);
-  }
-
-  /**
-   * 두 명 이상의 유저들에게 크레딧을 증정하거나 차감합니다.
-   * @author 현웅
-   */
-  @Roles(UserType.ADMIN)
-  @Patch("users/multiple/credit")
-  async giveMultipleUserCredit(
-    @Body()
-    body: {
-      userIds?: string[];
-      researchId?: string;
-      scale: number;
-      reason: string;
-      type: string;
-    },
-  ) {
-    //* 유저를 직접 지정하는 경우
-    let userIds: string[] = [];
-
-    //* 특정 리서치 참여자들에게 주는 경우
-    if (body.researchId) {
-      const participations =
-        await this.mongoResearchFindService.getResearchParticipations({
-          filterQuery: { researchId: body.researchId },
-          selectQuery: { userId: true },
-        });
-      userIds = participations.map((participation) => participation.userId);
-    } else {
-      userIds = body.userIds;
-    }
-
-    console.log(userIds);
-
-    const userSession = await this.userConnection.startSession();
-    await tryMultiTransaction(async () => {
-      for (const userId of userIds) {
-        const creditBalance =
-          await this.mongoUserFindService.getUserCreditBalance(userId);
-        const creditHistory: CreditHistory = {
-          userId,
-          scale: body.scale,
-          balance: creditBalance + body.scale,
-          isIncome: body.scale >= 0 ? true : false,
-          reason: body.reason, // (교환한 상품명) "리서치 참여에 대한 누락 크레딧 지급"
-          type: body.type, // "PRODUCT_EXCHANGE" "CREDIT_COMPENSATION"
-          createdAt: getCurrentISOTime(),
-        };
-        await this.mongoUserCreateService.createCreditHistory(
-          { userId, creditHistory },
-          userSession,
-        );
-      }
-    }, [userSession]);
-  }
 
   /**
    * 리서치를 통합합니다.
@@ -169,7 +43,7 @@ export class AdminPatchController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Patch("researches/integrate")
+  @Patch("integrate")
   async integrateResearch(
     @Body() body: { oldResearchId: string; newResearchId: string },
   ) {
@@ -235,7 +109,7 @@ export class AdminPatchController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Patch("researches/close")
+  @Patch("close")
   async closeResearch(@Body() body: { researchId: string }) {
     await this.researchUpdateService.closeResearch({
       userId: "",
@@ -249,7 +123,7 @@ export class AdminPatchController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Patch("researches/close/all")
+  @Patch("close/all")
   async closeAllResearch() {
     const openedResearches =
       await this.mongoResearchFindService.getAllOpenedResearchWithDeadline();
@@ -275,7 +149,7 @@ export class AdminPatchController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Patch("researches/distribute/all")
+  @Patch("distribute/all")
   async distributeAllResearchCredits() {
     const undistributedResearches =
       await this.mongoResearchFindService.getResearches({
@@ -321,7 +195,7 @@ export class AdminPatchController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Patch("researches/block")
+  @Patch("block")
   async blockResearch(@Body() body: ResearchBlockBodyDto) {
     return await this.mongoResearchUpdateService.updateResearch({
       researchId: body.researchId,
@@ -334,7 +208,7 @@ export class AdminPatchController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Patch("researches/comments/block")
+  @Patch("comments/block")
   async blockResearchComment(@Body() body: CommentBlockBodyDto) {
     return await this.mongoResearchUpdateService.blockResearchComment(
       body.commentId,
@@ -346,43 +220,10 @@ export class AdminPatchController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Patch("researches/replies/block")
+  @Patch("replies/block")
   async blockResearchReply(@Body() body: ReplyBlockBodyDto) {
     return await this.mongoResearchUpdateService.blockResearchReply(
       body.replyId,
     );
-  }
-
-  /**
-   * 투표를 블락처리합니다.
-   * @author 현웅
-   */
-  @Roles(UserType.ADMIN)
-  @Patch("votes/block")
-  async blockVote(@Body() body: VoteBlockBodyDto) {
-    return await this.mongoVoteUpdateService.updateVote({
-      voteId: body.voteId,
-      updateQuery: { $set: { blocked: true } },
-    });
-  }
-
-  /**
-   * 투표 댓글을 블락처리합니다.
-   * @author 현웅
-   */
-  @Roles(UserType.ADMIN)
-  @Patch("votes/comments/block")
-  async blockVoteComment(@Body() body: CommentBlockBodyDto) {
-    return await this.mongoVoteUpdateService.blockVoteComment(body.commentId);
-  }
-
-  /**
-   * 투표 대댓글을 블락처리합니다.
-   * @author 현웅
-   */
-  @Roles(UserType.ADMIN)
-  @Patch("votes/replies/block")
-  async blockVoteReply(@Body() body: ReplyBlockBodyDto) {
-    return await this.mongoVoteUpdateService.blockVoteReply(body.replyId);
   }
 }
