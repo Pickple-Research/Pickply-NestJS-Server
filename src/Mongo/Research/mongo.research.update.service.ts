@@ -42,13 +42,17 @@ export class MongoResearchUpdateService {
     private readonly ResearchUser: Model<ResearchUserDocument>,
   ) {}
 
+  // ********************************** //
+  /** 기본형 **/
+  // ********************************** //
+
   /**
    * @Transaction
-   * 리서치 정보를 업데이트합니다.
+   * 특정 리서치 정보를 업데이트합니다.
    * @return 수정된 리서치 정보
    * @author 현웅
    */
-  async updateResearch(
+  async updateResearchById(
     param: {
       researchId: string;
       updateQuery: UpdateQuery<ResearchDocument>;

@@ -152,7 +152,7 @@ export class AdminUserPostController {
   }
 
   /**
-   * 두 명 이상의 유저들에게 크레딧을 증정하거나 차감합니다.
+   * 다수 유저에게 크레딧을 증정하거나 차감합니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
@@ -195,8 +195,8 @@ export class AdminUserPostController {
       scale: body.scale,
       balance: user.credit + body.scale,
       isIncome: body.scale >= 0 ? true : false,
-      reason: body.reason, // (교환한 상품명) / "리서치 참여에 대한 누락 크레딧 지급" / "(관리자) 리서치 업로드 크레딧 지원"
-      type: body.type, // "PRODUCT_EXCHANGE" / "CREDIT_COMPENSATION" / "ETC"
+      reason: body.reason, // (교환한 상품명) / "리서치 참여에 대한 누락 크레딧 지급" / "회원간 크레딧 이관" / "(관리자) 리서치 업로드 크레딧 지원"
+      type: body.type, // "PRODUCT_EXCHANGE" / "CREDIT_COMPENSATION" / "CREDIT_SHARE" / "ETC"
       createdAt: currentISOTime,
     }));
 

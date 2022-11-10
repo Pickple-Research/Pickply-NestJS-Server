@@ -5,6 +5,8 @@
  */
 
 //Admin
+export * from "./Admin/App/admin.app.controller";
+
 export * from "./Admin/Auth/admin.auth.controller";
 
 export * from "./Admin/Research/admin.research.get.controller";

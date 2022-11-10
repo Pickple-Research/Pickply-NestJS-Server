@@ -103,6 +103,9 @@ export class Research {
   @Prop({ default: false }) // 종료 여부. deadline이 지나기 전일지라도 사용자가 종료 가능.
   closed?: boolean;
 
+  @Prop({ default: false }) // 리서치 게시 승인 여부
+  confirmed?: boolean;
+
   @Prop({ default: false }) // 숨김 여부
   hidden?: boolean;
 

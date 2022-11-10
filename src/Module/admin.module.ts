@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
 import {
+  // App
+  AdminAppController,
   // Auth
   AdminAuthController,
   // Researchs
@@ -22,10 +24,13 @@ import {
   MongoUserModule,
   MongoResearchModule,
   MongoVoteModule,
+  MongoNoticeModule,
 } from "src/Mongo";
 
 @Module({
   controllers: [
+    // App
+    AdminAppController,
     // Auth
     AdminAuthController,
     // Researchs
@@ -45,6 +50,12 @@ import {
     AdminUpdateService,
     ResearchUpdateService,
   ],
-  imports: [MongoUserModule, MongoResearchModule, MongoVoteModule, AuthModule],
+  imports: [
+    AuthModule,
+    MongoUserModule,
+    MongoResearchModule,
+    MongoVoteModule,
+    MongoNoticeModule,
+  ],
 })
 export class AdminModule {}

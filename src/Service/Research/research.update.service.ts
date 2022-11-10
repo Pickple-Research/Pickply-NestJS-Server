@@ -80,7 +80,7 @@ export class ResearchUpdateService {
       return null;
     }
 
-    await this.mongoResearchUpdateService.updateResearch({
+    await this.mongoResearchUpdateService.updateResearchById({
       researchId: param.researchView.researchId,
       updateQuery: { $inc: { viewsNum: 1 } },
     });
@@ -101,7 +101,7 @@ export class ResearchUpdateService {
     researchScrap: ResearchScrap;
   }) {
     //* 리서치 스크랩 수 증가
-    const updateResearch = this.mongoResearchUpdateService.updateResearch({
+    const updateResearch = this.mongoResearchUpdateService.updateResearchById({
       researchId: param.researchId,
       updateQuery: { $inc: { scrapsNum: 1 } },
     });
@@ -126,7 +126,7 @@ export class ResearchUpdateService {
    */
   async unscrapResearch(param: { userId: string; researchId: string }) {
     //* 리서치 스크랩 수 감소
-    const updateResearch = this.mongoResearchUpdateService.updateResearch({
+    const updateResearch = this.mongoResearchUpdateService.updateResearchById({
       researchId: param.researchId,
       updateQuery: { $inc: { scrapsNum: -1 } },
     });
@@ -161,7 +161,7 @@ export class ResearchUpdateService {
         researchId: param.researchId,
       });
     //* 리서치 참여자 수 1 증가
-    const updateResearch = this.mongoResearchUpdateService.updateResearch(
+    const updateResearch = this.mongoResearchUpdateService.updateResearchById(
       {
         researchId: param.researchId,
         updateQuery: { $inc: { participantsNum: 1 } },
@@ -201,7 +201,7 @@ export class ResearchUpdateService {
     researchNonMemberParticipation: ResearchNonMemberParticipation;
   }) {
     //* 비회원 리서치 참여자 수 1 증가
-    const updateResearch = this.mongoResearchUpdateService.updateResearch({
+    const updateResearch = this.mongoResearchUpdateService.updateResearchById({
       researchId: param.researchId,
       updateQuery: { $inc: { nonMemberParticipantsNum: 1 } },
     });
@@ -239,7 +239,7 @@ export class ResearchUpdateService {
       researchId: param.researchId,
     });
     //* 리서치를 끌올합니다.
-    const pullUpResearch = this.mongoResearchUpdateService.updateResearch(
+    const pullUpResearch = this.mongoResearchUpdateService.updateResearchById(
       { researchId: param.researchId, updateQuery: { $set: param.research } },
       session,
     );
@@ -272,7 +272,7 @@ export class ResearchUpdateService {
       researchId: param.researchId,
     });
     //* 리서치 내용을 수정
-    const updateResearch = this.mongoResearchUpdateService.updateResearch(
+    const updateResearch = this.mongoResearchUpdateService.updateResearchById(
       { researchId: param.researchId, updateQuery: { $set: param.research } },
       session,
     );
@@ -303,7 +303,7 @@ export class ResearchUpdateService {
       skipValidation: param.skipValidation,
     });
     //* 리서치 마감
-    const closeResearch = this.mongoResearchUpdateService.updateResearch(
+    const closeResearch = this.mongoResearchUpdateService.updateResearchById(
       { researchId: param.researchId, updateQuery: { $set: { closed: true } } },
       session,
     );
@@ -407,7 +407,7 @@ export class ResearchUpdateService {
       }
 
       //* 리서치의 creditDistributed 플래그를 true 로 설정합니다.
-      await this.mongoResearchUpdateService.updateResearch(
+      await this.mongoResearchUpdateService.updateResearchById(
         {
           researchId: param.researchId,
           updateQuery: { $set: { creditDistributed: true } },
