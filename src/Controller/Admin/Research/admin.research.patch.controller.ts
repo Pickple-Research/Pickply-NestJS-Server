@@ -38,6 +38,21 @@ export class AdminResearchPatchController {
   private readonly mongoResearchDeleteService: MongoResearchDeleteService;
 
   /**
+   * 리서치를 승인/승인 취소합니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Patch("confirm")
+  async confirmResearch(
+    @Body() body: { researchId: string; confirmed: boolean },
+  ) {
+    return await this.mongoResearchUpdateService.updateResearchById({
+      researchId: body.researchId,
+      updateQuery: { $set: { confirmed: body.confirmed } },
+    });
+  }
+
+  /**
    * 리서치를 통합합니다.
    * 조회수, 스크랩수, 참여자수, (대)댓글을 통합합니다. 이 후 기존 리서치를 삭제합니다.
    * @author 현웅
@@ -88,7 +103,7 @@ export class AdminResearchPatchController {
           researchSession,
         );
       //* 수치 통합
-      await this.mongoResearchUpdateService.updateResearch({
+      await this.mongoResearchUpdateService.updateResearchById({
         researchId: body.newResearchId,
         updateQuery: {
           $inc: {
@@ -197,7 +212,7 @@ export class AdminResearchPatchController {
   @Roles(UserType.ADMIN)
   @Patch("block")
   async blockResearch(@Body() body: ResearchBlockBodyDto) {
-    return await this.mongoResearchUpdateService.updateResearch({
+    return await this.mongoResearchUpdateService.updateResearchById({
       researchId: body.researchId,
       updateQuery: { $set: { blocked: true } },
     });

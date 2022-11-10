@@ -1,74 +1,74 @@
 import { Controller, Inject, Get } from "@nestjs/common";
-import { AppService } from "./app.service";
 import { Public } from "src/Security/Metadata";
 import {
   MongoNoticeFindService,
   MongoResearchFindService,
   MongoVoteFindService,
 } from "src/Mongo";
-import {
-  appCompanyConstants,
-  appResearchConstant,
-  appServiceConstant,
-  appVoteConstant,
-} from "src/Constant/App";
 
-@Controller("")
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+/**
+ * 관리자용 앱 관련 Get 컨트롤러입니다.
+ */
+@Controller("admin")
+export class AdminAppController {
+  constructor() {}
 
   @Inject() private readonly mongoNoticeFindService: MongoNoticeFindService;
   @Inject() private readonly mongoResearchFindService: MongoResearchFindService;
   @Inject() private readonly mongoVoteFindService: MongoVoteFindService;
 
   /**
-   * 배포 시 테스트 URL입니다.
-   * @author 현웅
-   */
-  @Public()
-  @Get("release")
-  async test() {
-    return "2022-11-10 2038 v1.1.15";
-  }
-
-  /**
-   * 서버 헬스체크용 경로입니다.
-   * @author 현웅
-   */
-  @Public()
-  @Get("health")
-  async healthCheck() {
-    return await this.appService.healthCheck();
-  }
-
-  /**
-   * 앱에서 사용되는 상수 중 서버에서 동적으로 변경할 수 있는 상수를 반환합니다.
+   * 관리자용 앱에서만 사용되는 상수들을 반환합니다.
    * @author 현웅
    */
   @Public()
   @Get("constants")
-  async appConstant() {
+  async getAdminConstants() {
     return {
-      service: appServiceConstant,
-      research: appResearchConstant,
-      vote: appVoteConstant,
-      company: appCompanyConstants,
+      user: {
+        creditHistoryPresets: [
+          {
+            reason: "[스타벅스] 카페 아메리카노T",
+            type: "PRODUCT_EXCHANGE",
+            scale: -50,
+          },
+          {
+            reason: "[네이버페이] 5천원권",
+            type: "PRODUCT_EXCHANGE",
+            scale: -60,
+          },
+          {
+            reason: "[네이버페이] 1만원권",
+            type: "PRODUCT_EXCHANGE",
+            scale: -100,
+          },
+          {
+            reason: "(관리자) 리서치 업로드 크레딧 지원",
+            type: "ETC",
+            scale: -100,
+          },
+        ],
+      },
     };
   }
 
   /**
    * 앱을 처음 시작할 때 호출합니다.
    * 모든 공지사항, 최신 리서치, 추천 리서치, 최신 투표, HOT 투표, 카테고리별 최신 투표를 가져옵니다.
+   * 일반 bootstrap 과 다르게 hidden, blocked, confirmed 되지 않은 리서치와 투표도 모두 가져옵니다.
+   * (추천 / 고정 / 카테고리별 콘텐츠는 제외)
    * @author 현웅
    */
   @Public()
   @Get("bootstrap")
-  async bootstrap() {
+  async adminBootstrap() {
     const getNotices = this.mongoNoticeFindService.getAllNotices();
-    const getResearches = this.mongoResearchFindService.getRecentResearches();
+    const getResearches = this.mongoResearchFindService.getResearches({
+      limit: 20,
+    });
     const getRecommendResearches =
       this.mongoResearchFindService.getRecommendResearches();
-    const getVotes = this.mongoVoteFindService.getRecentVotes();
+    const getVotes = this.mongoVoteFindService.getVotes({ limit: 20 });
     const getFixedVotes = this.mongoVoteFindService.getFixedVotes();
     const getHotVotes = this.mongoVoteFindService.getHotVotes();
     const getRecentCategoryVotes =
