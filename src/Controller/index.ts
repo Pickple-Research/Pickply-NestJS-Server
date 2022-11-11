@@ -13,6 +13,7 @@ export * from "./Admin/Research/admin.research.get.controller";
 export * from "./Admin/Research/admin.research.patch.controller";
 export * from "./Admin/Research/admin.research.post.controller";
 
+export * from "./Admin/User/admin.user.get.controller";
 export * from "./Admin/User/admin.user.patch.controller";
 export * from "./Admin/User/admin.user.post.controller";
 

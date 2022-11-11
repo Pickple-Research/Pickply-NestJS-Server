@@ -16,7 +16,15 @@ export class MongoResearchStandardizeService {
 
   async standardize() {
     return "standardize research data";
-    // await this.
+    // await this.function();
+  }
+
+  /**
+   * v1.1.15) 리서치 confirmed 속성 추가
+   * @author 현웅
+   */
+  async addConfirmed() {
+    await this.Research.updateMany({}, { $set: { confirmed: true } });
   }
 
   /**
