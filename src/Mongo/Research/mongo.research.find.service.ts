@@ -232,9 +232,9 @@ export class MongoResearchFindService {
    * @author 현웅
    */
   async getRecommendResearches() {
-    const fixedResearch = await this.getResearchById({
-      researchId: "63105952d00e56a36fcafe23",
-    });
+    // const fixedResearch = await this.getResearchById({
+    //   researchId: "63105952d00e56a36fcafe23",
+    // });
     const researches = await this.getResearches({
       filterQuery: {
         // 마감일이 존재하고 숨기거나 마감되지 않은 리서치만 뽑은 후
@@ -248,7 +248,8 @@ export class MongoResearchFindService {
       },
       limit: 6, // 6개 추출
     });
-    return [fixedResearch, ...researches];
+    // return [fixedResearch, ...researches];
+    return researches;
   }
 
   /** 인자로 받은 pulledupAt 보다 나중에 끌올된 리서치를 가져옵니다. */

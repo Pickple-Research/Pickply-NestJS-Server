@@ -24,6 +24,7 @@ export class FirebaseService {
 
   /**
    * 인자로 주어진 내용을 푸쉬 알람 형태로 유저에게 전송합니다.
+   * TODO: Error 대신 return 으로..?
    * @author 현웅
    */
   async sendPushAlarm(message: TokenMessage) {

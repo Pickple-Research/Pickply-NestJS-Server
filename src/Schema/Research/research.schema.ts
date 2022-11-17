@@ -97,6 +97,9 @@ export class Research {
   @Prop({ default: 0 }) // 비회원 참여자 수
   nonMemberParticipantsNum?: number;
 
+  @Prop({ default: 0 }) // 관리자 참여 수 (소요시간 체크 수)
+  adminParticipantsNum?: number;
+
   @Prop({ default: 0 }) // 댓글 수
   commentsNum?: number;
 
