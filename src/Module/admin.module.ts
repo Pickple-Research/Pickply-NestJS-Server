@@ -16,9 +16,7 @@ import {
   AdminVoteGetController,
   AdminVotePatchController,
 } from "src/Controller";
-import { FirebaseService } from "src/Firebase";
-//* 빌려 쓰는 ResearchService 가 AwsS3Service 를 추가로 사용하므로 AdminModule 의 provider 에도 추가해줍니다.
-import { AwsS3Service } from "src/AWS";
+import { FirebaseModule } from "src/Firebase";
 import { AdminUpdateService, ResearchUpdateService } from "src/Service";
 import { AuthModule } from "./auth.module";
 import {
@@ -46,13 +44,9 @@ import {
     AdminVoteGetController,
     AdminVotePatchController,
   ],
-  providers: [
-    FirebaseService,
-    AwsS3Service,
-    AdminUpdateService,
-    ResearchUpdateService,
-  ],
+  providers: [AdminUpdateService, ResearchUpdateService],
   imports: [
+    FirebaseModule,
     AuthModule,
     MongoUserModule,
     MongoResearchModule,

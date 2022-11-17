@@ -6,9 +6,9 @@ import {
   UserPatchController,
   UserDeleteController,
 } from "src/Controller";
-import { FirebaseService } from "src/Firebase";
-import { GoogleService } from "src/Google";
-import { SensService } from "src/NCP";//승원 추가
+import { FirebaseModule } from "src/Firebase";
+import { GoogleModule } from "src/Google";
+import { SensService } from "src/NCP"; //승원 추가
 import {
   AuthService,
   UserCreateService,
@@ -35,15 +35,15 @@ import {
     UserDeleteController,
   ],
   providers: [
-    FirebaseService,
-    GoogleService,
-    SensService,//ncp sens 
+    SensService, //ncp sens
     AuthService,
     UserCreateService,
     UserFindService,
     UserDeleteService,
   ],
   imports: [
+    FirebaseModule,
+    GoogleModule,
     MongoUserModule,
     MongoResearchModule,
     MongoVoteModule,
@@ -56,4 +56,4 @@ import {
     }),
   ],
 })
-export class UserModule { }
+export class UserModule {}

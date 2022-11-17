@@ -12,7 +12,7 @@ import {
   VoteDeleteService,
   VoteUpdateService,
 } from "src/Service";
-import { FirebaseService } from "src/Firebase";
+import { FirebaseModule } from "src/Firebase";
 import { MongoUserModule, MongoVoteModule } from "src/Mongo";
 
 @Module({
@@ -23,13 +23,12 @@ import { MongoUserModule, MongoVoteModule } from "src/Mongo";
     VoteDeleteController,
   ],
   providers: [
-    FirebaseService,
     UserCreateService,
     UserUpdateService,
     VoteFindService,
     VoteDeleteService,
     VoteUpdateService,
   ],
-  imports: [MongoUserModule, MongoVoteModule],
+  imports: [FirebaseModule, MongoUserModule, MongoVoteModule],
 })
 export class VoteModule {}

@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { AwsS3Service } from "src/AWS";
+import { AWSModule } from "src/AWS";
 import {
   MongoResearchCreateService,
   MongoResearchDeleteService,
@@ -37,7 +37,6 @@ import { MONGODB_RESEARCH_CONNECTION } from "src/Constant";
 
 @Module({
   providers: [
-    AwsS3Service,
     MongoResearchCreateService,
     MongoResearchDeleteService,
     MongoResearchFindService,
@@ -46,6 +45,7 @@ import { MONGODB_RESEARCH_CONNECTION } from "src/Constant";
     MongoResearchValidateService,
   ],
   imports: [
+    AWSModule,
     MongooseModule.forFeature(
       [
         { name: Research.name, schema: ResearchSchema },

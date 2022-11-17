@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { AuthController } from "src/Controller";
 import { AuthService, UserFindService } from "src/Service";
-import { GoogleService } from "src/Google";
+import { GoogleModule } from "src/Google";
 import {
   MongoUserModule,
   MongoResearchModule,
@@ -17,8 +17,9 @@ import { MongoSurBayModule } from "src/Mongo";
  */
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, UserFindService, GoogleService],
+  providers: [AuthService, UserFindService],
   imports: [
+    GoogleModule,
     MongoUserModule,
     MongoResearchModule,
     MongoVoteModule,
