@@ -219,7 +219,8 @@ export class MongoUserFindService {
   }) {
     return await this.Notification.find(param.filterQuery)
       .select(param.selectQuery)
-      .sort({ _id: -1 })
+      // 알림은 최신순으로 가져오지 않기 때문에 내림차순 정렬하지 않습니다.
+      // .sort({ _id: -1 })
       .limit(param.limit)
       .lean();
   }

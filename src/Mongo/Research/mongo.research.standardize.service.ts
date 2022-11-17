@@ -15,15 +15,16 @@ export class MongoResearchStandardizeService {
   ) {}
 
   async standardize() {
-    // await this.addConfirmed();
+    await this.addProperty();
   }
 
   /**
    * v1.1.15) 리서치 confirmed 속성 추가
+   * v1.1.15) 리서치 관리자 참여 속성 추가
    * @author 현웅
    */
-  async addConfirmed() {
-    await this.Research.updateMany({}, { $set: { confirmed: true } });
+  async addProperty() {
+    await this.Research.updateMany({}, { $set: { adminParticipantsNum: 0 } });
   }
 
   /**
