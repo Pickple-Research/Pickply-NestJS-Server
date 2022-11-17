@@ -15,8 +15,8 @@ import {
   ResearchCreateService,
   ResearchUpdateService,
 } from "src/Service";
-import { FirebaseService } from "src/Firebase";
-import { AwsS3Service } from "src/AWS";
+import { FirebaseModule } from "src/Firebase";
+import { AWSModule } from "src/AWS";
 import { SlackModule } from "src/Slack";
 import { MongoUserModule, MongoResearchModule } from "src/Mongo";
 import { RESEARCH_AUTO_CLOSE_CRONJOB_NAME } from "src/Constant";
@@ -29,8 +29,6 @@ import { RESEARCH_AUTO_CLOSE_CRONJOB_NAME } from "src/Constant";
     ResearchDeleteController,
   ],
   providers: [
-    FirebaseService,
-    AwsS3Service,
     UserCreateService,
     UserUpdateService,
     ResearchDeleteService,
@@ -38,7 +36,13 @@ import { RESEARCH_AUTO_CLOSE_CRONJOB_NAME } from "src/Constant";
     ResearchFindService,
     ResearchUpdateService,
   ],
-  imports: [SlackModule, MongoUserModule, MongoResearchModule],
+  imports: [
+    AWSModule,
+    FirebaseModule,
+    SlackModule,
+    MongoUserModule,
+    MongoResearchModule,
+  ],
   exports: [ResearchUpdateService],
 })
 export class ResearchModule implements OnModuleInit {

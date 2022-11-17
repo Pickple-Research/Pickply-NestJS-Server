@@ -233,7 +233,7 @@ export class ResearchPostController {
     //* 리서치가 성공적으로 생성된 경우, Slack 운영 채널에 메세지를 보냅니다.
     //* (응답에 영향을 주지 않도록 await 을 사용하지 않습니다.)
     this.slackService.sendMessageToSlackOperationChannel({
-      message: `새로운 리서치가 업로드 되었습니다: ${newResearch.title}`,
+      message: `새로운 리서치가 업로드 되었습니다: (${newResearch.estimatedTime}분) ${newResearch.title}`,
     });
 
     return { newResearch, newCreditHistory };
