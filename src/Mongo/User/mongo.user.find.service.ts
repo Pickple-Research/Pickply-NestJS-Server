@@ -219,8 +219,7 @@ export class MongoUserFindService {
   }) {
     return await this.Notification.find(param.filterQuery)
       .select(param.selectQuery)
-      // 알림은 최신순으로 가져오지 않기 때문에 내림차순 정렬하지 않습니다.
-      // .sort({ _id: -1 })
+      .sort({ _id: -1 })
       .limit(param.limit)
       .lean();
   }
@@ -396,7 +395,7 @@ export class MongoUserFindService {
     notificationId: string;
   }) {
     return await this.getNotifications({
-      filterQuery: { $gt: param.notificationId, userId: param.userId },
+      filterQuery: { _id: { $gt: param.notificationId }, userId: param.userId },
     });
   }
 
@@ -410,7 +409,7 @@ export class MongoUserFindService {
     notificationId: string;
   }) {
     return await this.getNotifications({
-      filterQuery: { $lt: param.notificationId, userId: param.userId },
+      filterQuery: { _id: { $lt: param.notificationId }, userId: param.userId },
     });
   }
 }
