@@ -38,7 +38,29 @@ export class AdminResearchPatchController {
   private readonly mongoResearchDeleteService: MongoResearchDeleteService;
 
   /**
+   * 리서치 정보를 수정합니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Patch("")
+  async editResearch() {}
+
+  /**
+   * 리서치에 참여합니다. 리서치 참여 정보는 만들지 않고, 관리자 참여자 수만 증가시킵니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Patch("check")
+  async checkResearch(@Body() body: { researchId: string }) {
+    return await this.mongoResearchUpdateService.updateResearchById({
+      researchId: body.researchId,
+      updateQuery: { $inc: { adminParticipantsNum: 1 } },
+    });
+  }
+
+  /**
    * 리서치를 승인/승인 취소합니다.
+   * TODO: 승인되는 경우 리서치 작성자에게 알림이 전송됩니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)

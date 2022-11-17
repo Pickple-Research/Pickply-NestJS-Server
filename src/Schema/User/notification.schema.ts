@@ -19,8 +19,8 @@ export class Notification {
   @Prop({ required: true }) // 알림 내용
   content: string;
 
-  @Prop({ required: true }) // 알림 세부 내용 (리서치/투표 제목)
-  detail: string;
+  @Prop() // 알림 세부 내용 (리서치/투표 제목)
+  detail?: string;
 
   @Prop({ default: false }) // 알림 확인 여부
   checked?: boolean;

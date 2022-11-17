@@ -15,8 +15,7 @@ export class MongoResearchStandardizeService {
   ) {}
 
   async standardize() {
-    return "standardize research data";
-    // await this.function();
+    // await this.addConfirmed();
   }
 
   /**

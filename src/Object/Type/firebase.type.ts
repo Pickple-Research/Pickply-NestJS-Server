@@ -23,8 +23,10 @@ export type PushAlarm = TokenMessage & {
   data: {
     notificationId: string;
     type: string;
-    detail: string;
+    detail?: string;
     researchId?: string;
     voteId?: string;
+    outerLink?: string;
+    inAppLink?: string;
   };
 };

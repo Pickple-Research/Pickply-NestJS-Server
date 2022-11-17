@@ -1,4 +1,4 @@
-import { Controller, Inject, Body, Post } from "@nestjs/common";
+import { Controller, Inject, Body, Post, Get } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import { TokenMessage } from "firebase-admin/lib/messaging/messaging-api";
@@ -13,7 +13,7 @@ import { AlarmType, UserType } from "src/Object/Enum";
 import { PushAlarm } from "src/Object/Type";
 import { MONGODB_USER_CONNECTION } from "src/Constant";
 import { getCurrentISOTime, tryMultiTransaction } from "src/Util";
-import { CreditHistory } from "src/Schema";
+import { Notification, CreditHistory } from "src/Schema";
 
 /**
  * 관리자만 사용하는 유저 관련 Post 컨트롤러입니다.
@@ -33,122 +33,104 @@ export class AdminUserPostController {
   @Inject() private readonly mongoResearchFindService: MongoResearchFindService;
 
   /**
-   * 특정 유저에게 푸시 알림을 전송합니다.
-   * @author 현웅
-   */
-  @Roles(UserType.ADMIN)
-  @Post("alarm")
-  async sendPushAlarm(
-    @Body()
-    body: {
-      token: string;
-      title: string;
-      body: string;
-      data: Record<string, string>;
-    },
-  ) {
-    const alarm: TokenMessage = {
-      token: body.token,
-      notification: {
-        title: body.title,
-        body: body.body,
-      },
-      data: body.data,
-    };
-    await this.firebaseService.sendPushAlarm(alarm);
-  }
-
-  /**
    * 여러 개의 푸시 알림을 전송합니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Post("multiple/alarm")
+  @Post("alarm")
   async sendMultiplePushAlarm(
     @Body()
     body: {
       userIds?: string[];
       researchId?: string;
+      fcmTokens?: string[];
       title?: string;
       body?: string;
+      imageUrl?: string;
     },
   ) {
-    let userIds: string[] = [];
+    if (body.fcmTokens) {
+      const pushAlarms: PushAlarm[] = [];
 
-    if (body.userIds) {
-      userIds = body.userIds;
-    } else if (body.researchId) {
-      const participations =
-        await this.mongoResearchFindService.getResearchParticipations({
-          filterQuery: { researchId: body.researchId },
-          selectQuery: { userId: true },
+      body.fcmTokens.forEach((token) => {
+        pushAlarms.push({
+          token,
+          notification: {
+            title: body.title,
+            body: body.body,
+            imageUrl: body.imageUrl,
+          },
+          data: {
+            notificationId: "",
+            type: AlarmType.WIN_EXTRA_CREDIT,
+            detail: "",
+            researchId: body.researchId,
+          },
         });
-      userIds = participations.map((participation) => participation.userId);
+      });
+      await this.firebaseService.sendMultiplePushAlarm(pushAlarms);
+      return;
     }
 
-    console.log(userIds);
+    let userIds: string[] = body.userIds;
+    // let userIds: string[] = [];
 
-    const notificationSettings =
-      await this.mongoUserFindService.getUserNotificationSettings({
-        filterQuery: { _id: { $in: userIds } },
-        selectQuery: { fcmToken: true },
-      });
+    // if (body.userIds) {
+    //   userIds = body.userIds;
+    // } else if (body.researchId) {
+    //   const participations =
+    //     await this.mongoResearchFindService.getResearchParticipations({
+    //       filterQuery: { researchId: body.researchId },
+    //       selectQuery: { userId: true },
+    //     });
+    //   userIds = participations.map((participation) => participation.userId);
+    // }
 
-    const pushAlarms: PushAlarm[] = [];
-    notificationSettings.forEach((notificationSetting) => {
-      pushAlarms.push({
-        token: notificationSetting.fcmToken,
-        notification: {
-          title: body.title, // "추가 크레딧 지급"
-          body: body.body, // "리서치 참여에 대한 누락 크레딧이 지급되었어요."
-        },
-        data: {
-          notificationId: "",
-          type: AlarmType.WIN_EXTRA_CREDIT,
-          detail: "",
-          researchId: body.researchId,
-        },
-      });
-    });
+    console.log(userIds.length);
 
-    await this.firebaseService.sendMultiplePushAlarm(pushAlarms);
-  }
+    // const notificationSettings =
+    //   await this.mongoUserFindService.getUserNotificationSettings({
+    //     filterQuery: { _id: { $in: userIds } },
+    //     selectQuery: { fcmToken: true },
+    //   });
 
-  /**
-   * 특정 유저에게 크레딧을 증정하거나 차감합니다.
-   * @author 현웅
-   */
-  @Roles(UserType.ADMIN)
-  @Post("credit")
-  async giveCredit(
-    @Body()
-    body: {
-      userId: string;
-      scale: number;
-      reason: string;
-      type: string;
-    },
-  ) {
-    const creditBalance = await this.mongoUserFindService.getUserCreditBalance(
-      body.userId,
-    );
-    const creditHistory: CreditHistory = {
-      userId: body.userId,
-      scale: body.scale,
-      balance: creditBalance + body.scale,
-      isIncome: body.scale >= 0 ? true : false,
-      reason: body.reason, // "(관리자) 리서치 업로드 비용 지원"
-      type: body.type, // "PRODUCT_EXCHANGE"
-      createdAt: getCurrentISOTime(),
-    };
+    // const pushAlarms: PushAlarm[] = [];
+    // notificationSettings.forEach((notificationSetting) => {
+    //   pushAlarms.push({
+    //     token: notificationSetting.fcmToken,
+    //     notification: {
+    //       title: body.title, // "추가 크레딧 지급"
+    //       body: body.body, // "리서치 참여에 대한 누락 크레딧이 지급되었어요."
+    //       imageUrl: body.imageUrl,
+    //     },
+    //     data: {
+    //       notificationId: "",
+    //       type: AlarmType.WIN_EXTRA_CREDIT,
+    //       detail: "",
+    //       researchId: body.researchId,
+    //     },
+    //   });
+    // });
 
-    const userSession = await this.userConnection.startSession();
-    await tryMultiTransaction(async () => {
-      await this.mongoUserCreateService.createCreditHistory(
-        { userId: body.userId, creditHistory },
-        userSession,
-      );
-    }, [userSession]);
+    // await this.firebaseService.sendMultiplePushAlarm(pushAlarms);
+
+    // const currentISOTime = getCurrentISOTime();
+    // const notifications: Notification[] = [];
+    // userIds.forEach((userId) => {
+    //   notifications.push({
+    //     userId,
+    //     type: "ETC",
+    //     title: body.title,
+    //     content: body.body,
+    //     detail: "EXPO 이벤트 당첨",
+    //     createdAt: currentISOTime,
+    //     researchId: body.researchId,
+    //   });
+    // });
+
+    // for (const notification of notifications) {
+    //   await this.mongoUserCreateService.createNotification({ notification });
+    // }
   }
 
   /**
@@ -156,7 +138,7 @@ export class AdminUserPostController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Post("multiple/credit")
+  @Post("credit")
   async giveMultipleUserCredit(
     @Body()
     body: {
@@ -209,5 +191,85 @@ export class AdminUserPostController {
         );
       }
     }, [userSession]);
+  }
+
+  /**
+   * ((2022.11.11 발송) 리서치를 진행했던 유저들에게 리뷰 요청 알림을 발송합니다.)
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Get("multiple/alarm/review")
+  async sendAlarmForReview() {
+    const researches = await this.mongoResearchFindService.getResearches({
+      filterQuery: { closed: true },
+      selectQuery: {
+        authorId: true,
+        participantsNum: true,
+        nonMemberParticipantsNum: true,
+      },
+    });
+
+    const preTreatResearches = researches.map((research) => ({
+      researchId: research._id,
+      userId: research.authorId,
+      participantsNum:
+        research.participantsNum + research.nonMemberParticipantsNum,
+    }));
+    console.log(preTreatResearches.length);
+
+    const trimmedResearches = preTreatResearches
+      .sort((a, b) => b.participantsNum - a.participantsNum)
+      .filter(
+        (research) =>
+          research.participantsNum >= 30 && research.participantsNum < 75,
+      )
+      .filter(
+        (research, index, self) =>
+          self.findIndex((res) => res.userId === research.userId) === index,
+      );
+    console.log(trimmedResearches.length);
+
+    const currentISOTime = getCurrentISOTime();
+
+    for (const research of trimmedResearches) {
+      const notificationSetting =
+        await this.mongoUserFindService.getUserNotificationSettingById({
+          userId: research.userId,
+        });
+      const title = `최근 리서치에서 ${research.participantsNum}명의 참여자를 모으셨네요!`;
+      const body = `픽플리가 도움이 되셨다면 앱 리뷰를 남겨주실래요?`;
+
+      const notification: Notification = {
+        userId: research.userId,
+        type: "ETC",
+        title,
+        content: body,
+        researchId: research.researchId,
+        createdAt: currentISOTime,
+      };
+      const newNotification =
+        await this.mongoUserCreateService.createNotification({ notification });
+
+      const pushAlarm: PushAlarm = {
+        token: notificationSetting.fcmToken,
+        notification: {
+          title,
+          body,
+        },
+        data: {
+          type: "ETC",
+          notificationId: newNotification._id.toString(),
+          researchId: research.researchId.toString(),
+        },
+      };
+
+      try {
+        await this.firebaseService.sendPushAlarm(pushAlarm);
+      } catch (e) {
+        console.log(
+          `ERROR: researchId: ${research.researchId}, userId: ${research.userId}`,
+        );
+      }
+    }
   }
 }
