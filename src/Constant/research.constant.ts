@@ -3,10 +3,9 @@
  * 리서치 소요시간당 차감 크레딧
  */
 export const CREDIT_PER_MINUTE = (estimatedTime: number) => {
-  if (estimatedTime >= 10) return 20;
-  if (estimatedTime >= 7) return 15;
-  if (estimatedTime >= 4) return 10;
-  return 5;
+  if (estimatedTime >= 16) return 35;
+  if (estimatedTime >= 11) return 30;
+  return Math.ceil(estimatedTime / 2) * 5;
 };
 
 /**
@@ -14,9 +13,9 @@ export const CREDIT_PER_MINUTE = (estimatedTime: number) => {
  * 리서치 소요시간당 취득 크레딧
  */
 export const ACHEIVE_CREDIT_PER_MINUTE = (estimatedTime: number) => {
-  if (estimatedTime >= 10) return 4;
+  if (estimatedTime >= 11) return 4;
   if (estimatedTime >= 7) return 3;
-  if (estimatedTime >= 4) return 2;
+  if (estimatedTime >= 3) return 2;
   return 1;
 };
 
