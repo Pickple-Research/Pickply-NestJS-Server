@@ -3,6 +3,7 @@ import { ResearchFindService } from "src/Service";
 import { MongoResearchFindService } from "src/Mongo";
 import { JwtUserInfo } from "src/Object/Type";
 import { Public } from "src/Security/Metadata";
+import { CREDIT_PER_MINUTE } from "src/Constant";
 import { ResearchNotFoundException } from "src/Exception";
 
 @Controller("researches")
@@ -40,6 +41,16 @@ export class ResearchGetController {
   @Get("")
   async getRecentResearches(@Query() query: { get?: number }) {
     return await this.mongoResearchFindService.getRecentResearches();
+  }
+
+  /**
+   * 리서치 소요시간에 따른 요구 크레딧을 반환합니다.
+   * @author 현웅
+   */
+  @Public()
+  @Get("credit/:estimatedTime")
+  async getCreditPerMinute(@Param("estimatedTime") estimatedTime: number) {
+    return CREDIT_PER_MINUTE(estimatedTime);
   }
 
   /**

@@ -88,31 +88,31 @@ export class AdminUserPostController {
 
     console.log(userIds.length);
 
-    // const notificationSettings =
-    //   await this.mongoUserFindService.getUserNotificationSettings({
-    //     filterQuery: { _id: { $in: userIds } },
-    //     selectQuery: { fcmToken: true },
-    //   });
+    const notificationSettings =
+      await this.mongoUserFindService.getUserNotificationSettings({
+        filterQuery: { _id: { $in: userIds } },
+        selectQuery: { fcmToken: true },
+      });
 
-    // const pushAlarms: PushAlarm[] = [];
-    // notificationSettings.forEach((notificationSetting) => {
-    //   pushAlarms.push({
-    //     token: notificationSetting.fcmToken,
-    //     notification: {
-    //       title: body.title, // "추가 크레딧 지급"
-    //       body: body.body, // "리서치 참여에 대한 누락 크레딧이 지급되었어요."
-    //       imageUrl: body.imageUrl,
-    //     },
-    //     data: {
-    //       notificationId: "",
-    //       type: AlarmType.WIN_EXTRA_CREDIT,
-    //       detail: "",
-    //       researchId: body.researchId,
-    //     },
-    //   });
-    // });
+    const pushAlarms: PushAlarm[] = [];
+    notificationSettings.forEach((notificationSetting) => {
+      pushAlarms.push({
+        token: notificationSetting.fcmToken,
+        notification: {
+          title: body.title, // "추가 크레딧 지급"
+          body: body.body, // "리서치 참여에 대한 누락 크레딧이 지급되었어요."
+          imageUrl: body.imageUrl,
+        },
+        data: {
+          notificationId: "",
+          type: AlarmType.WIN_EXTRA_CREDIT,
+          detail: "",
+          researchId: body.researchId,
+        },
+      });
+    });
 
-    // await this.firebaseService.sendMultiplePushAlarm(pushAlarms);
+    await this.firebaseService.sendMultiplePushAlarm(pushAlarms);
 
     // const currentISOTime = getCurrentISOTime();
     // const notifications: Notification[] = [];

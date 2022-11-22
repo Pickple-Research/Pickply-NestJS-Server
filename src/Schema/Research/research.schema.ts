@@ -83,6 +83,9 @@ export class Research {
   @Prop() // 생성일
   createdAt: string;
 
+  @Prop() // 마감일 (상시 리서치 마감일자)
+  closedAt?: string;
+
   //? 앱단에 정보를 넘겨줄 때는 유저 _id를 넘겨줄 필요가 없고 숫자만 넘기면 되는데,
   //? 그 때마다 .length를 사용하여 넘겨주면 (아마도) 좋지 않기에 숫자만 따로 관리합니다.
   @Prop({ default: 0 }) // 조회 수
