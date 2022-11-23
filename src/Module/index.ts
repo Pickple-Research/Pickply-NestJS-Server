@@ -7,6 +7,7 @@
 export * from "./admin.module";
 export * from "./auth.module";
 export * from "./feedback.module";
+export * from "./iamport.module";
 export * from "./notice.module";
 export * from "./partner.module";
 export * from "./research.module";
