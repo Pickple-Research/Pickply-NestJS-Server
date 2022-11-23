@@ -37,6 +37,7 @@
     "class-validator": "^0.13.2",
     "dotenv": "^16.0.0",
     "firebase-admin": "^11.0.0",
+    "iamport-rest-client-nodejs": "^0.9.11",
     "keccak": "^3.0.2",
     "mongoose": "^6.2.8",
     "multer": "^1.4.4",

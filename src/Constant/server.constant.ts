@@ -7,10 +7,15 @@ import * as winston from "winston";
  * @add 승원
  */
 export const CORS_ORIGINS = [
-  "https://pickply.com", // 픽플리 홈페이지 도메인 추가
+  // 픽플리 홈페이지 도메인
+  "https://pickply.com",
   "https://pickpleresearch.com",
   "https://r2c-pickpleresearch.web.app",
   "https://r2c-pickpleresearch.firebaseapp.com",
+  // 아임포트 측 도메인 (클라이언트 단에서 결제 완료 후 자동으로 아임포트가 API 를 호출함)
+  "52.78.100.19",
+  "52.78.48.223",
+  "52.78.5.241",
 ];
 
 /**
