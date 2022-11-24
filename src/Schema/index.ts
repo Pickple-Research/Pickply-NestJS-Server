@@ -8,6 +8,10 @@ export * from "./Partner/partnerActivity.schema";
 export * from "./Partner/partnerPost.schema";
 export * from "./Partner/partnerProduct.schema";
 
+// 결제/주문 관련 스키마
+export * from "./Payment/order.schema";
+export * from "./Payment/payment.schema";
+
 // 리서치 관련 정보 스키마
 export * from "./Research/research.schema";
 export * from "./Research/researchComment.schema";

@@ -21,6 +21,11 @@ export * from "./Partner/mongo.partner.find.service";
 export * from "./Partner/mongo.partner.update.service";
 export * from "./Partner/mongo.partner.module";
 
+// Payment
+export * from "./Payment/mongo.payment.create.service";
+export * from "./Payment/mongo.payment.update.service";
+export * from "./Payment/mongo.payment.module";
+
 // Research
 export * from "./Research/mongo.research.create.service";
 export * from "./Research/mongo.research.delete.service";
