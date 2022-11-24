@@ -8,6 +8,7 @@
 export * from "./Admin/admin.patch.dto";
 
 export * from "./auth.dto";
+export * from "./iamport.dto";
 export * from "./notice.dto";
 export * from "./partner.dto";
 

@@ -93,7 +93,6 @@ export class AdminUserPostController {
         filterQuery: { _id: { $in: userIds } },
         selectQuery: { fcmToken: true },
       });
-
     const pushAlarms: PushAlarm[] = [];
     notificationSettings.forEach((notificationSetting) => {
       pushAlarms.push({

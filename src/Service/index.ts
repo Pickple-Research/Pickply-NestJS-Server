@@ -14,6 +14,9 @@ export * from "./Auth/auth.service";
 // Feedback
 export * from "./Feedback/feedback.find.service";
 
+// Iamport
+export * from "./Iamport/Iamport.find.service";
+
 // Notice
 export * from "./Notice/notice.find.service";
 

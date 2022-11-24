@@ -46,6 +46,7 @@ import {
   MONGODB_VOTE_CONNECTION,
   MONGODB_NOTICE_CONNECTION,
   MONGODB_PARTNER_CONNECTION,
+  MONGODB_PAYMENT_CONNECTION,
   MONGODB_FEEDBACK_CONNECTION,
   // MongoDB - SurBay
   MONGODB_SURBAY_CONNECTION,
@@ -101,6 +102,9 @@ import {
     }),
     MongooseModule.forRoot(process.env.MONGODB_PARTNER_ENDPOINT, {
       connectionName: MONGODB_PARTNER_CONNECTION,
+    }),
+    MongooseModule.forRoot(process.env.MONGODB_PAYMENT_ENDPOINT, {
+      connectionName: MONGODB_PAYMENT_CONNECTION,
     }),
     MongooseModule.forRoot(process.env.MONGODB_RESEARCH_ENDPOINT, {
       connectionName: MONGODB_RESEARCH_CONNECTION,

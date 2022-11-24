@@ -26,6 +26,11 @@ export * from "./Auth/auth.controller";
 //Feedback
 export * from "./Feedback/feedback.get.controller";
 
+//Iamport
+export * from "./Iamport/iamport.get.controller";
+export * from "./Iamport/iamport.patch.controller";
+export * from "./Iamport/iamport.post.controller";
+
 //Notice
 export * from "./Notice/notice.get.controller";
 export * from "./Notice/notice.post.controller";
