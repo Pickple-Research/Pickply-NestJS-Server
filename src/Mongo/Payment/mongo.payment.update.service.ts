@@ -29,6 +29,7 @@ export class MongoPaymentUpdateService {
     param: {
       merchant_uid: string;
       updateQuery?: UpdateQuery<PaymentDocument>;
+      selectQuery?: Partial<Record<keyof Payment, boolean>>;
     },
     session: ClientSession,
   ) {
@@ -37,7 +38,7 @@ export class MongoPaymentUpdateService {
       param.updateQuery,
       { session },
     )
-      .select({ amount: true })
+      .select(param.selectQuery)
       .lean();
     return updatedPayment;
   }
