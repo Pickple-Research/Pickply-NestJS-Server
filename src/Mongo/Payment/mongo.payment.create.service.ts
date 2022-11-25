@@ -20,10 +20,17 @@ export class MongoPaymentCreateService {
 
   /**
    * 결제 정보를 생성합니다.
+   * TODO: 결제 정보에 대한 추가 정보가 있는 경우, 생성 후 덧붙입니다.
    * @author 현웅
    */
-  async createPayment(param: { payment: Payment }, session: ClientSession) {
-    const newPayments = await this.Payment.create([param.payment], { session });
+  async createPayment(
+    param: { payment: Payment; otherInfo?: Record<string, any> },
+    session: ClientSession,
+  ) {
+    const newPayments = await this.Payment.create(
+      [{ ...param.payment, ...param.otherInfo }],
+      { session },
+    );
     return newPayments[0].toObject();
   }
 }

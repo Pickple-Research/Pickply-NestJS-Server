@@ -16,6 +16,6 @@ export class IamportGetController {
    */
   @Get("merchantUid")
   async getMerchantUid(@Request() req: { user: JwtUserInfo }) {
-    return `${req.user.userId}-${new Date().getTime()}`;
+    return `${req.user.userId}_${new Date().getTime()}`;
   }
 }

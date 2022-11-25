@@ -32,14 +32,15 @@ export class IamportPostController {
   @Public()
   @Post("webhook/paid")
   async webhookTest(@Body() body: { imp_uid: string; merchant_uid: string }) {
-    const paidAmount = await this.iamportFindService.getIamportPaymentAmount(
-      body.imp_uid,
-    );
+    const paymentResponse =
+      await this.iamportFindService.getIamportPaymentAmount(body.imp_uid);
+    const { amount, ...otherInfo } = paymentResponse;
 
     const payment: Payment = {
       imp_uid: body.imp_uid,
       merchant_uid: body.merchant_uid,
-      amount: paidAmount,
+      amount,
+      userId: "",
       createdAt: getCurrentISOTime(),
     };
 
@@ -47,7 +48,7 @@ export class IamportPostController {
 
     await tryMultiTransaction(async () => {
       await this.mongoPaymentCreateService.createPayment(
-        { payment },
+        { payment, otherInfo },
         paymentSession,
       );
     }, [paymentSession]);

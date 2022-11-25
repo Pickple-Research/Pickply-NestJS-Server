@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
+import { IamportPaymentResponse } from "src/Object/Type";
 import { UnableToConnectIamportException } from "src/Exception";
 
 @Injectable()
@@ -37,7 +38,8 @@ export class IamportFindService {
     const access_token = await this.getIamportAccessToken();
 
     const paymentInfo = await this.httpService.axiosRef
-      .request({
+      // amount 이외에도 많은 정보가 있지만, 핵심 정보인 amount 만 정의합니다.
+      .request<IamportPaymentResponse>({
         method: "GET",
         url: `https://api.iamport.kr/payments/${imp_uid}`,
         headers: { Authorization: access_token },
@@ -46,6 +48,6 @@ export class IamportFindService {
       .catch((error) => {
         throw new UnableToConnectIamportException();
       });
-    return paymentInfo.amount as number;
+    return paymentInfo.response;
   }
 }

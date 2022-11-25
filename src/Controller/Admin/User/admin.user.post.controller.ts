@@ -98,8 +98,10 @@ export class AdminUserPostController {
       pushAlarms.push({
         token: notificationSetting.fcmToken,
         notification: {
-          title: body.title, // "추가 크레딧 지급"
-          body: body.body, // "리서치 참여에 대한 누락 크레딧이 지급되었어요."
+          // "추가 크레딧 지급" / "리서치 참여에 대한 크레딧이 정상 지급되었습니다."
+          title: body.title,
+          // "리서치 참여에 대한 누락 크레딧이 지급되었어요." / "불편함을 끼쳐드려 죄송합니다. 기다려주셔서 감사합니다."
+          body: body.body,
           imageUrl: body.imageUrl,
         },
         data: {
