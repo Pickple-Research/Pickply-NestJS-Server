@@ -1,4 +1,4 @@
-import { Controller, Inject, Get } from "@nestjs/common";
+import { Controller, Inject, Get, Req } from "@nestjs/common";
 import { AppService } from "./app.service";
 import { Public } from "src/Security/Metadata";
 import {
@@ -12,6 +12,7 @@ import {
   appServiceConstant,
   appVoteConstant,
 } from "src/Constant/App";
+import { JwtUserInfo } from "src/Object/Type";
 
 @Controller("")
 export class AppController {
@@ -28,7 +29,16 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-11-25 1042 v1.1.17";
+    return "2022-12-01 1414 v1.1.17";
+  }
+
+  /**
+   * 앱 내 webView 에서 JWT 사용 가능 여부를 확인하기 위한 테스트 API 입니다.
+   * @author 현웅
+   */
+  @Get("webview-text")
+  async webViewTest(@Req() req: { user: JwtUserInfo }) {
+    return `JWT received from: ${req.user.userNickname}`;
   }
 
   /**

@@ -8,6 +8,7 @@ import {
   MongoResearchUpdateService,
   MongoResearchDeleteService,
 } from "src/Mongo";
+import { Research } from "src/Schema";
 import {
   ResearchBlockBodyDto,
   CommentBlockBodyDto,
@@ -43,7 +44,7 @@ export class AdminResearchPatchController {
    */
   @Roles(UserType.ADMIN)
   @Patch("")
-  async editResearch() {}
+  async editResearch(@Body() body: Partial<Research>) {}
 
   /**
    * 리서치에 참여합니다. 리서치 참여 정보는 만들지 않고, 관리자 참여자 수만 증가시킵니다.

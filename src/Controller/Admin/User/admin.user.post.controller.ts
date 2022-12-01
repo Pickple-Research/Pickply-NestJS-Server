@@ -49,11 +49,10 @@ export class AdminUserPostController {
       imageUrl?: string;
     },
   ) {
+    //* fcmToken 을 직접 지정하는 경우
     if (body.fcmTokens) {
-      const pushAlarms: PushAlarm[] = [];
-
-      body.fcmTokens.forEach((token) => {
-        pushAlarms.push({
+      const pushAlarms = body.fcmTokens.map((token) => {
+        return {
           token,
           notification: {
             title: body.title,
@@ -66,25 +65,27 @@ export class AdminUserPostController {
             detail: "",
             researchId: body.researchId,
           },
-        });
+        };
       });
       await this.firebaseService.sendMultiplePushAlarm(pushAlarms);
       return;
     }
 
-    let userIds: string[] = body.userIds;
-    // let userIds: string[] = [];
+    let userIds: string[] = [];
+    const pushAlarms: PushAlarm[] = [];
 
-    // if (body.userIds) {
-    //   userIds = body.userIds;
-    // } else if (body.researchId) {
-    //   const participations =
-    //     await this.mongoResearchFindService.getResearchParticipations({
-    //       filterQuery: { researchId: body.researchId },
-    //       selectQuery: { userId: true },
-    //     });
-    //   userIds = participations.map((participation) => participation.userId);
-    // }
+    if (body.userIds) {
+      //* userIds 가 지정된 경우, researchId 는 목적지로만 정보로만 삽입합니다
+      userIds = body.userIds;
+    } else if (body.researchId) {
+      //* userIds 없이 researchId 만 지정된 경우, 특정 리서치 참여자에게만 알림을 전송합니다.
+      const participations =
+        await this.mongoResearchFindService.getResearchParticipations({
+          filterQuery: { researchId: body.researchId },
+          selectQuery: { userId: true },
+        });
+      userIds = participations.map((participation) => participation.userId);
+    }
 
     console.log(userIds.length);
 
@@ -93,7 +94,7 @@ export class AdminUserPostController {
         filterQuery: { _id: { $in: userIds } },
         selectQuery: { fcmToken: true },
       });
-    const pushAlarms: PushAlarm[] = [];
+
     notificationSettings.forEach((notificationSetting) => {
       pushAlarms.push({
         token: notificationSetting.fcmToken,
@@ -108,30 +109,30 @@ export class AdminUserPostController {
           notificationId: "",
           type: AlarmType.WIN_EXTRA_CREDIT,
           detail: "",
-          researchId: body.researchId,
+          researchId: body.researchId ? body.researchId : "",
         },
       });
     });
 
     await this.firebaseService.sendMultiplePushAlarm(pushAlarms);
 
-    // const currentISOTime = getCurrentISOTime();
-    // const notifications: Notification[] = [];
-    // userIds.forEach((userId) => {
-    //   notifications.push({
-    //     userId,
-    //     type: "ETC",
-    //     title: body.title,
-    //     content: body.body,
-    //     detail: "EXPO 이벤트 당첨",
-    //     createdAt: currentISOTime,
-    //     researchId: body.researchId,
-    //   });
-    // });
+    const currentISOTime = getCurrentISOTime();
+    const notifications: Notification[] = [];
+    userIds.forEach((userId) => {
+      notifications.push({
+        userId,
+        type: AlarmType.WIN_EXTRA_CREDIT,
+        title: body.title,
+        content: body.body,
+        // detail: "EXPO 이벤트 당첨",
+        createdAt: currentISOTime,
+        researchId: body.researchId,
+      });
+    });
 
-    // for (const notification of notifications) {
-    //   await this.mongoUserCreateService.createNotification({ notification });
-    // }
+    for (const notification of notifications) {
+      await this.mongoUserCreateService.createNotification({ notification });
+    }
   }
 
   /**
@@ -150,19 +151,19 @@ export class AdminUserPostController {
       type: string;
     },
   ) {
-    //* 유저를 직접 지정하는 경우
     let userIds: string[] = [];
 
-    //* 특정 리서치 참여자들에게 주는 경우
-    if (body.researchId) {
+    if (body.userIds) {
+      //* 유저를 직접 지정하는 경우
+      userIds = body.userIds;
+    } else if (body.researchId) {
+      //* 특정 리서치 참여자들에게 주는 경우
       const participations =
         await this.mongoResearchFindService.getResearchParticipations({
           filterQuery: { researchId: body.researchId },
           selectQuery: { userId: true },
         });
       userIds = participations.map((participation) => participation.userId);
-    } else {
-      userIds = body.userIds;
     }
 
     console.log(userIds.length);
@@ -178,7 +179,7 @@ export class AdminUserPostController {
       scale: body.scale,
       balance: user.credit + body.scale,
       isIncome: body.scale >= 0 ? true : false,
-      reason: body.reason, // (교환한 상품명) / "리서치 참여에 대한 누락 크레딧 지급" / "회원간 크레딧 이관" / "(관리자) 리서치 업로드 크레딧 지원"
+      reason: body.reason, // (교환한 상품명) / "리서치 참여에 대한 누락 크레딧 지급" / "회원간 크레딧 이관" / "(관리자) 리서치 업로드 크레딧 지원" / "리서치 업로드 크레딧 조정"
       type: body.type, // "PRODUCT_EXCHANGE" / "CREDIT_COMPENSATION" / "CREDIT_SHARE" / "ETC"
       createdAt: currentISOTime,
     }));
