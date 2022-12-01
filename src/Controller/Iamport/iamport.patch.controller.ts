@@ -7,6 +7,7 @@ import { MONGODB_PAYMENT_CONNECTION } from "src/Constant";
 import { tryMultiTransaction } from "src/Util";
 import { JwtUserInfo } from "src/Object/Type";
 import { InvalidPaymentException } from "src/Exception";
+import { Public } from "src/Security/Metadata";
 
 /**
  * 아임포트 결제 관련 Patch 컨트롤러입니다.
@@ -43,7 +44,7 @@ export class IamportPatchController {
             updateQuery: {
               $set: {
                 reason,
-                userId: req.user.userId,
+                // userId: req.user.userId,
                 researchId,
               },
             },
@@ -51,8 +52,10 @@ export class IamportPatchController {
           paymentSession,
         );
 
+      console.log(updatedPayment);
+
       if (!updatedPayment || updatedPayment.amount !== body.amount) {
-        //T결제 정보가 존재하지 않거나, 결제 금액이 일치하지 않는 경우:
+        // 결제 정보가 존재하지 않거나, 결제 금액이 일치하지 않는 경우:
         throw new InvalidPaymentException();
       }
     }, [paymentSession]);

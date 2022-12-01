@@ -4,6 +4,7 @@ import {
   MongoUserCreateService,
   MongoUserDeleteService,
   MongoUserFindService,
+  MongoUserStatService,
   MongoUserUpdateService,
   MongoUserValidateService,
 } from "src/Mongo";
@@ -38,6 +39,7 @@ import { MONGODB_USER_CONNECTION } from "src/Constant";
     MongoUserCreateService,
     MongoUserDeleteService,
     MongoUserFindService,
+    MongoUserStatService,
     MongoUserUpdateService,
     MongoUserValidateService,
   ],
@@ -71,6 +73,7 @@ import { MONGODB_USER_CONNECTION } from "src/Constant";
     MongoUserCreateService,
     MongoUserDeleteService,
     MongoUserFindService,
+    MongoUserStatService,
     MongoUserUpdateService,
     MongoUserValidateService,
   ],

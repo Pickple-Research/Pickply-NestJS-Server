@@ -48,9 +48,9 @@ export class ResearchGetController {
    * @author 현웅
    */
   @Public()
-  @Get("credit/:estimatedTime")
-  async getCreditPerMinute(@Param("estimatedTime") estimatedTime: number) {
-    return CREDIT_PER_MINUTE(estimatedTime);
+  @Get("credit")
+  async getCreditPerMinute(@Query() query: { estimatedTime?: number }) {
+    return CREDIT_PER_MINUTE(query.estimatedTime);
   }
 
   /**

@@ -1,6 +1,6 @@
 import { Controller, Inject, Param, Get } from "@nestjs/common";
 import { Roles } from "src/Security/Metadata";
-import { MongoUserFindService } from "src/Mongo";
+import { MongoUserFindService, MongoUserStatService } from "src/Mongo";
 import { UserType } from "src/Object/Enum";
 
 /**
@@ -12,6 +12,17 @@ export class AdminUserGetController {
   constructor() {}
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
+  @Inject() private readonly mongoUserStatService: MongoUserStatService;
+
+  /**
+   *
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Get("stat")
+  async getUserStat() {
+    return await this.mongoUserStatService.getStat();
+  }
 
   /**
    * 이메일 정규식으로 유저를 검색합니다.
