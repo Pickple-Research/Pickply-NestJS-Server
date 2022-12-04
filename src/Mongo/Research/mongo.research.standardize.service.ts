@@ -19,6 +19,14 @@ export class MongoResearchStandardizeService {
   }
 
   /**
+   * v1.1.17) 기존 리서치 모두 승인 처리
+   * @author 현웅
+   */
+  async confirmAllResearch() {
+    await this.Research.updateMany({}, { $set: { confirmed: true } });
+  }
+
+  /**
    * v1.1.15) 리서치 confirmed 속성 추가
    * v1.1.15) 리서치 관리자 참여 속성 추가
    * @author 현웅

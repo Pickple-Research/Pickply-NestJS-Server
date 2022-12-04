@@ -55,5 +55,6 @@ import {
       signOptions: { expiresIn: "14d" },
     }),
   ],
+  exports: [UserCreateService],
 })
 export class UserModule {}

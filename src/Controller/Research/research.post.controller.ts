@@ -177,7 +177,9 @@ export class ResearchPostController {
       pulledupAt: currentTime,
       createdAt: currentTime,
       creditDistributed:
-        param.body.extraCredit === 0 || param.body.extraCreditReceiverNum === 0,
+        param.body.extraCredit === 0 || param.body.extraCreditReceiverNum === 0
+          ? true
+          : false,
     };
     //* CreditHistory 정보
     const creditHistory: CreditHistory = {

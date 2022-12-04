@@ -2,13 +2,13 @@ import { Controller, Inject, Body, Patch } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import { Roles } from "src/Security/Metadata";
-import { ResearchUpdateService } from "src/Service";
+import { UserCreateService, ResearchUpdateService } from "src/Service";
 import {
   MongoResearchFindService,
   MongoResearchUpdateService,
   MongoResearchDeleteService,
 } from "src/Mongo";
-import { Research } from "src/Schema";
+import { Notification, Research } from "src/Schema";
 import {
   ResearchBlockBodyDto,
   CommentBlockBodyDto,
@@ -32,6 +32,8 @@ export class AdminResearchPatchController {
   ) {}
 
   @Inject()
+  private readonly userCreateService: UserCreateService;
+  @Inject()
   private readonly mongoResearchFindService: MongoResearchFindService;
   @Inject()
   private readonly mongoResearchUpdateService: MongoResearchUpdateService;
@@ -40,11 +42,34 @@ export class AdminResearchPatchController {
 
   /**
    * 리서치 정보를 수정합니다.
+   * 이 때, confirmed: true 속성이 포함되어 있다면 리서치 작성자에게 푸시알림을 보냅니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
   @Patch("")
-  async editResearch(@Body() body: Partial<Research>) {}
+  async editResearch(
+    @Body() body: { researchId: string; research: Partial<Research> },
+  ) {
+    const updatedResearch =
+      await this.mongoResearchUpdateService.updateResearchById({
+        researchId: body.researchId,
+        updateQuery: { $set: body.research },
+      });
+    //* 업데이트하는 내용 중 검수 완료가 포함된 경우
+    if (body.research.confirmed === true) {
+      const notification: Notification = {
+        userId: updatedResearch.authorId,
+        type: "RESEARCH_CONFIRM",
+        title: "작성하신 게시물의 검수가 완료되었습니다!",
+        content: "리서치를 통해 픽플러분들과 소통해보세요",
+        detail: updatedResearch.title,
+        createdAt: getCurrentISOTime(),
+        researchId: updatedResearch._id.toString(),
+      };
+      await this.userCreateService.makeNotification({ notification });
+    }
+    return updatedResearch;
+  }
 
   /**
    * 리서치에 참여합니다. 리서치 참여 정보는 만들지 않고, 관리자 참여자 수만 증가시킵니다.
@@ -183,7 +208,7 @@ export class AdminResearchPatchController {
 
   /**
    * 추가 크레딧이 걸린 리서치 중에서 마감 기한이 지났거나, 마감되었지만
-   * 크레딧이 분배되자 않은 리서치를 모두 찾아 크레딧을 분배합니다.
+   * 크레딧이 분배되지 않은 리서치를 모두 찾아 크레딧을 분배합니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
