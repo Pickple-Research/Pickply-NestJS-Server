@@ -19,6 +19,7 @@ import {
 import { FirebaseModule } from "src/Firebase";
 import { AdminUpdateService, ResearchUpdateService } from "src/Service";
 import { AuthModule } from "./auth.module";
+import { UserModule } from "./user.module";
 import {
   MongoUserModule,
   MongoResearchModule,
@@ -48,6 +49,7 @@ import {
   imports: [
     FirebaseModule,
     AuthModule,
+    UserModule,
     MongoUserModule,
     MongoResearchModule,
     MongoVoteModule,

@@ -29,16 +29,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-12-01 1414 v1.1.17";
-  }
-
-  /**
-   * 앱 내 webView 에서 JWT 사용 가능 여부를 확인하기 위한 테스트 API 입니다.
-   * @author 현웅
-   */
-  @Get("webview-test")
-  async webViewTest(@Req() req: { user: JwtUserInfo }) {
-    return `JWT received from: ${req.user.userNickname}`;
+    return "2022-12-04 2237 v1.1.17";
   }
 
   /**

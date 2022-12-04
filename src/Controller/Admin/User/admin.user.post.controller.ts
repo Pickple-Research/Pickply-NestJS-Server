@@ -46,7 +46,9 @@ export class AdminUserPostController {
       fcmTokens?: string[];
       title?: string;
       body?: string;
+      detail?: string;
       imageUrl?: string;
+      notificationType?: string;
     },
   ) {
     //* fcmToken 을 직접 지정하는 경우
@@ -62,7 +64,7 @@ export class AdminUserPostController {
           data: {
             notificationId: "",
             type: AlarmType.WIN_EXTRA_CREDIT,
-            detail: "",
+            detail: body.detail ? body.detail : "",
             researchId: body.researchId,
           },
         };
@@ -108,7 +110,7 @@ export class AdminUserPostController {
         data: {
           notificationId: "",
           type: AlarmType.WIN_EXTRA_CREDIT,
-          detail: "",
+          detail: body.detail ? body.detail : "",
           researchId: body.researchId ? body.researchId : "",
         },
       });
@@ -121,10 +123,11 @@ export class AdminUserPostController {
     userIds.forEach((userId) => {
       notifications.push({
         userId,
-        type: AlarmType.WIN_EXTRA_CREDIT,
+        // WIN_EXTRA_CREDIT
+        type: body.notificationType ? body.notificationType : "ETC",
         title: body.title,
         content: body.body,
-        // detail: "EXPO 이벤트 당첨",
+        detail: body.detail ? body.detail : "",
         createdAt: currentISOTime,
         researchId: body.researchId,
       });
