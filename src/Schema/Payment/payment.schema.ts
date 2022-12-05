@@ -10,8 +10,8 @@ export class Payment {
   @Prop({ required: true }) // 아임포트에서 부여하는 고유 결제 번호
   imp_uid: string;
 
-  @Prop({ required: true, index: true }) // 클라이언트에서 부여한 고유 결제 번호
-  merchant_uid: string;
+  @Prop({ required: true }) // 주문내역 _id
+  orderId: string;
 
   @Prop({ required: true }) // 결제 금액
   amount: number;
@@ -28,9 +28,6 @@ export class Payment {
 
   @Prop() // 결제 관련 리서치 _id
   researchId?: string;
-
-  @Prop() // 주문내역 _id
-  orderId?: string;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

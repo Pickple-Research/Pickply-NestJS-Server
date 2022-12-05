@@ -11,11 +11,12 @@ export class MongoPaymentCreateService {
   ) {}
 
   /**
-   * 주문 정보를 생성합니다. 이후 결제할 때 대조를 위해 사용합니다.
+   * 주문 정보를 생성합니다. 결제 완료 이후 결제 금액 대조를 위해 사용합니다.
    * @author 현웅
    */
   async createOrder(param: { order: Order }, session: ClientSession) {
-    await this.Order.create([param.order], { session });
+    const newOrders = await this.Order.create([param.order], { session });
+    return newOrders[0].toObject();
   }
 
   /**
