@@ -9,6 +9,7 @@ export type CompanyConstants = {
   personalInformationProtectionOfficer: string;
   address: string;
   registrationNumber: string;
+  officeNumber: string;
 };
 
 export const appCompanyConstants: CompanyConstants = {
@@ -17,4 +18,5 @@ export const appCompanyConstants: CompanyConstants = {
   personalInformationProtectionOfficer: "김동호",
   address: "서울특별시 서대문구 연세로2다길 11-3, 203호 (청년창업꿈터 A동)",
   registrationNumber: "479-88-02430",
+  officeNumber: "070 - 8095 - 1260",
 };

@@ -43,6 +43,7 @@ export class AdminUserPostController {
     body: {
       userIds?: string[];
       researchId?: string;
+      voteId?: string;
       fcmTokens?: string[];
       title?: string;
       body?: string;
@@ -112,6 +113,7 @@ export class AdminUserPostController {
           type: AlarmType.WIN_EXTRA_CREDIT,
           detail: body.detail ? body.detail : "",
           researchId: body.researchId ? body.researchId : "",
+          voteId: body.voteId ? body.voteId : "",
         },
       });
     });
@@ -130,6 +132,7 @@ export class AdminUserPostController {
         detail: body.detail ? body.detail : "",
         createdAt: currentISOTime,
         researchId: body.researchId,
+        voteId: body.voteId,
       });
     });
 
@@ -149,6 +152,7 @@ export class AdminUserPostController {
     body: {
       userIds?: string[];
       researchId?: string;
+      voteId?: string;
       scale: number;
       reason: string;
       type: string;
@@ -179,6 +183,7 @@ export class AdminUserPostController {
     const creditHistories: CreditHistory[] = users.map((user) => ({
       userId: user._id,
       researchId: body.researchId,
+      voteId: body.voteId,
       scale: body.scale,
       balance: user.credit + body.scale,
       isIncome: body.scale >= 0 ? true : false,

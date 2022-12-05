@@ -7,17 +7,17 @@ import { Document } from "mongoose";
  */
 @Schema()
 export class Order {
+  @Prop({ required: true, index: true }) // 주문자 _id
+  userId: string;
+
   @Prop({ required: true }) // 주문 내역 사유
   reason: string;
 
-  @Prop({ required: true }) // 주문자 _id
-  userId: string;
-
-  @Prop() // 주문 관련 리서치 _id
-  researchId?: string;
-
   @Prop({ required: true }) // 결제 예정 금액
   amount: number;
+
+  @Prop({ index: true }) // 주문 관련 리서치 _id
+  researchId?: string;
 
   @Prop({ default: "" }) // 결제 _id. 결제 완료 후 값이 부여됩니다.
   paymentId?: string;

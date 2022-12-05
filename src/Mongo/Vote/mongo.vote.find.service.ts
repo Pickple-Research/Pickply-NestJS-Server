@@ -174,7 +174,7 @@ export class MongoVoteFindService {
    */
   async getVotesByIds(voteIds: string[]) {
     const votes = await this.getVotes({
-      filterQuery: { _id: { $in: voteIds } },
+      filterQuery: { _id: { $in: voteIds }, hidden: false, blocked: false },
     });
 
     return votes.sort((a, b) => {
