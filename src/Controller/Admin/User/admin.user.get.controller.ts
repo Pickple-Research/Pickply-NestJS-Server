@@ -2,6 +2,9 @@ import { Controller, Inject, Param, Get } from "@nestjs/common";
 import { Roles } from "src/Security/Metadata";
 import { MongoUserFindService, MongoUserStatService } from "src/Mongo";
 import { UserType } from "src/Object/Enum";
+import { encrypt } from "src/Util/crypto.util";
+import { Public } from "src/Security/Metadata";
+
 
 /**
  * 관리자만 사용하는 유저 관련 Get 컨트롤러입니다.
@@ -9,10 +12,26 @@ import { UserType } from "src/Object/Enum";
  */
 @Controller("admin/users")
 export class AdminUserGetController {
-  constructor() {}
+  constructor() { }
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
   @Inject() private readonly mongoUserStatService: MongoUserStatService;
+
+  /**
+   * @author 승원
+   * 회원 기본 정보 모두 가져오기
+   */
+  //@Roles(UserType.ADMIN)
+  @Public()//추후 수정
+  @Get("")
+  async getUsers() {
+
+    const users = await this.mongoUserFindService.getUsers({})
+
+    return encrypt(users)
+
+
+  }
 
   /**
    *
