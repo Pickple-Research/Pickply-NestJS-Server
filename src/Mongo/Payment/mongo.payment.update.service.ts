@@ -11,14 +11,18 @@ export class MongoPaymentUpdateService {
   ) {}
 
   /**
-   * 특정 주문 정보를 수정합니다.
+   * _id 를 통해 특정 주문 정보를 찾고 수정합니다.
    * @author 현웅
    */
-  async updateOrder(
-    param: { order: Order; updateQuery?: UpdateQuery<OrderDocument> },
-    session: ClientSession,
+  async updateOrderById(
+    param: { orderId: string; updateQuery?: UpdateQuery<OrderDocument> },
+    session?: ClientSession,
   ) {
-    // await this.Order.findOneAndUpdate({}, {}, { session });
+    return await this.Order.findByIdAndUpdate(
+      param.orderId,
+      param.updateQuery,
+      { session },
+    ).lean();
   }
 
   /**

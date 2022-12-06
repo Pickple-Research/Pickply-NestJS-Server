@@ -23,6 +23,7 @@ export * from "./Partner/mongo.partner.module";
 
 // Payment
 export * from "./Payment/mongo.payment.create.service";
+export * from "./Payment/mongo.payment.find.service";
 export * from "./Payment/mongo.payment.update.service";
 export * from "./Payment/mongo.payment.module";
 
