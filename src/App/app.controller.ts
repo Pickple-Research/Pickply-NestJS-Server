@@ -1,4 +1,4 @@
-import { Controller, Inject, Get, Req } from "@nestjs/common";
+import { Controller, Inject, Get } from "@nestjs/common";
 import { AppService } from "./app.service";
 import { Public } from "src/Security/Metadata";
 import {
@@ -12,7 +12,6 @@ import {
   appServiceConstant,
   appVoteConstant,
 } from "src/Constant/App";
-import { JwtUserInfo } from "src/Object/Type";
 
 @Controller("")
 export class AppController {
@@ -29,7 +28,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-12-05 1606 v1.1.17";
+    return "2022-12-06 1150 v1.1.18";
   }
 
   /**

@@ -1,12 +1,17 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { MongoPaymentCreateService } from "./mongo.payment.create.service";
+import { MongoPaymentFindService } from "./mongo.payment.find.service";
 import { MongoPaymentUpdateService } from "./mongo.payment.update.service";
 import { Payment, PaymentSchema, Order, OrderSchema } from "src/Schema";
 import { MONGODB_PAYMENT_CONNECTION } from "src/Constant";
 
 @Module({
-  providers: [MongoPaymentCreateService, MongoPaymentUpdateService],
+  providers: [
+    MongoPaymentCreateService,
+    MongoPaymentFindService,
+    MongoPaymentUpdateService,
+  ],
   imports: [
     MongooseModule.forFeature(
       [
@@ -16,6 +21,10 @@ import { MONGODB_PAYMENT_CONNECTION } from "src/Constant";
       MONGODB_PAYMENT_CONNECTION,
     ),
   ],
-  exports: [MongoPaymentCreateService, MongoPaymentUpdateService],
+  exports: [
+    MongoPaymentCreateService,
+    MongoPaymentFindService,
+    MongoPaymentUpdateService,
+  ],
 })
 export class MongoPaymentModule {}
