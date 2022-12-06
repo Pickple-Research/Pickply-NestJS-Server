@@ -13,6 +13,9 @@ export class Order {
   @Prop({ required: true }) // 주문 내역 사유
   reason: string;
 
+  @Prop() // 상세 내역 (리서치 제목 등)
+  detail?: string;
+
   @Prop({ required: true }) // 결제 예정 금액
   amount: number;
 

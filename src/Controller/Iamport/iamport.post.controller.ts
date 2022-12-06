@@ -50,6 +50,7 @@ export class IamportPostController {
     const order: Order = {
       userId: req.user.userId,
       reason: body.reason,
+      detail: body.detail,
       amount: body.amount,
       researchId: body.researchId,
       createdAt: getCurrentISOTime(),
@@ -105,6 +106,7 @@ export class IamportPostController {
       amount,
       userId: orderInfo.userId,
       reason: orderInfo.reason,
+      detail: orderInfo.detail,
       researchId: orderInfo.researchId,
       createdAt: getCurrentISOTime(),
     };

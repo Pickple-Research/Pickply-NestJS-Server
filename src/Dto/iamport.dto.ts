@@ -8,6 +8,9 @@ export class IamportCreateOrderDto {
   @IsString() // 주문(결제) 사유
   reason: string;
 
+  @IsString() // 상세 사유
+  detail: string;
+
   @IsNumber() // 결제 예정 금액
   amount: number;
 
