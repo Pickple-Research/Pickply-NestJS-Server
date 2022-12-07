@@ -28,7 +28,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-12-06 1329 v1.1.18";
+    return "2022-12-07 0930 v1.1.18";
   }
 
   /**

@@ -15,7 +15,7 @@ export class MongoResearchStandardizeService {
   ) {}
 
   async standardize() {
-    await this.addProperty();
+    await this.confirmAllResearch();
   }
 
   /**

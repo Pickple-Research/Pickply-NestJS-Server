@@ -14,28 +14,30 @@ import { AuthService } from "src/Service";
 export class AdminAuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly mongoUserFindService: MongoUserFindService
-  ) { }
+    private readonly mongoUserFindService: MongoUserFindService,
+  ) {}
 
   /**
-   * 
    * 관리자용 로그인 API입니다. 반환된 유저의 type이 ADMIN 이 아닌 경우 에러를 일으킵니다.
+   *
    * @author 현웅
    * @add 승원
-   * @Param email, password
-   * 
-   *
-   * 
+   * @param email
+   * @param password
    */
-  @Public()//추후 삭제
+  @Public() //추후 삭제
   @Post("login/email")
   async adminLogin(@Body() body: LoginBodyDto) {
-    const getUserInfo = this.mongoUserFindService.getUserInfoByEmail(body.email)
-    const authenticate = this.authService.authenticate(body.email, body.password)
+    const getUserInfo = this.mongoUserFindService.getUserInfoByEmail(
+      body.email,
+    );
+    const authenticate = this.authService.authenticate(
+      body.email,
+      body.password,
+    );
     const userInfo = await Promise.all([getUserInfo, authenticate]).then(
       ([userInfo, _]) => {
         return userInfo;
-
       },
     );
 
@@ -44,13 +46,9 @@ export class AdminAuthController {
       userId: userInfo.user._id,
       userNickname: userInfo.user.nickname,
       userEmail: userInfo.user.email,
-    })
+    });
 
-    return {
-      jwt, userInfo
-    }
-
-
+    return { jwt, userInfo };
   }
 
   /**
@@ -59,5 +57,5 @@ export class AdminAuthController {
    */
   @Roles(UserType.ADMIN)
   @Post("login/jwt")
-  async adminLoginWithJwt() { }
+  async adminLoginWithJwt() {}
 }
