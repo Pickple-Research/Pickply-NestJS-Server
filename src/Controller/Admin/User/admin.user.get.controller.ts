@@ -5,36 +5,31 @@ import { UserType } from "src/Object/Enum";
 import { encrypt } from "src/Util/crypto.util";
 import { Public } from "src/Security/Metadata";
 
-
 /**
  * 관리자만 사용하는 유저 관련 Get 컨트롤러입니다.
  * @author 현웅
  */
 @Controller("admin/users")
 export class AdminUserGetController {
-  constructor() { }
+  constructor() {}
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
   @Inject() private readonly mongoUserStatService: MongoUserStatService;
 
   /**
+   * 회원 기본 정보를 모두 가져옵니다.
    * @author 승원
-   * 회원 기본 정보 모두 가져오기
    */
-  //@Roles(UserType.ADMIN)
-  @Public()//추후 수정
+  // @Roles(UserType.ADMIN)
+  @Public() // 추후 삭제
   @Get("")
   async getUsers() {
-
-    const users = await this.mongoUserFindService.getUsers({})
-
-    return encrypt(users)
-
-
+    const users = await this.mongoUserFindService.getUsers({});
+    return encrypt(users);
   }
 
   /**
-   *
+   * 유저에 대한 통계 정보를 특정 조건에 맞춰 가져옵니다. 필요할 때마다 맞춰서 사용합니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)

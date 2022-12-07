@@ -220,6 +220,7 @@ export class MongoResearchFindService {
   async getRecentResearches() {
     return await this.getResearches({
       filterQuery: {
+        confirmed: true, // 승인되었으며
         hidden: false, // 숨겼거나
         blocked: false, // 차단되지 않은 리서치 중
       },
@@ -237,7 +238,8 @@ export class MongoResearchFindService {
     // });
     const researches = await this.getResearches({
       filterQuery: {
-        // 마감일이 존재하고 숨기거나 마감되지 않은 리서치만 뽑은 후
+        // 승인되었으며, 마감일이 존재하고 숨기거나 마감되지 않은 리서치만 뽑은 후
+        confirmed: true,
         hidden: false,
         closed: false,
         deadline: { $gt: new Date().toISOString() },
@@ -256,6 +258,7 @@ export class MongoResearchFindService {
   async getNewerResearches(param: { pulledupAt: string }) {
     return await this.getResearches({
       filterQuery: {
+        confirmed: true, // 승인되었으며
         hidden: false, // 숨겼거나
         blocked: false, // 차단되지 않은 리서치 중
         pulledupAt: { $gt: param.pulledupAt }, // 주어진 pulledupAt 시기보다 더 나중에 끌올된 리서치
@@ -267,6 +270,7 @@ export class MongoResearchFindService {
   async getOlderResearches(param: { pulledupAt: string }) {
     return await this.getResearches({
       filterQuery: {
+        confirmed: true, // 승인되었으며
         hidden: false, // 숨겼거나
         blocked: false, // 차단되지 않은 리서치 중
         pulledupAt: { $lt: param.pulledupAt }, // 주어진 pulledupAt 시기보다 먼저 끌올된 리서치 중
