@@ -208,6 +208,7 @@ export class MongoResearchCreateService {
   }
 
   /**
+   * TODO: mongo service 가 아니라 research service 로 옮깁니다.
    * @Transaction
    * 리서치 댓글을 작성합니다.
    * @return 업데이트된 리서치 정보와 생성된 리서치 댓글
@@ -220,7 +221,7 @@ export class MongoResearchCreateService {
     const updatedResearch = await this.Research.findByIdAndUpdate(
       param.comment.researchId,
       { $inc: { commentsNum: 1 } },
-      { session, returnOriginal: false },
+      { returnOriginal: false },
     )
       .populate({
         path: "author",
@@ -229,15 +230,12 @@ export class MongoResearchCreateService {
       .lean();
     if (!updatedResearch) throw new ResearchNotFoundException();
 
-    const newComments = await this.ResearchComment.create(
-      [
-        {
-          ...param.comment,
-          author: param.comment.authorId,
-        },
-      ],
-      { session },
-    );
+    const newComments = await this.ResearchComment.create([
+      {
+        ...param.comment,
+        author: param.comment.authorId,
+      },
+    ]);
 
     const newComment = await newComments[0].populate({
       path: "author",
@@ -248,6 +246,7 @@ export class MongoResearchCreateService {
   }
 
   /**
+   * TODO: mongo service 가 아니라 research service 로 옮깁니다.
    * @Transaction
    * 리서치 대댓글을 작성합니다.
    * @return 업데이트된 리서치 정보와 생성된 리서치 대댓글
@@ -260,7 +259,7 @@ export class MongoResearchCreateService {
     const updatedResearch = await this.Research.findByIdAndUpdate(
       param.reply.researchId,
       { $inc: { commentsNum: 1 } },
-      { session, returnOriginal: false },
+      { returnOriginal: false },
     )
       .populate({
         path: "author",
@@ -269,20 +268,15 @@ export class MongoResearchCreateService {
       .lean();
     if (!updatedResearch) throw new ResearchNotFoundException();
 
-    const newReplies = await this.ResearchReply.create(
-      [
-        {
-          ...param.reply,
-          author: param.reply.authorId,
-        },
-      ],
-      { session },
-    );
-    await this.ResearchComment.findByIdAndUpdate(
-      param.reply.commentId,
-      { $push: { replies: newReplies[0]._id } },
-      { session },
-    );
+    const newReplies = await this.ResearchReply.create([
+      {
+        ...param.reply,
+        author: param.reply.authorId,
+      },
+    ]);
+    await this.ResearchComment.findByIdAndUpdate(param.reply.commentId, {
+      $push: { replies: newReplies[0]._id },
+    });
 
     const newReply = await newReplies[0].populate({
       path: "author",

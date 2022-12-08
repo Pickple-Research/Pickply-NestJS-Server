@@ -1,7 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { MongoUserFindService } from "src/Mongo";
 import admin from "firebase-admin";
 //! 필요한 정보만 .env 로 옮겨서 관리하고 있습니다.
 // import * as account from "./r2c-pickpleresearch-firebase-adminsdk-7ykfc-8627d5f061.json";
+import { PushAlarm } from "src/Object/Type";
 import { TokenMessage } from "firebase-admin/lib/messaging/messaging-api";
 
 @Injectable()
@@ -19,6 +21,34 @@ export class FirebaseService {
       });
     } else {
       admin.app();
+    }
+  }
+
+  @Inject() private readonly mongoUserFindService: MongoUserFindService;
+
+  /**
+   * user 의 _id 와 pushAlarm 를 인자로 받아서 해당 유저에게 푸쉬 알람을 전송합니다.
+   * @author 현웅
+   */
+  async sendPushNotification(param: {
+    userId: string;
+    pushAlarm: Partial<PushAlarm>;
+    handleAsException?: boolean;
+  }) {
+    const user = await this.mongoUserFindService.getUserNotificationSettingById(
+      { userId: param.userId, selectQuery: { fcmToken: true } },
+    );
+    //* 유저가 존재하지 않는 경우 아무 행동을 취하지 않습니다.
+    if (!user.fcmToken) return;
+    const pushAlarm: PushAlarm = {
+      token: user.fcmToken,
+      ...param.pushAlarm,
+    };
+    try {
+      await admin.messaging().send(pushAlarm);
+    } catch (error) {
+      if (param.handleAsException === true) throw new Error(error.message);
+      return;
     }
   }
 

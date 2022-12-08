@@ -42,7 +42,7 @@ import {
   ResearchMypageBodyDto,
 } from "src/Dto";
 import { JwtUserInfo } from "src/Object/Type";
-import { AlarmType, CreditHistoryType } from "src/Object/Enum";
+import { AlarmType, CreditHistoryType, UserType } from "src/Object/Enum";
 import {
   CREDIT_PER_MINUTE,
   ACHEIVE_CREDIT_PER_MINUTE,
@@ -285,6 +285,19 @@ export class ResearchPostController {
       this.userCreateService.makeNotification({ notification });
     }
 
+    //* 또한 관리자가 단 댓글이 아니라면, Slack 운영 채널에 메세지를 보냅니다.
+    if (req.user.userType !== UserType.ADMIN) {
+      this.slackService.sendMessageToSlackOperationChannel({
+        message: `
+      리서치에 새로운 댓글: ${
+        body.content.length < 60
+          ? body.content
+          : `${body.content.slice(0, 60)}...`
+      }\n리서치 _id: ${body.researchId}`,
+      });
+    }
+
+    //* 최종적으로 리서치와 댓글을 반환합니다.
     return { updatedResearch, newComment };
   }
 
@@ -333,6 +346,19 @@ export class ResearchPostController {
       this.userCreateService.makeNotification({ notification });
     }
 
+    //* 또한 관리자가 단 대댓글이 아니라면, Slack 운영 채널에 메세지를 보냅니다.
+    if (req.user.userType !== UserType.ADMIN) {
+      this.slackService.sendMessageToSlackOperationChannel({
+        message: `
+          리서치에 새로운 대댓글: ${
+            body.content.length < 60
+              ? body.content
+              : `${body.content.slice(0, 60)}...`
+          }\n리서치 _id: ${body.researchId}`,
+      });
+    }
+
+    //* 최종적으로 리서치와 대댓글을 반환합니다.
     return { updatedResearch, newReply };
   }
 

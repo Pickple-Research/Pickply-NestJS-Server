@@ -51,28 +51,3 @@ export class VoteEditBodyDto {
   @IsOptional()
   content?: string;
 }
-
-/**
- * 투표에 참여하지 않고 투표 결과 통계만 조회한 후
- * 해당 투표에 참여할 때 Body에 포함되어야 하는 정보들
- * @author 현웅
- */
-export class VoteParticipationUpdateBodyDto {
-  @IsString()
-  voteId: string;
-
-  @IsString()
-  voteParticipationId: string;
-
-  /** 최소 하나 이상의 숫자 배열 */
-  @ArrayMinSize(1)
-  @Type(() => Number)
-  @IsNumber({}, { each: true })
-  selectedOptionIndexes: number[];
-
-  @IsString()
-  gender: string;
-
-  @IsString()
-  ageGroup: string;
-}
