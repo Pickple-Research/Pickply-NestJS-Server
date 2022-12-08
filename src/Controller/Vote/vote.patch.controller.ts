@@ -14,7 +14,6 @@ import {
   VoteInteractBodyDto,
   VoteParticipateBodyDtoOld,
   VoteEditBodyDto,
-  VoteParticipationUpdateBodyDto,
 } from "src/Dto";
 import { JwtUserInfo } from "src/Object/Type";
 import { getCurrentISOTime, getAgeGroup, tryMultiTransaction } from "src/Util";

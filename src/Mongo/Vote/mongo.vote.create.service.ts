@@ -174,6 +174,7 @@ export class MongoVoteCreateService {
   }
 
   /**
+   * TODO: Vote Create 로 이동
    * @Transaction
    * 투표 댓글을 작성합니다.
    * @return 업데이트 된 투표 정보와 생성된 투표 댓글
@@ -189,7 +190,7 @@ export class MongoVoteCreateService {
         $inc: { commentsNum: 1 },
         $addToSet: { commentedUserIds: param.comment.authorId },
       },
-      { session, returnOriginal: false },
+      { returnOriginal: false },
     )
       .populate({
         path: "author",
@@ -198,15 +199,12 @@ export class MongoVoteCreateService {
       .lean();
     if (!updatedVote) throw new VoteNotFoundException();
 
-    const newComments = await this.VoteComment.create(
-      [
-        {
-          ...param.comment,
-          author: param.comment.authorId,
-        },
-      ],
-      { session },
-    );
+    const newComments = await this.VoteComment.create([
+      {
+        ...param.comment,
+        author: param.comment.authorId,
+      },
+    ]);
 
     const newComment = await newComments[0].populate({
       path: "author",
@@ -236,6 +234,7 @@ export class MongoVoteCreateService {
   }
 
   /**
+   * TODO: Vote Create 로 이동
    * @Transaction
    * 투표 대댓글을 작성합니다.
    * @return 업데이트 된 투표 정보와 생성된 투표 대댓글
@@ -248,7 +247,7 @@ export class MongoVoteCreateService {
         $inc: { commentsNum: 1 },
         $addToSet: { commentedUserIds: param.reply.authorId },
       },
-      { session, returnOriginal: false },
+      { returnOriginal: false },
     )
       .populate({
         path: "author",

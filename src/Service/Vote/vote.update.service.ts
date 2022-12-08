@@ -130,28 +130,24 @@ export class VoteUpdateService {
         param.voteNonMemberParticipation.selectedOptionIndexes,
       );
     //* 비회원 투표 참여자 수 1 증가, 비회원 투표 결과값 반영
-    const updateVote = this.mongoVoteUpdateService.updateVote(
-      {
-        voteId: param.voteId,
-        updateQuery: { $inc: { nonMemberParticipantsNum: 1, ...incQuery } },
-      },
-      session,
-    );
-    //* 위 두 함수를 동시에 실행
-    const updatedVote = await Promise.all([checkIndexesValid, updateVote]).then(
-      ([_, updatedVote]) => {
-        return updatedVote;
-      },
-    );
-
-    //* 새로운 비회원 투표 참여 정보 생성
-    const newVoteNonMemberParticipation =
-      await this.mongoVoteCreateService.createVoteNonMemberParticipation(
+    const updateVote = this.mongoVoteUpdateService.updateVote({
+      voteId: param.voteId,
+      updateQuery: { $inc: { nonMemberParticipantsNum: 1, ...incQuery } },
+    });
+    //* 새로운 비회원 투표 참여 정보 생성 (Session 사용)
+    const createVoteNonMemberParticipation =
+      this.mongoVoteCreateService.createVoteNonMemberParticipation(
         { voteParticipation: param.voteNonMemberParticipation },
         session,
       );
-
-    return { updatedVote, newVoteNonMemberParticipation };
+    //* 위 세 함수를 동시에 실행
+    return await Promise.all([
+      checkIndexesValid,
+      updateVote,
+      createVoteNonMemberParticipation,
+    ]).then(([_, updatedVote, newVoteNonMemberParticipation]) => {
+      return { updatedVote, newVoteNonMemberParticipation };
+    });
   }
 
   /**
@@ -191,32 +187,25 @@ export class VoteUpdateService {
         param.voteParticipation.selectedOptionIndexes,
       );
     //* 투표 참여자 수 1 증가, 투표 결과값 반영
-    const updateVote = this.mongoVoteUpdateService.updateVote(
-      {
-        voteId: param.voteId,
-        updateQuery: { $inc: { participantsNum: 1, ...incQuery } },
-      },
-      session,
-    );
-    //* 위 세 함수를 동시에 실행
-    const updatedVote = await Promise.all([
-      checkAlreadyParticipated,
-      checkIndexesValid,
-      updateVote,
-    ]).then(([_, __, updatedVote]) => {
-      return updatedVote;
+    const updateVote = this.mongoVoteUpdateService.updateVote({
+      voteId: param.voteId,
+      updateQuery: { $inc: { participantsNum: 1, ...incQuery } },
     });
-
-    //* 새로운 투표 참여 정보 생성
-    //! 이 함수가 종속된 session은 updateVote 함수가 종속된 session 과 동일하므로
-    //! 같은 Promise.all 로 동시에 실행시킬 수 없습니다.
-    const newVoteParticipation =
-      await this.mongoVoteCreateService.createVoteParticipation(
+    //* 새로운 투표 참여 정보 생성 (Session 사용)
+    const createVoteParticipation =
+      this.mongoVoteCreateService.createVoteParticipation(
         { voteParticipation: param.voteParticipation },
         session,
       );
-
-    return { updatedVote, newVoteParticipation };
+    //* 위 네 함수를 동시에 실행
+    return await Promise.all([
+      checkAlreadyParticipated,
+      checkIndexesValid,
+      updateVote,
+      createVoteParticipation,
+    ]).then(([_, __, updatedVote, newVoteParticipation]) => {
+      return { updatedVote, newVoteParticipation };
+    });
   }
 
   /**

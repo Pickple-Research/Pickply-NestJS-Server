@@ -2,6 +2,7 @@ import { Controller, Inject, Request, Body, Patch } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import { ResearchUpdateService } from "src/Service";
+import { FirebaseService } from "src/Firebase";
 import {
   MongoUserFindService,
   MongoUserCreateService,
@@ -48,6 +49,7 @@ export class ResearchPatchController {
     private readonly researchConnection: Connection,
   ) {}
 
+  @Inject() private readonly firebaseService: FirebaseService;
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
   @Inject() private readonly mongoUserCreateService: MongoUserCreateService;
   @Inject()
@@ -186,21 +188,21 @@ export class ResearchPatchController {
     const userSession = await this.userConnection.startSession();
     const researchSession = await this.researchConnection.startSession();
 
-    return await tryMultiTransaction(async () => {
-      //* 리서치 참여자 수를 증가시키고 새로운 리서치 참여 정보를 생성합니다.
-      const updateResearch = this.researchUpdateService.participateResearch(
-        { researchId: body.researchId, researchParticipation },
-        researchSession,
-      );
-      //* 크레딧 변동내역 생성 및 추가
-      const updateUser = this.mongoUserCreateService.createCreditHistory(
-        { userId: req.user.userId, creditHistory },
-        userSession,
-      );
-      //* 위 두 함수를 동시에 실행하고
-      //* 업데이트된 리서치 정보, 생성된 리서치 참여 정보, 새로 생성된 크레딧 변동내역을 가져온 후 반환합니다.
-      const { updatedResearch, newResearchParticipation, newCreditHistory } =
-        await Promise.all([updateResearch, updateUser]).then(
+    const { updatedResearch, newResearchParticipation, newCreditHistory } =
+      await tryMultiTransaction(async () => {
+        //* 리서치 참여자 수를 증가시키고 새로운 리서치 참여 정보를 생성합니다.
+        const updateResearch = this.researchUpdateService.participateResearch(
+          { researchId: body.researchId, researchParticipation },
+          researchSession,
+        );
+        //* 크레딧 변동내역 생성 및 추가
+        const updateUser = this.mongoUserCreateService.createCreditHistory(
+          { userId: req.user.userId, creditHistory },
+          userSession,
+        );
+        //* 위 두 함수를 동시에 실행하고
+        //* 업데이트된 리서치 정보, 생성된 리서치 참여 정보, 새로 생성된 크레딧 변동내역을 가져온 후 반환합니다.
+        return await Promise.all([updateResearch, updateUser]).then(
           ([
             { updatedResearch, newResearchParticipation },
             newCreditHistory,
@@ -212,10 +214,23 @@ export class ResearchPatchController {
             };
           },
         );
+      }, [userSession, researchSession]);
 
-      //* 최종적으로 업데이트된 리서치 정보, 생성된 리서치 참여 정보, 새로 생성된 크레딧 변동내역을 반환합니다.
-      return { updatedResearch, newResearchParticipation, newCreditHistory };
-    }, [userSession, researchSession]);
+    //* 이 때, 참여자 수가 30명이 된 경우 리서치 작성자에게 푸시알림을 보냅니다.
+    if (updatedResearch.participantsNum === 30) {
+      this.firebaseService.sendPushNotification({
+        userId: updatedResearch.authorId,
+        pushAlarm: {
+          notification: {
+            title: "내 리서치 참여자가 30명을 돌파했어요!😛",
+            body: "축하해요! 픽플리 리뷰를 남겨주실래요?",
+          },
+        },
+      });
+    }
+
+    //* 최종적으로 업데이트된 리서치 정보, 생성된 리서치 참여 정보, 새로 생성된 크레딧 변동내역을 반환합니다.
+    return { updatedResearch, newResearchParticipation, newCreditHistory };
   }
 
   /**
