@@ -19,6 +19,7 @@ import {
   ResearchView,
   ResearchViewDocument,
 } from "src/Schema";
+import { getCurrentISOTime } from "src/Util";
 
 @Injectable()
 export class MongoResearchFindService {
@@ -223,6 +224,12 @@ export class MongoResearchFindService {
         confirmed: true, // 승인되었으며
         hidden: false, // 숨겼거나
         blocked: false, // 차단되지 않은 리서치 중
+        // v1.1.19) 이제 마감되지 않은 리서치를 먼저 가져옵니다.
+        closed: false,
+        $or: [
+          { deadline: { $eq: "" } },
+          { deadline: { $gt: getCurrentISOTime() } },
+        ],
       },
       limit: 20, // 최근 20개만
     });
@@ -268,15 +275,77 @@ export class MongoResearchFindService {
 
   /** 인자로 받은 pulledupAt 보다 이전에 끌올된 리서치를 가져옵니다. */
   async getOlderResearches(param: { pulledupAt: string }) {
-    return await this.getResearches({
-      filterQuery: {
-        confirmed: true, // 승인되었으며
-        hidden: false, // 숨겼거나
-        blocked: false, // 차단되지 않은 리서치 중
-        pulledupAt: { $lt: param.pulledupAt }, // 주어진 pulledupAt 시기보다 먼저 끌올된 리서치 중
-      },
-      limit: 20, // 최근 20개만
-    });
+    //TODO: 으아악 급하게 짜느라 코드가 너무 더러워요. 리팩토링 필요
+    const research = await this.Research.findOne({
+      pulledupAt: param.pulledupAt,
+    })
+      .select({ closed: true, deadline: true })
+      .lean();
+    if (!research) return [];
+
+    const researchAvailable =
+      !research.closed &&
+      (research.deadline === "" || research.deadline > getCurrentISOTime());
+
+    if (researchAvailable) {
+      // 먼저 마감되지 않은 리서치가 더 있는지 확인합니다.
+      const researches = await this.getResearches({
+        filterQuery: {
+          confirmed: true, // 승인되었으며
+          hidden: false, // 숨겼거나
+          blocked: false, // 차단되지 않은 리서치 중
+          pulledupAt: { $lt: param.pulledupAt }, // 주어진 pulledupAt 시기보다 먼저 끌올된 리서치 중
+          // v1.1.19) 이제 마감되지 않은 리서치를 먼저 가져옵니다.
+          closed: false,
+          $or: [
+            { deadline: { $eq: "" } },
+            { deadline: { $gt: getCurrentISOTime() } },
+          ],
+        },
+        limit: 20, // 좀 더 최신의 20개만
+      });
+
+      if (researches.length > 0) return researches;
+
+      //* 만약 마감되지 않은 리서치가 더 없다면, 마감된 리서치를 새로 20개 가져옵니다.
+      return await this.getResearches({
+        filterQuery: {
+          confirmed: true, // 승인되었으며
+          hidden: false, // 숨겼거나
+          blocked: false, // 차단되지 않은 리서치 중
+          $or: [
+            { closed: true },
+            {
+              $and: [
+                { deadline: { $ne: "" } },
+                { deadline: { $lt: getCurrentISOTime() } },
+              ],
+            },
+          ],
+        },
+        limit: 20, // 좀 더 최신의 20개만
+      });
+    } else {
+      return await this.getResearches({
+        filterQuery: {
+          confirmed: true, // 승인되었으며
+          hidden: false, // 숨겼거나
+          blocked: false, // 차단되지 않은 리서치 중
+          // v1.1.19) 이제 마감되지 않은 리서치를 먼저 가져옵니다.
+          pulledupAt: { $lt: param.pulledupAt }, // 주어진 pulledupAt 시기보다 먼저 끌올된 리서치 중
+          $or: [
+            { closed: true },
+            {
+              $and: [
+                { deadline: { $ne: "" } },
+                { deadline: { $lt: getCurrentISOTime() } },
+              ],
+            },
+          ],
+        },
+        limit: 20, // 좀 더 최신의 20개만
+      });
+    }
   }
 
   /** 특정 유저가 업로드한 리서치를 20개 가져옵니다. */
