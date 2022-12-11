@@ -23,13 +23,27 @@ export class SlackService {
   }
 
   /**
-   * 운영 채널에 메세지를 보냅니다.
+   * 리서치 봇 채널에 메세지를 보냅니다.
    * @author 현웅
    */
-  async sendMessageToSlackOperationChannel(param: { message: string }) {
+  async sendMessageToSlackResearchBotChannel(param: { message: string }) {
     await this.httpService.axiosRef.request({
       method: "POST",
-      url: process.env.SLACK_OPERATION_CHANNEL_WEBHOOK_URL,
+      url: process.env.SLACK_RESEARCHBOT_CHANNEL_WEBHOOK_URL,
+      data: { text: param.message },
+    });
+  }
+
+  /**
+   * 리서치 댓글/대댓글봇 채널에 메세지를 보냅니다.
+   * @author 현웅
+   */
+  async sendMessageToSlackResearchCommentBotChannel(param: {
+    message: string;
+  }) {
+    await this.httpService.axiosRef.request({
+      method: "POST",
+      url: process.env.SLACK_RESEARCH_COMMENTBOT_CHANNEL_WEBHOOK_URL,
       data: { text: param.message },
     });
   }
