@@ -13,7 +13,7 @@ type VoteConstant = {
 export const appVoteConstant: VoteConstant = {
   voteCategories: [
     { value: VoteCategory.GREEN_LIGHT, displayName: "연애" },
-    { value: VoteCategory.COORDI, displayName: "패션/코디" },
+    { value: VoteCategory.COORDI, displayName: "패션/뷰티" },
     { value: VoteCategory.ISSUE, displayName: "이슈/트렌드" },
     { value: VoteCategory.SPORTS, displayName: "스포츠" },
     { value: VoteCategory.STARTUP, displayName: "창업/스타트업" },

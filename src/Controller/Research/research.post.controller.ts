@@ -234,7 +234,7 @@ export class ResearchPostController {
 
     //* 리서치가 성공적으로 생성된 경우, Slack 운영 채널에 메세지를 보냅니다.
     //* (응답에 영향을 주지 않도록 await 을 사용하지 않습니다.)
-    this.slackService.sendMessageToSlackOperationChannel({
+    this.slackService.sendMessageToSlackResearchBotChannel({
       message: `새로운 리서치가 업로드 되었습니다: (${newResearch.estimatedTime}분) ${newResearch.title}`,
     });
 
@@ -287,7 +287,7 @@ export class ResearchPostController {
 
     //* 또한 관리자가 단 댓글이 아니라면, Slack 운영 채널에 메세지를 보냅니다.
     if (req.user.userType !== UserType.ADMIN) {
-      this.slackService.sendMessageToSlackOperationChannel({
+      this.slackService.sendMessageToSlackResearchCommentBotChannel({
         message: `
       리서치에 새로운 댓글: ${
         body.content.length < 60
@@ -348,7 +348,7 @@ export class ResearchPostController {
 
     //* 또한 관리자가 단 대댓글이 아니라면, Slack 운영 채널에 메세지를 보냅니다.
     if (req.user.userType !== UserType.ADMIN) {
-      this.slackService.sendMessageToSlackOperationChannel({
+      this.slackService.sendMessageToSlackResearchCommentBotChannel({
         message: `
           리서치에 새로운 대댓글: ${
             body.content.length < 60
