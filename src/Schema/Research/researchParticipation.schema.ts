@@ -22,6 +22,9 @@ export class ResearchParticipation {
   @Prop() // 연령대
   ageGroup?: string;
 
+  @Prop() // 허위 응답인지 여부. true 로 설정된 경우, 추가 크레딧 및 경품 당첨 대상에서 제외됩니다.
+  invalid?: boolean;
+
   @Prop({ required: true }) // 참여 일시
   createdAt: string;
 }

@@ -186,10 +186,13 @@ export class VoteUpdateService {
         param.voteId,
         param.voteParticipation.selectedOptionIndexes,
       );
-    //* 투표 참여자 수 1 증가, 투표 결과값 반영
+    //* 투표 참여자 수 1 증가, 투표 결과값 반영 + 마지막 참여 시간 업데이트
     const updateVote = this.mongoVoteUpdateService.updateVote({
       voteId: param.voteId,
-      updateQuery: { $inc: { participantsNum: 1, ...incQuery } },
+      updateQuery: {
+        $inc: { participantsNum: 1, ...incQuery },
+        $set: { lastParticipatedAt: param.voteParticipation.createdAt },
+      },
     });
     //* 새로운 투표 참여 정보 생성 (Session 사용)
     const createVoteParticipation =

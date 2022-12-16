@@ -38,7 +38,7 @@ export class MongoUserDeleteService {
     @InjectModel(UserNotice.name)
     private readonly UserNotice: Model<UserNoticeDocument>,
     @InjectModel(UserNotificationSetting.name)
-    private readonly UserNotification: Model<UserNotificationSettingDocument>,
+    private readonly UserNotificationSetting: Model<UserNotificationSettingDocument>,
     @InjectModel(UserPrivacy.name)
     private readonly UserPrivacy: Model<UserPrivacyDocument>,
     @InjectModel(UserProperty.name)
@@ -103,17 +103,20 @@ export class MongoUserDeleteService {
    * 인자로 받은 _id를 사용하는 유저의 모든 데이터를 삭제합니다.
    * UserNotice, UserNotification, UserPrivacy, UserRelation, UserSecurity 및
    * 해당 유저의 크레딧 변동내역과 알림을 모두 삭제하되,
-   * UserProperty는 데이터 분석을 위해 남겨둡니다.
+   * ! UserProperty는 데이터 분석을 위해 남겨둡니다.
    * @author 현웅
    */
   async deleteUserById(param: { userId: string }, session: ClientSession) {
-    await this.User.findByIdAndDelete(param.userId, { session });
-    await this.UserNotice.findByIdAndDelete(param.userId, { session });
-    await this.UserNotification.findByIdAndDelete(param.userId, { session });
-    await this.UserPrivacy.findByIdAndDelete(param.userId, { session });
-    await this.UserRelation.findByIdAndDelete(param.userId, { session });
-    await this.UserSecurity.findByIdAndDelete(param.userId, { session });
     await this.CreditHistory.deleteMany({ userId: param.userId }, { session });
     await this.Notification.deleteMany({ userId: param.userId }, { session });
+    await this.UserNotice.findByIdAndDelete(param.userId, { session });
+    await this.UserNotificationSetting.findByIdAndDelete(param.userId, {
+      session,
+    });
+    await this.UserPrivacy.findByIdAndDelete(param.userId, { session });
+    // await this.UserProperty.findByIdAndDelete(param.userId, { session });
+    await this.UserRelation.findByIdAndDelete(param.userId, { session });
+    await this.User.findByIdAndDelete(param.userId, { session });
+    await this.UserSecurity.findByIdAndDelete(param.userId, { session });
   }
 }

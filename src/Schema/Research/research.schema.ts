@@ -83,6 +83,9 @@ export class Research {
   @Prop() // 생성일
   createdAt: string;
 
+  @Prop() // 마지막 참여 날짜
+  lastParticipatedAt?: string;
+
   @Prop() // 마감일 (상시 리서치 마감일자)
   closedAt?: string;
 
