@@ -16,6 +16,7 @@ export type ServiceConstants = {
   APP_RECENT_VERSION: {
     version: string;
     forceUpdate: boolean;
+    updateList?: string[];
   };
 
   CONTACT_EMAIL: string;
@@ -36,8 +37,9 @@ export type ServiceConstants = {
  */
 export const appServiceConstant: ServiceConstants = {
   APP_RECENT_VERSION: {
-    version: "1.1.9",
+    version: "1.1.16",
     forceUpdate: false,
+    updateList: [],
   },
 
   CONTACT_EMAIL: "contact@r2c.company",

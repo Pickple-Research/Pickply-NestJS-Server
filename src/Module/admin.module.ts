@@ -9,6 +9,7 @@ import {
   AdminResearchPatchController,
   AdminResearchPostController,
   // Users
+  AdminUserDeleteController,
   AdminUserGetController,
   AdminUserPatchController,
   AdminUserPostController,
@@ -38,6 +39,7 @@ import {
     AdminResearchPatchController,
     AdminResearchPostController,
     // Users
+    AdminUserDeleteController,
     AdminUserGetController,
     AdminUserPatchController,
     AdminUserPostController,

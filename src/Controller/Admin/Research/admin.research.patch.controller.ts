@@ -267,6 +267,25 @@ export class AdminResearchPatchController {
   }
 
   /**
+   * 허위 응답 리서치 참여 정보를 찾아 invalid 속성을 true로 설정합니다.
+   * 해당 참여 정보는 추가 크레딧 증정 및 경품 추첨 대상에서 제외됩니다.
+   * @author 현웅
+   */
+  @Roles(UserType.ADMIN)
+  @Patch("participations/invalid")
+  async invalidateResearchParticipations(
+    @Body() body: { researchId: string; userIds: string[] },
+  ) {
+    await this.mongoResearchUpdateService.updateResearchParticipations({
+      filterQuery: {
+        researchId: body.researchId,
+        userId: { $in: body.userIds },
+      },
+      updateQuery: { $set: { invalid: true } },
+    });
+  }
+
+  /**
    * 리서치 댓글을 블락처리합니다.
    * @author 현웅
    */

@@ -39,15 +39,17 @@ export class AdminUserGetController {
   }
 
   /**
-   * 이메일 정규식으로 유저를 검색합니다.
+   * 이메일/닉네임 정규식으로 유저를 검색합니다.
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Get(":email")
-  async getUsersByEmailRegex(@Param("email") email: string) {
-    if (email.length < 3) return [];
+  @Get(":token")
+  async getUsersByEmailRegex(@Param("token") token: string) {
+    if (token.length < 3) return [];
     return await this.mongoUserFindService.getUsers({
-      filterQuery: { email: { $regex: email } },
+      filterQuery: {
+        $or: [{ email: { $regex: token } }, { nickname: { $regex: token } }],
+      },
       selectQuery: { email: true, nickname: true, credit: true },
     });
   }

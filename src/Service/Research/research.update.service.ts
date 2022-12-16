@@ -160,10 +160,13 @@ export class ResearchUpdateService {
         userId: param.researchParticipation.userId,
         researchId: param.researchId,
       });
-    //* 리서치 참여자 수 1 증가
+    //* 리서치 참여자 수 1 증가 + 마지막 참여 시간 업데이트
     const updateResearch = this.mongoResearchUpdateService.updateResearchById({
       researchId: param.researchId,
-      updateQuery: { $inc: { participantsNum: 1 } },
+      updateQuery: {
+        $inc: { participantsNum: 1 },
+        $set: { lastParticipatedAt: param.researchParticipation.createdAt },
+      },
     });
     //* 새로운 리서치 참여 정보 생성 (Session 사용)
     const createResearchParticipation =
@@ -357,9 +360,14 @@ export class ResearchUpdateService {
 
     await tryMultiTransaction(async () => {
       //* 해당 리서치 참여정보를 모두 가져옵니다.
+      //* (이 때, invalid 속성이 true 로 설정된 참여정보(허위응답)는 제외합니다.)
+      //! invalid 속성은 optional 하기 때문에, invalid: false 로 검색하면 아무 것도 나오지 않습니다.
       const researchParticipations =
         await this.mongoResearchFindService.getResearchParticipations({
-          filterQuery: { researchId: param.researchId },
+          filterQuery: {
+            researchId: param.researchId,
+            invalid: { $not: { $eq: true } },
+          },
           selectQuery: { userId: true },
         });
       //* 참여정보에서 유저 _id 만 추출합니다.
