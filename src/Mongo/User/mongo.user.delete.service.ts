@@ -91,11 +91,16 @@ export class MongoUserDeleteService {
 
   /**
    * 사용자 탈퇴 요청시, 곧바로 사용자 정보를 지우지 않고 deleted 플래그를 true 로 변경합니다.
+   * (앱 v1.1.16) 탈퇴 사유를 추가합니다.)
    * @author 현웅
    */
-  async preDeleteUser(param: { userId: string }) {
+  async preDeleteUser(param: { userId: string; resignReason?: string }) {
     await this.User.findByIdAndUpdate(param.userId, {
-      $set: { deleted: true, deletedAt: getCurrentISOTime() },
+      $set: {
+        deleted: true,
+        resignReason: param.resignReason,
+        deletedAt: getCurrentISOTime(),
+      },
     });
   }
 

@@ -26,7 +26,14 @@ export class MongoVoteStandardizeService {
   ) {}
 
   async standardize() {
-    // await this.
+    // await this.();
+  }
+
+  async closeVotesBeforeNovember2022() {
+    await this.Vote.updateMany(
+      { _id: { $lte: "635fa0120fc4ccb784451386" } },
+      { $set: { closed: true } },
+    );
   }
 
   /**

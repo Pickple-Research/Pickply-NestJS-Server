@@ -48,8 +48,6 @@ import {
   MONGODB_PARTNER_CONNECTION,
   MONGODB_PAYMENT_CONNECTION,
   MONGODB_FEEDBACK_CONNECTION,
-  // MongoDB - SurBay
-  MONGODB_SURBAY_CONNECTION,
   // Winston
   WINSTON_LOG_CONSOLE_OPTION,
   WINSTON_COMMON_LOG_FILE_OPTION,
@@ -114,10 +112,6 @@ import {
     }),
     MongooseModule.forRoot(process.env.MONGODB_VOTE_ENDPOINT, {
       connectionName: MONGODB_VOTE_CONNECTION,
-    }),
-    // SurBay DB
-    MongooseModule.forRoot(process.env.MONGODB_SURBAY_ENDPOINT, {
-      connectionName: MONGODB_SURBAY_CONNECTION,
     }),
 
     //* 전역 적용 모듈

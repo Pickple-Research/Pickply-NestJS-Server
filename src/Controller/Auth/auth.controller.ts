@@ -2,11 +2,7 @@ import { Controller, Inject, Request, Body, Post } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import { AuthService, UserFindService } from "src/Service";
-import {
-  MongoUserFindService,
-  MongoUserUpdateService,
-  MongoSurBayService,
-} from "src/Mongo";
+import { MongoUserFindService, MongoUserUpdateService } from "src/Mongo";
 import { Public } from "src/Security/Metadata";
 import {
   LoginBodyDto,
@@ -32,7 +28,6 @@ export class AuthController {
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
   @Inject() private readonly mongoUserUpdateService: MongoUserUpdateService;
-  @Inject() private readonly mongoSurBayService: MongoSurBayService;
 
   /**
    * 이메일, 비밀번호를 받아 로그인합니다.
@@ -60,7 +55,8 @@ export class AuthController {
       },
     );
 
-    //* 인자로 Fcm 토큰이 주어진 경우 업데이트
+    //TODO: MongoService 로 대체?
+    //* 유저 OS, 사용 버전, 마지막 로그인 시간, Fcm 토큰 업데이트
     const updateFcmToken = this.authService.updateFcmToken({
       email: body.email,
       fcmToken: body.fcmToken,
@@ -106,7 +102,8 @@ export class AuthController {
       req.user.userId,
     );
 
-    //* Fcm 토큰 업데이트
+    //TODO: MongoService 로 대체?
+    //* 유저 OS, 사용 버전, 마지막 로그인 시간, Fcm 토큰 업데이트
     const updateFcmToken = this.authService.updateFcmToken({
       userId: req.user.userId,
       fcmToken: body.fcmToken,
@@ -135,19 +132,6 @@ export class AuthController {
   }
 
   /**
-   * SurBay DB 데이터를 통해 로그인합니다.
-   * @author 현웅
-   */
-  @Public()
-  @Post("login/surbay")
-  async surBayLogin(@Body() body: LoginBodyDto) {
-    return await this.mongoSurBayService.surBayLogin({
-      email: body.email,
-      password: body.password,
-    });
-  }
-
-  /**
    * 로그아웃합니다. fcm 토큰을 초기화합니다.
    * @author 현웅
    */
@@ -172,6 +156,14 @@ export class AuthController {
       email: body.email,
       code: body.code,
     });
+  }
+
+  @Post("authorize")
+  async authorize(
+    @Request() req: { user: JwtUserInfo },
+    @Body() body: { password: string },
+  ) {
+    return await this.authService.authorize(req.user.userId, body.password);
   }
 
   /**
