@@ -36,10 +36,6 @@ export * from "./Research/mongo.research.update.service";
 export * from "./Research/mongo.research.validate.service";
 export * from "./Research/mongo.research.module";
 
-// SurBay
-export * from "./SurBay/mongo.surbay.service";
-export * from "./SurBay/mongo.surbay.module";
-
 // User
 export * from "./User/mongo.user.create.service";
 export * from "./User/mongo.user.delete.service";

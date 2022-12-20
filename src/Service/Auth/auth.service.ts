@@ -49,6 +49,29 @@ export class AuthService {
   }
 
   /**
+   * userId 와 비밀번호를 인자로 받아, 해당 유저가 맞는지 확인합니다.
+   * @author 현웅
+   */
+  async authorize(userId: string, password: string) {
+    //* UserSecurity 정보 조회
+    const userSecurity = await this.mongoUserFindService.getUserSecurityById({
+      userId,
+      selectQuery: { password: true, salt: true },
+    });
+
+    //* 주어진 비밀번호 해쉬
+    const hashedPassword = await this.getHashedPassword(
+      password,
+      userSecurity.salt,
+    );
+
+    //* 비밀번호가 일치하지 않는 경우
+    if (hashedPassword !== userSecurity.password)
+      throw new WrongPasswordException();
+    return;
+  }
+
+  /**
    * 유저 기본 정보를 Jwt로 만들어 반환합니다.
    * @author 현웅
    */

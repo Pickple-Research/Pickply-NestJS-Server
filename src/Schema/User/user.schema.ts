@@ -38,6 +38,9 @@ export class User {
   @Prop({ default: false }) // 탈퇴 요청 여부
   deleted?: boolean;
 
+  @Prop() // 탈퇴 사유
+  resignReason?: string;
+
   @Prop({ required: true }) // 회원가입 일자
   createdAt: string;
 

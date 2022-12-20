@@ -2,7 +2,7 @@ import {
   Controller,
   Request,
   Param,
-  Headers,
+  Body,
   Delete,
   Inject,
 } from "@nestjs/common";
@@ -49,18 +49,14 @@ export class UserDeleteController {
   private readonly mongoVoteDeleteService: MongoVoteDeleteService;
 
   /**
-   * !caution: 서버에서 header 데이터를 못 받습니다
-   * User 데이터를 삭제합니다.
+   * 회원탈퇴를 요청합니다.
    * @author 현웅
    */
   @Delete("")
   async deleteUserById(
     @Request() req: { user: JwtUserInfo },
-    @Headers("user_id") userId: string,
+    @Body() body: { resignReason: string },
   ) {
-    //* 다른 사람이 회원탈퇴를 요청하는 경우
-    if (req.user.userId !== userId) throw new NotSelfRequestException();
-
     const startUserSession = this.userConnection.startSession();
     const startResearchSession = this.researchConnection.startSession();
     const startVoteSession = this.voteConnection.startSession();
@@ -74,17 +70,21 @@ export class UserDeleteController {
     });
 
     await tryMultiTransaction(async () => {
-      const deleteUser = this.mongoUserDeleteService.deleteUserById(
-        { userId },
-        userSession,
-      );
+      const deleteUser = this.mongoUserDeleteService.preDeleteUser({
+        userId: req.user.userId,
+        resignReason: body.resignReason,
+      });
+      // const deleteUser = this.mongoUserDeleteService.deleteUserById(
+      //   { userId: req.user.userId },
+      //   userSession,
+      // );
       const deleteResearchUser =
         this.mongoResearchDeleteService.deleteResearchUser(
-          { userId },
+          { userId: req.user.userId },
           researchSession,
         );
       const deleteVoteUser = this.mongoVoteDeleteService.deleteVoteUser(
-        { userId },
+        { userId: req.user.userId },
         voteSession,
       );
 
@@ -112,6 +112,7 @@ export class UserDeleteController {
   }
 
   /**
+   * @deprecated
    * User 데이터를 삭제합니다.
    * @author 현웅
    */

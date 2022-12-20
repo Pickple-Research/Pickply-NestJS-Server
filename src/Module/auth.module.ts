@@ -8,8 +8,6 @@ import {
   MongoResearchModule,
   MongoVoteModule,
 } from "src/Mongo";
-// SurBay
-import { MongoSurBayModule } from "src/Mongo";
 
 /**
  * 로그인, 정규유저 전환 기능을 담당합니다.
@@ -28,8 +26,6 @@ import { MongoSurBayModule } from "src/Mongo";
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: "14d" },
     }),
-    // SurBay
-    MongoSurBayModule,
   ],
   exports: [AuthService],
 })
