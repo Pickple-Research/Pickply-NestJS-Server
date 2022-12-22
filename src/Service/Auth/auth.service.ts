@@ -4,7 +4,12 @@ import { ClientSession } from "mongoose";
 import { GoogleService } from "src/Google";
 import { MongoUserFindService, MongoUserUpdateService } from "src/Mongo";
 import { JwtUserInfo } from "src/Object/Type";
-import { getSalt, getKeccak512Hash, didDatePassed } from "src/Util";
+import {
+  getSalt,
+  getKeccak512Hash,
+  didDatePassed,
+  getCurrentISOTime,
+} from "src/Util";
 import {
   WrongPasswordException,
   WrongAuthorizationCodeException,
@@ -83,33 +88,40 @@ export class AuthService {
   }
 
   /**
-   * 로그인 시 fcm 토큰이 같이 전달되는 경우 유저 데이터에 저장합니다.
+   * 로그인 시 전달되는 fcm 토큰, 사용자 OS, 사용 버전을 유저 데이터에 저장합니다.
    * @author 현웅
    */
-  async updateFcmToken(
+  async updateLoginInfo(
     param:
-      | { email: string; fcmToken?: string }
-      | { userId: string; fcmToken?: string },
+      | { email: string; fcmToken?: string; OS?: string; version?: string }
+      | { userId: string; fcmToken?: string; OS?: string; version?: string },
   ) {
     //* fcm 토큰이 없는 경우, 곧바로 반환
     if (!param.fcmToken) return;
 
-    //* userId 대신 email 이 주어진 경우 (일반 로그인)
+    let userId: string;
     if ("email" in param) {
-      const userId = await this.mongoUserFindService.getUserIdByEmail(
-        param.email,
-      );
-      await this.mongoUserUpdateService.updateUserNotificationSetting({
+      userId = await this.mongoUserFindService.getUserIdByEmail(param.email);
+    } else {
+      userId = param.userId;
+    }
+
+    const updateNotificationSetting =
+      this.mongoUserUpdateService.updateUserNotificationSetting({
         userId,
         updateQuery: { $set: { fcmToken: param.fcmToken } },
       });
-      return;
-    }
-    //* userId 가 주어진 경우 (자동 로그인)
-    await this.mongoUserUpdateService.updateUserNotificationSetting({
-      userId: param.userId,
-      updateQuery: { $set: { fcmToken: param.fcmToken } },
+    const updateProperty = this.mongoUserUpdateService.updateUserPropertyById({
+      userId,
+      updateQuery: {
+        $set: {
+          OS: param.OS,
+          version: param.version,
+          lastLoggedInAt: getCurrentISOTime(),
+        },
+      },
     });
+    await Promise.all([updateNotificationSetting, updateProperty]);
   }
 
   /**

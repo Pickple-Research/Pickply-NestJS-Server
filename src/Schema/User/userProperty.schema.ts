@@ -28,8 +28,17 @@ export class UserProperty {
   @Prop({ type: [String], enum: Category }) // (활동 정보를 바탕으로 추론한) 관심사 카테고리
   tendency?: Category[];
 
+  @Prop() // 사용자 OS
+  OS?: string;
+
+  @Prop() // 사용 중인 앱 버전
+  version?: string;
+
   @Prop() // 회원가입 일자
   createdAt: string;
+
+  @Prop() // 마지막 로그인 일자
+  lastLoggedInAt?: string;
 }
 
 export const UserPropertySchema = SchemaFactory.createForClass(UserProperty);

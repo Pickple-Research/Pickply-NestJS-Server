@@ -92,6 +92,23 @@ export class MongoUserUpdateService {
   }
 
   /**
+   * 특정 유저 특성 정보를 업데이트합니다.
+   * @author 현웅
+   */
+  async updateUserPropertyById(param: {
+    userId: string;
+    updateQuery?: UpdateQuery<UserPropertyDocument>;
+    selectQuery?: Partial<Record<keyof UserProperty, boolean>>;
+  }) {
+    return await this.UserProperty.findByIdAndUpdate(
+      param.userId,
+      param.updateQuery,
+    )
+      .select(param.selectQuery)
+      .lean();
+  }
+
+  /**
    * UserSecurity 스키마에 해당하는 값들을 업데이트합니다.
    * @author 현웅
    */
