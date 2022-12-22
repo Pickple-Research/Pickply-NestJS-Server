@@ -1,6 +1,9 @@
 import { Controller, Inject, Request, Body, Post } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
+import { UserCreateService, VoteUpdateService } from "src/Service";
+import { FirebaseService } from "src/Firebase";
+import { MongoVoteFindService, MongoVoteCreateService } from "src/Mongo";
 import {
   Notification,
   Vote,
@@ -13,8 +16,6 @@ import {
   CreditHistory,
   VoteStatTicket,
 } from "src/Schema";
-import { UserCreateService, VoteUpdateService } from "src/Service";
-import { MongoVoteFindService, MongoVoteCreateService } from "src/Mongo";
 import {
   VoteCreateBodyDto,
   VoteParticipateBodyDto,
@@ -52,6 +53,7 @@ export class VotePostController {
     private readonly voteConnection: Connection,
   ) {}
 
+  @Inject() private readonly firebaseService: FirebaseService;
   @Inject()
   private readonly mongoVoteFindService: MongoVoteFindService;
   @Inject()
@@ -115,14 +117,36 @@ export class VotePostController {
 
     const voteSession = await this.voteConnection.startSession();
 
-    return await tryMultiTransaction(async () => {
-      const { updatedVote, newVoteParticipation } =
-        await this.voteUpdateService.participateVote(
-          { voteId: body.voteId, voteParticipation },
-          voteSession,
-        );
-      return { updatedVote, newVoteParticipation };
-    }, [voteSession]);
+    const { updatedVote, newVoteParticipation } =
+      await tryMultiTransaction(async () => {
+        const { updatedVote, newVoteParticipation } =
+          await this.voteUpdateService.participateVote(
+            { voteId: body.voteId, voteParticipation },
+            voteSession,
+          );
+        return { updatedVote, newVoteParticipation };
+      }, [voteSession]);
+
+    //* 참여자 수가 30, 70, 100명에 도달할 때마다 푸시알림을 보냅니다.
+    const pn = updatedVote.participantsNum;
+    if (pn === 30 || pn === 70 || pn === 100) {
+      this.firebaseService.sendPushNotification({
+        userId: updatedVote.authorId,
+        pushAlarm: {
+          notification: {
+            title: `와! ${updatedVote.author.nickname}님이 쓰신 글에 ${pn}명이 참여했어요! 👏`,
+            body: "투표 결과를 확인해볼까요? 😳",
+          },
+          data: {
+            notificationId: "",
+            type: "ETC",
+            voteId: updatedVote._id.toString(),
+          },
+        },
+      });
+    }
+
+    return { updatedVote, newVoteParticipation };
   }
 
   /**

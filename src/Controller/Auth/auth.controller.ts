@@ -57,9 +57,11 @@ export class AuthController {
 
     //TODO: MongoService 로 대체?
     //* 유저 OS, 사용 버전, 마지막 로그인 시간, Fcm 토큰 업데이트
-    const updateFcmToken = this.authService.updateFcmToken({
+    const updateFcmToken = this.authService.updateLoginInfo({
       email: body.email,
       fcmToken: body.fcmToken,
+      OS: body.OS,
+      version: body.version,
     });
     //* 유저의 모든 활동 데이터 반환
     const getUserActivities = await this.userFindService.getUserActivities({
@@ -104,9 +106,11 @@ export class AuthController {
 
     //TODO: MongoService 로 대체?
     //* 유저 OS, 사용 버전, 마지막 로그인 시간, Fcm 토큰 업데이트
-    const updateFcmToken = this.authService.updateFcmToken({
+    const updateFcmToken = this.authService.updateLoginInfo({
       userId: req.user.userId,
       fcmToken: body.fcmToken,
+      OS: body.OS,
+      version: body.version,
     });
     //* 유저의 모든 활동 데이터 반환
     const getUserActivities = this.userFindService.getUserActivities({

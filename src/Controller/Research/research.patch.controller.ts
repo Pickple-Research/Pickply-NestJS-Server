@@ -225,6 +225,11 @@ export class ResearchPatchController {
             title: "내 리서치 참여자가 30명을 돌파했어요!😛",
             body: "축하해요! 픽플리 리뷰를 남겨주실래요?",
           },
+          data: {
+            notificationId: "",
+            type: "ETC",
+            researchId: updatedResearch._id.toString(),
+          },
         },
       });
     }
