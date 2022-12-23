@@ -257,7 +257,10 @@ export class MongoVoteFindService {
    * @author 현웅
    */
   async getFixedVotes() {
-    return [];
+    return await this.getVotes({
+      filterQuery: { _id: { $in: ["63a2c4454734d804a0211389"] } },
+    });
+    // return []
   }
 
   /**
