@@ -20,6 +20,6 @@ export const appVoteConstant: VoteConstant = {
     { value: VoteCategory.UNIV_STUDENT, displayName: "대학생" },
     { value: VoteCategory.POST_GRAD_STUDENT, displayName: "대학원생" },
     { value: VoteCategory.OFFICE_WORKER, displayName: "직장인" },
-    { value: VoteCategory.ETC, displayName: "기타" },
+    { value: VoteCategory.ETC, displayName: "자유" },
   ],
 };
