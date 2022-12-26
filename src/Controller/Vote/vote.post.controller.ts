@@ -128,7 +128,8 @@ export class VotePostController {
       }, [voteSession]);
 
     //* 참여자 수가 30, 70, 100명에 도달할 때마다 푸시알림을 보냅니다.
-    const pn = updatedVote.participantsNum;
+    const pn =
+      updatedVote.participantsNum + updatedVote.nonMemberParticipantsNum;
     if (pn === 30 || pn === 70 || pn === 100) {
       this.firebaseService.sendPushNotification({
         userId: updatedVote.authorId,
@@ -168,17 +169,40 @@ export class VotePostController {
       createdAt: getCurrentISOTime(),
     };
 
-    return await tryMultiTransaction(async () => {
-      const { updatedVote, newVoteNonMemberParticipation } =
-        await this.voteUpdateService.nonMemberParticipateVote(
-          {
-            voteId: body.voteId,
-            voteNonMemberParticipation,
+    const { updatedVote, newVoteNonMemberParticipation } =
+      await tryMultiTransaction(async () => {
+        const { updatedVote, newVoteNonMemberParticipation } =
+          await this.voteUpdateService.nonMemberParticipateVote(
+            {
+              voteId: body.voteId,
+              voteNonMemberParticipation,
+            },
+            voteSession,
+          );
+        return { updatedVote, newVoteNonMemberParticipation };
+      }, [voteSession]);
+
+    //* 참여자 수가 30, 70, 100명에 도달할 때마다 푸시알림을 보냅니다.
+    const pn =
+      updatedVote.participantsNum + updatedVote.nonMemberParticipantsNum;
+    if (pn === 30 || pn === 70 || pn === 100) {
+      this.firebaseService.sendPushNotification({
+        userId: updatedVote.authorId,
+        pushAlarm: {
+          notification: {
+            title: `와! ${updatedVote.author.nickname}님이 쓰신 글에 ${pn}명이 참여했어요! 👏`,
+            body: "투표 결과를 확인해볼까요? 😳",
           },
-          voteSession,
-        );
-      return { updatedVote, newVoteNonMemberParticipation };
-    }, [voteSession]);
+          data: {
+            notificationId: "",
+            type: "ETC",
+            voteId: updatedVote._id.toString(),
+          },
+        },
+      });
+    }
+
+    return { updatedVote, newVoteNonMemberParticipation };
   }
 
   /**
