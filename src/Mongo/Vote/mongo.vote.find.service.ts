@@ -257,10 +257,13 @@ export class MongoVoteFindService {
    * @author 현웅
    */
   async getFixedVotes() {
-    return await this.getVotes({
-      filterQuery: { _id: { $in: ["63a2c4454734d804a0211389"] } },
-    });
-    // return []
+    //* 고정 투표 _id 목록
+    // return await this.getVotes({
+    //   filterQuery: { _id: { $in: [""] } },
+    // });
+
+    //* 고정 투표가 필요 없는 경우
+    return [];
   }
 
   /**
