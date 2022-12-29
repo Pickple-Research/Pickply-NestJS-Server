@@ -15,6 +15,7 @@ type Event = {
 export type ServiceConstants = {
   APP_RECENT_VERSION: {
     version: string;
+    recommendUpdate: boolean;
     forceUpdate: boolean;
     updateList?: string[];
   };
@@ -37,7 +38,8 @@ export type ServiceConstants = {
  */
 export const appServiceConstant: ServiceConstants = {
   APP_RECENT_VERSION: {
-    version: "1.1.16",
+    version: "1.1.17",
+    recommendUpdate: false,
     forceUpdate: false,
     updateList: [],
   },
@@ -51,9 +53,9 @@ export const appServiceConstant: ServiceConstants = {
   KAKAO_CHAT_URL: "http://pf.kakao.com/_xkDElxj/chat",
 
   SERVICE_TERMS:
-    "https://docs.google.com/document/d/e/2PACX-1vRODbIfrzgcjFLgTRfN3Gtkjlb_t8XW2eBPK-8ANFTyoRFhbOrAYzx6mTY7nSYq5Q/pub?embedded=true",
+    "https://docs.google.com/document/d/e/2PACX-1vSSuPTA7Y6EBWjw5hCYBVJ4eaW68cRf9hYp1-Y_9H9WTAFHJBEXKo7O-A1UsEJ_BQ/pub?embedded=true",
   PRIVACY_TERMS:
-    "https://docs.google.com/document/d/e/2PACX-1vQ9pknYh_aZVLQZNuAydAqAgLXQIaPqjIWvMaVw77TSwB_LEi3U31OAGLkdZEM8tA/pub?embedded=true",
+    "https://docs.google.com/document/d/e/2PACX-1vS3HRyE32LgbNpmaxEgUGFT1vVX_Ht_FfWka_E6EB89RAeauUhttsJedkvN19nq0A/pub?embedded=true",
 
   event: {},
 };

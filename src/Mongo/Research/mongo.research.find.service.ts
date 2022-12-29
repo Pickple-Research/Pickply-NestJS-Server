@@ -207,9 +207,11 @@ export class MongoResearchFindService {
   async getResearchParticipations(param: {
     filterQuery?: FilterQuery<ResearchParticipationDocument>;
     selectQuery?: Partial<Record<keyof ResearchParticipation, boolean>>;
+    limit?: number;
   }) {
     return await this.ResearchParticipation.find(param.filterQuery)
       .select(param.selectQuery)
+      .limit(param.limit)
       .lean();
   }
 

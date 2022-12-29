@@ -5,6 +5,7 @@ import {
   UpdateUserNotificationSettingBodyDto,
 } from "src/Dto";
 import { JwtUserInfo } from "src/Object/Type";
+import { getCurrentISOTime } from "src/Util";
 
 @Controller("users")
 export class UserPatchController {
@@ -41,7 +42,7 @@ export class UserPatchController {
   }
 
   /**
-   * 알림 설정을 변경합니다.
+   * 알림 설정을 변경하고 마지막 변경 시간을 업데이트합니다.
    * @author 현웅
    */
   @Patch("notifications/setting")
@@ -51,7 +52,7 @@ export class UserPatchController {
   ) {
     await this.mongoUserUpdateService.updateUserNotificationSetting({
       userId: req.user.userId,
-      updateQuery: { $set: body },
+      updateQuery: { $set: { ...body, lastUpdatedAt: getCurrentISOTime() } },
     });
     return;
   }
