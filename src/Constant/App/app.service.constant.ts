@@ -38,7 +38,7 @@ export type ServiceConstants = {
  */
 export const appServiceConstant: ServiceConstants = {
   APP_RECENT_VERSION: {
-    version: "1.1.17",
+    version: "1.1.16",
     recommendUpdate: false,
     forceUpdate: false,
     updateList: [],
