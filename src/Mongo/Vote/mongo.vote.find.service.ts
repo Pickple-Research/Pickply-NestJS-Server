@@ -262,29 +262,33 @@ export class MongoVoteFindService {
     //   filterQuery: { _id: { $in: [""] } },
     // });
 
-    //* 고정 투표가 필요 없는 경우
+    //* 고정 투표가 없는 경우
     return [];
   }
 
   /**
    * 최신 투표를 가져옵니다. 인자가 주어지지 않으면 20개를 가져옵니다.
+   * analytics 데이터는 제외하고 가져옵니다.
    * @author 현웅
    */
   async getRecentVotes(limit: number = 20) {
     return await this.getVotes({
       filterQuery: { hidden: false, blocked: false },
+      selectQuery: { analytics: false },
       limit,
     });
   }
 
   /**
-   * 각 카테고리별 최신 투표를 하나씩 가져옵니다
+   * 각 카테고리별 최신 투표를 하나씩 가져옵니다.
+   * analytics 데이터는 제외하고 가져옵니다.
    * @author 현웅
    */
   async getRecentCategoryVotes() {
     const votes = await Promise.all(
       AllVoteCategory.map((category) => {
         return this.Vote.findOne({ category, hidden: false, blocked: false })
+          .select({ analytics: false })
           .sort({ _id: -1 })
           .populate({ path: "author", model: this.VoteUser })
           .lean();

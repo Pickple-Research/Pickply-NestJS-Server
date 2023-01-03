@@ -33,7 +33,7 @@ export class Research {
   @Prop({ required: true }) // 리서치 내용
   content: string;
 
-  @Prop({ required: true }) // 리서치 목적 (학술, 개인, 기타, ...)
+  @Prop({ required: true }) // 리서치 목적 (학술, 비즈니스 마케팅, 비즈니스 창업, 기타, ...)
   purpose: string;
 
   @Prop({ required: true }) // 리서치 종류 (설문조사, 실험참여, UIUX 설문, ...)
@@ -59,6 +59,9 @@ export class Research {
 
   @Prop({ required: true }) // 예상 소요시간
   estimatedTime: number;
+
+  @Prop() // 검수 수 확정된 소요시간. 처음 생성될 때는 estimatedTime 으로 입력된 값을 따릅니다.
+  confirmedEstimatedTime: number;
 
   @Prop() // 참여시 제공 크레딧
   credit: number;
@@ -114,6 +117,12 @@ export class Research {
 
   @Prop({ default: false }) // 리서치 게시 승인 여부
   confirmed?: boolean;
+
+  @Prop({ default: true }) // 결제 서비스를 이용하는 리서치의 경우, 결제 완료 여부. (결제 서비스를 사용하지 않고 크레딧을 사용하여 업로드 한 일반 리서치의 경우, 항상 true 값을 가집니다.)
+  paid?: boolean;
+
+  @Prop() // 결제 정보 _id
+  paymentId?: string;
 
   @Prop({ default: false }) // 숨김 여부
   hidden?: boolean;

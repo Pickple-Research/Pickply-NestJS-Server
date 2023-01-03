@@ -28,7 +28,7 @@ export class AppController {
   @Public()
   @Get("release")
   async test() {
-    return "2022-12-29 1622 v1.1.23";
+    return "2023-01-03 1935 v1.1.24";
   }
 
   /**
@@ -57,8 +57,15 @@ export class AppController {
   }
 
   /**
-   * 앱을 처음 시작할 때 호출합니다.
-   * 모든 공지사항, 최신 리서치, 추천 리서치, 최신 투표, HOT 투표, 카테고리별 최신 투표를 가져옵니다.
+   * 앱을 처음 시작할 때 호출합니다. 아래와 같은 정보들을 반환합니다:
+   *
+   *  - 모든 공지사항 (TODO: 첫 20개만)
+   *  - 최신 리서치
+   *  - 추천 리서치
+   *  - 최신 투표 (TODO: analytics 속성은 제거하고 가져옵니다)
+   *  - HOT 투표 (TODO: analytics 속성은 제거하고 가져옵니다)
+   *  - 카테고리별 최신 투표
+   *
    * @author 현웅
    */
   @Public()

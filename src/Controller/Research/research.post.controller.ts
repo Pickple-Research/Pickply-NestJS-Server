@@ -169,10 +169,14 @@ export class ResearchPostController {
       ...param.body,
       //TODO: 추후 앱단에서 수정
       //? 왜 이렇게 하나요?: 구글 폼을 이용해 리서치를 진행할 때 로그인을 요구하는 리서치인 경우 리서치 마감 감지를 못합니다. (이유는 불명)
-      link: param.body.link.startsWith("https://accounts.google.com")
-        ? param.body.originalLink
-        : param.body.link,
+      //? 모아폼의 경우 역시 변환된 url 이 answer.moaform.com 으로 시작하는 경우 완료 감지를 못 합니다.
+      link:
+        param.body.link.startsWith("https://accounts.google.com") ||
+        param.body.link.startsWith("https://answer.moaform.com")
+          ? param.body.originalLink
+          : param.body.link,
       authorId: param.userId,
+      confirmedEstimatedTime: param.body.estimatedTime,
       credit: ACHEIVE_CREDIT_PER_MINUTE(param.body.estimatedTime),
       pulledupAt: currentTime,
       createdAt: currentTime,
@@ -293,7 +297,7 @@ export class ResearchPostController {
         body.content.length < 60
           ? body.content
           : `${body.content.slice(0, 60)}...`
-      }\n리서치 _id: ${body.researchId}`,
+      }\n리서치: ${updatedResearch.title}`,
       });
     }
 
@@ -354,7 +358,7 @@ export class ResearchPostController {
             body.content.length < 60
               ? body.content
               : `${body.content.slice(0, 60)}...`
-          }\n리서치 _id: ${body.researchId}`,
+          }\n리서치: ${updatedResearch.title}`,
       });
     }
 
