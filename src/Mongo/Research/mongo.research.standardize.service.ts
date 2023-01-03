@@ -15,7 +15,23 @@ export class MongoResearchStandardizeService {
   ) {}
 
   async standardize() {
-    await this.confirmAllResearch();
+    await this.addPaidAndConfirmedEstimatedTimeProperty();
+  }
+
+  /**
+   * v1.1.24) paid 속성, confirmedEstimatedTime 속성 추가
+   * (앱 버전 v1.1.18 승격시 적용)
+   * @author 현웅
+   */
+  async addPaidAndConfirmedEstimatedTimeProperty() {
+    await this.Research.find().then((researches) => {
+      console.log(researches.length);
+      researches.forEach((research) => {
+        research.paid = true;
+        research.confirmedEstimatedTime = research.estimatedTime;
+        research.save();
+      });
+    });
   }
 
   /**

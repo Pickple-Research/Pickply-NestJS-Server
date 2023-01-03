@@ -1,6 +1,7 @@
 import { Controller, Body, Post, Inject, Req } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
+import { MongoResearchUpdateService } from "src/Mongo";
 import {
   MongoPaymentFindService,
   MongoPaymentCreateService,
@@ -28,6 +29,8 @@ export class IamportPostController {
     private readonly paymentConnection: Connection,
   ) {}
 
+  @Inject()
+  private readonly mongoResearchUpdateService: MongoResearchUpdateService;
   @Inject()
   private readonly mongoPaymentFindService: MongoPaymentFindService;
   @Inject()
@@ -67,8 +70,9 @@ export class IamportPostController {
   }
 
   /**
-   * 앱단에서 아임포트를 이용해 결제를 완료하는 경우 아임포트 웹훅을 통해 자동으로 호출되는 API 입니다.
+   * 앱단에서 아임포트를 이용해 결제를 완료하는 경우 아임포트 사의 웹훅을 통해 자동으로 호출되는 API 입니다.
    * 결제 정보 (imp_uid, merchant_uid, amount) 를 아임포트로부터 가져와 DB 에 존재하는 주문 정보와 비교합니다.
+   * 이 때, merchant_uid 는 주문 정보의 _id 와 동일합니다.
    * @author 현웅
    */
   @Public()
@@ -76,14 +80,15 @@ export class IamportPostController {
   async iamportPaidWebhook(
     @Body() body: { imp_uid: string; merchant_uid: string },
   ) {
+    //* DB 단의 주문 정보를 가져옵니다. (결제 전에 "[POST] /iamport/order" 요청으로 생성하였던 정보)
     const getOrderInfo = this.mongoPaymentFindService.getOrderById(
       body.merchant_uid,
     );
-
+    //* 아임포트 사의 결제 정보를 가져옵니다.
     const getPaymentResponse = this.iamportFindService.getIamportPaymentAmount(
       body.imp_uid,
     );
-
+    //* 위의 두 함수를 동시에 실행
     const { orderInfo, paymentResponse } = await Promise.all([
       getOrderInfo,
       getPaymentResponse,
@@ -91,7 +96,7 @@ export class IamportPostController {
       return { orderInfo, paymentResponse };
     });
 
-    const { amount, ...otherInfo } = paymentResponse;
+    const { amount, ...additionalInfo } = paymentResponse;
 
     /**
      * 결제에 대한 주문 정보가 없거나, 주문 정보의 금액과 결제 금액이 다른 경우: 에러
@@ -116,9 +121,17 @@ export class IamportPostController {
     await tryMultiTransaction(async () => {
       //* 결제 정보 생성
       const newPayment = await this.mongoPaymentCreateService.createPayment(
-        { payment, otherInfo },
+        { payment, additionalInfo },
         paymentSession,
       );
+      //* 결제된 리서치 정보의 paid 속성을 true 로 변경하고, paymentId 를 반영합니다.
+      await this.mongoResearchUpdateService.updateResearchById({
+        researchId: orderInfo.researchId,
+        updateQuery: {
+          $set: { paid: true, paymentId: newPayment._id.toString() },
+        },
+      });
+
       //* 생성된 결제 정보 _id 를 주문 정보에 추가 (session 은 사용하지 않습니다.)
       await this.mongoPaymentUpdateService.updateOrderById({
         orderId: body.merchant_uid,

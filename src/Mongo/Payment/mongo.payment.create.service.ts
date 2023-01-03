@@ -25,11 +25,11 @@ export class MongoPaymentCreateService {
    * @author 현웅
    */
   async createPayment(
-    param: { payment: Payment; otherInfo?: Record<string, any> },
+    param: { payment: Payment; additionalInfo?: Record<string, any> },
     session: ClientSession,
   ) {
     const newPayments = await this.Payment.create(
-      [{ ...param.payment, ...param.otherInfo }],
+      [{ ...param.payment, ...param.additionalInfo }],
       { session },
     );
     return newPayments[0].toObject();
