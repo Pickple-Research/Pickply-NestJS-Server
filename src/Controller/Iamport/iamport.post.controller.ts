@@ -1,19 +1,23 @@
 import { Controller, Body, Post, Inject, Req } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
-import { MongoResearchUpdateService } from "src/Mongo";
 import {
+  MongoResearchUpdateService,
   MongoPaymentFindService,
   MongoPaymentCreateService,
   MongoPaymentUpdateService,
 } from "src/Mongo";
 import { IamportFindService } from "src/Service";
+import { GoogleService } from "src/Google";
 import { JwtUserInfo } from "src/Object/Type";
 import { IamportCreateOrderDto } from "src/Dto";
 import { Order, Payment } from "src/Schema";
 import { getCurrentISOTime, tryMultiTransaction } from "src/Util";
 import { Public } from "src/Security/Metadata";
-import { MONGODB_PAYMENT_CONNECTION } from "src/Constant";
+import {
+  MONGODB_RESEARCH_CONNECTION,
+  MONGODB_PAYMENT_CONNECTION,
+} from "src/Constant";
 import { InvalidPaymentException } from "src/Exception";
 
 /**
@@ -25,10 +29,14 @@ export class IamportPostController {
   constructor(
     private readonly iamportFindService: IamportFindService,
 
+    @InjectConnection(MONGODB_RESEARCH_CONNECTION)
+    private readonly researchConnection: Connection,
     @InjectConnection(MONGODB_PAYMENT_CONNECTION)
     private readonly paymentConnection: Connection,
   ) {}
 
+  @Inject()
+  private readonly googleService: GoogleService;
   @Inject()
   private readonly mongoResearchUpdateService: MongoResearchUpdateService;
   @Inject()
@@ -104,7 +112,7 @@ export class IamportPostController {
     if (!orderInfo || orderInfo.amount !== amount)
       throw new InvalidPaymentException();
 
-    // 결제가 정상적으로 이루어진 경우, 주문 정보로부터 정보를 가져온 후 결제 정보를 생성
+    // 주문 정보와 결제 정보가 일치하는 경우, 주문 정보로부터 정보를 가져온 후 결제 정보를 생성
     const payment: Payment = {
       imp_uid: body.imp_uid,
       orderId: body.merchant_uid,
@@ -116,6 +124,7 @@ export class IamportPostController {
       createdAt: getCurrentISOTime(),
     };
 
+    const researchSession = await this.researchConnection.startSession();
     const paymentSession = await this.paymentConnection.startSession();
 
     await tryMultiTransaction(async () => {
@@ -125,19 +134,22 @@ export class IamportPostController {
         paymentSession,
       );
       //* 결제된 리서치 정보의 paid 속성을 true 로 변경하고, paymentId 를 반영합니다.
-      await this.mongoResearchUpdateService.updateResearchById({
-        researchId: orderInfo.researchId,
-        updateQuery: {
-          $set: { paid: true, paymentId: newPayment._id.toString() },
+      await this.mongoResearchUpdateService.updateResearchById(
+        {
+          researchId: orderInfo.researchId,
+          updateQuery: {
+            $set: { paid: true, paymentId: newPayment._id.toString() },
+          },
         },
-      });
+        researchSession,
+      );
 
       //* 생성된 결제 정보 _id 를 주문 정보에 추가 (session 은 사용하지 않습니다.)
       await this.mongoPaymentUpdateService.updateOrderById({
         orderId: body.merchant_uid,
         updateQuery: { $set: { paymentId: newPayment._id.toString() } },
       });
-    }, [paymentSession]);
+    }, [researchSession, paymentSession]);
 
     return;
   }

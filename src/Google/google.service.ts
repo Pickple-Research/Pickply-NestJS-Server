@@ -45,4 +45,42 @@ export class GoogleService {
         throw new EmailTransmitFailedException();
       });
   }
+  /**
+   * 이메일을 전송합니다.
+   * @param to 전송할 이메일 주소
+   * @param subject 이메일 제목
+   * @param content 이메일 내용
+   * @author 현웅
+   */
+  async sendEmail(param: { to: string; subject: string; content: string }) {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      host: "smtp-relay.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        type: "OAuth2",
+        user: process.env.GMAIL_OAUTH_USER,
+        serviceClient: process.env.GMAIL_PROJECT_CLIENT_ID,
+        privateKey: process.env.GMAIL_PROJECT_CLIENT_PRIVATE_KEY,
+      },
+    });
+
+    const message = {
+      from: "픽플리 <noreply@r2c.company>",
+      to: param.to,
+      subject: param.subject,
+      html: param.content,
+    };
+
+    await transporter
+      .sendMail(message)
+      .then((info) => {
+        // console.log(info.messageId);
+        return;
+      })
+      .catch((err) => {
+        throw new EmailTransmitFailedException();
+      });
+  }
 }

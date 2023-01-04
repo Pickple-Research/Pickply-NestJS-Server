@@ -7,6 +7,7 @@ import {
 } from "src/Controller";
 import { IamportFindService } from "src/Service";
 import { MongoResearchModule, MongoPaymentModule } from "src/Mongo";
+import { GoogleModule } from "src/Google";
 
 @Module({
   controllers: [
@@ -15,6 +16,6 @@ import { MongoResearchModule, MongoPaymentModule } from "src/Mongo";
     IamportPostController,
   ],
   providers: [IamportFindService],
-  imports: [HttpModule, MongoResearchModule, MongoPaymentModule],
+  imports: [HttpModule, GoogleModule, MongoResearchModule, MongoPaymentModule],
 })
 export class IamportModule {}
