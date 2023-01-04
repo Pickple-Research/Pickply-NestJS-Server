@@ -275,29 +275,35 @@ export class ResearchPostController {
         );
       }, [researchSession]);
 
-    //* 리서치 댓글 생성이 완료되면 해당 내용에 대한 알림을 생성하고 알림을 보냅니다.
-    if (req.user.userId !== updatedResearch.authorId) {
-      const notification: Notification = {
-        userId: updatedResearch.authorId,
-        type: AlarmType.NEW_COMMENT_TO_RESEARCH,
-        title: NEW_COMMENT_ALRAM_TITLE,
-        content: NEW_COMMENT_ALRAM_CONTENT,
-        detail: updatedResearch.title,
-        createdAt: currentISOTime,
-        researchId: body.researchId,
-      };
-      this.userCreateService.makeNotification({ notification });
-    }
+    const isSelfComment = req.user.userId === updatedResearch.authorId;
+    const isAdminComment = req.user.userType === UserType.ADMIN;
 
-    //* 또한 관리자가 단 댓글이 아니라면, Slack 운영 채널에 메세지를 보냅니다.
-    if (req.user.userType !== UserType.ADMIN) {
+    //* 리서치 댓글 생성이 완료되면 해당 내용에 대한 알림을 생성합니다.
+    const notification: Notification = {
+      userId: updatedResearch.authorId,
+      type: AlarmType.NEW_COMMENT_TO_RESEARCH,
+      title: isAdminComment
+        ? "회원님의 글에 운영진의 댓글이 달렸습니다"
+        : NEW_COMMENT_ALRAM_TITLE,
+      content: isAdminComment
+        ? body.content.slice(0, 60)
+        : NEW_COMMENT_ALRAM_CONTENT,
+      detail: updatedResearch.title,
+      createdAt: currentISOTime,
+      researchId: body.researchId,
+    };
+    //* 본인 이외의 유저가 댓글을 단 경우 푸시 알림 전송을 요청합니다.
+    //* 이 때, 관리자가 댓글을 달았다면 푸시 알림 조건을 무시하고 전송합니다.
+    if (!isSelfComment) {
+      this.userCreateService.makeNotification({
+        notification,
+        force: isAdminComment,
+      });
+    }
+    //* 관리자가 단 댓글이 아니라면, Slack 운영 채널에 메세지를 보냅니다.
+    if (!isAdminComment) {
       this.slackService.sendMessageToSlackResearchCommentBotChannel({
-        message: `
-      리서치에 새로운 댓글: ${
-        body.content.length < 60
-          ? body.content
-          : `${body.content.slice(0, 60)}...`
-      }\n리서치: ${updatedResearch.title}`,
+        message: `리서치에 새로운 댓글: ${body.content}}\n(리서치: ${updatedResearch.title})`,
       });
     }
 
@@ -336,29 +342,35 @@ export class ResearchPostController {
         );
       }, [researchSession]);
 
-    //* 리서치 대댓글 생성이 완료되면 해당 내용에 대한 알림을 생성하고 알림을 보냅니다.
-    if (req.user.userId !== body.targetUserId) {
-      const notification: Notification = {
-        userId: body.targetUserId,
-        type: AlarmType.NEW_REPLY_TO_RESEARCH,
-        title: NEW_REPLY_ALRAM_TITLE,
-        content: NEW_REPLY_ALRAM_CONTENT,
-        detail: updatedResearch.title,
-        createdAt: currentISOTime,
-        researchId: body.researchId,
-      };
-      this.userCreateService.makeNotification({ notification });
-    }
+    const isSelfReply = req.user.userId === body.targetUserId;
+    const isAdminReply = req.user.userType === UserType.ADMIN;
 
-    //* 또한 관리자가 단 대댓글이 아니라면, Slack 운영 채널에 메세지를 보냅니다.
+    //* 리서치 대댓글 생성이 완료되면 해당 내용에 대한 알림을 생성합니다.
+    const notification: Notification = {
+      userId: body.targetUserId,
+      type: AlarmType.NEW_REPLY_TO_RESEARCH,
+      title: isAdminReply
+        ? "회원님의 댓글에 운영진의 대댓글이 달렸습니다"
+        : NEW_REPLY_ALRAM_TITLE,
+      content: isAdminReply
+        ? body.content.slice(0, 60)
+        : NEW_REPLY_ALRAM_CONTENT,
+      detail: updatedResearch.title,
+      createdAt: currentISOTime,
+      researchId: body.researchId,
+    };
+    //* 댓글 작성자 이외의 유저가 대댓글을 단 경우 푸시 알림 전송을 요청합니다.
+    //* 이 때, 관리자가 댓글을 달았다면 푸시 알림 조건을 무시하고 전송합니다.
+    if (!isSelfReply) {
+      this.userCreateService.makeNotification({
+        notification,
+        force: isAdminReply,
+      });
+    }
+    //* 관리자가 단 대댓글이 아니라면, Slack 운영 채널에 메세지를 보냅니다.
     if (req.user.userType !== UserType.ADMIN) {
       this.slackService.sendMessageToSlackResearchCommentBotChannel({
-        message: `
-          리서치에 새로운 대댓글: ${
-            body.content.length < 60
-              ? body.content
-              : `${body.content.slice(0, 60)}...`
-          }\n리서치: ${updatedResearch.title}`,
+        message: `리서치에 새로운 대댓글: ${body.content}\n(리서치: ${updatedResearch.title})`,
       });
     }
 
