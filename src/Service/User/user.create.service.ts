@@ -151,10 +151,18 @@ export class UserCreateService {
   }
 
   /**
-   * 개인화된 알림을 생성하고 푸시알림을 보냅니다. Session 은 사용하지 않습니다.
+   * 유저 한명에게 개인화된 알림을 생성하고 푸시알림을 보냅니다. Session 은 사용하지 않습니다.
+   *
+   * @param force 조건을 무시하고 알림을 전송할지 여부
+   *
    * @author 현웅
    */
-  async makeNotification(param: { notification: Notification }) {
+  async makeNotification(param: {
+    notification: Notification;
+    force?: boolean;
+  }) {
+    const force = param.force ? param.force : false;
+
     //* 알림 생성
     const newNotification =
       await this.mongoUserCreateService.createNotification({
@@ -169,8 +177,11 @@ export class UserCreateService {
       },
     );
 
-    //* 전송 대상 유저가 없거나, fcmToken 이 없거나 (로그아웃), 푸시알림 수신 동의를 하지 않은 경우 전송하지 않습니다.
-    if (!user || !Boolean(user.fcmToken) || !user.appPush) return;
+    //* 전송 대상 유저가 없거나, fcmToken 이 없는 경우 (로그아웃) 전송하지 않습니다.
+    if (!user || !Boolean(user.fcmToken)) return;
+
+    //* 푸시알림 수신 동의를 하지 않은 경우 역시 전송하지 않지만, force 옵션이 true 인 경우 조건에 관계 없이 전송합니다.
+    if (!user.appPush && !force) return;
 
     //* 푸시알림에 들어가는 데이터는 string 형태여야 하므로, undefined 값이 생기지 않도록 빈 값을 넣어줍니다.
     //* (나중에 일부 data 에는 JSON.stringify 를 해주어야 할 수도 있습니다)

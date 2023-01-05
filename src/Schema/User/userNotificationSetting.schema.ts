@@ -39,6 +39,9 @@ export class UserNotificationSetting {
 
   @Prop() // 마케팅 알림
   agreeMarketingDate?: string;
+
+  @Prop() // 알림 설정 변경 시간
+  lastUpdatedAt?: string;
 }
 
 export const UserNotificationSettingSchema = SchemaFactory.createForClass(

@@ -178,7 +178,7 @@ export class MongoResearchFindService {
   }
 
   /**
-   * 특정 유저가 스크랩한 리서치 스크랩 정보를 모두 가져옵니다.
+   * 특정 유저가 스크랩한 리서치 스크랩 정보 중 researchId 만 뽑아 모두 가져옵니다.
    * @author 현웅
    */
   async getUserResearchScraps(userId: string) {
@@ -189,7 +189,7 @@ export class MongoResearchFindService {
   }
 
   /**
-   * 특정 유저가 참여한 리서치 참여 정보를 모두 가져옵니다.
+   * 특정 유저가 참여한 리서치 참여 정보 중 researchId 만 뽑아 모두 가져옵니다.
    * @author 현웅
    */
   async getUserResearchParticipations(userId: string) {
@@ -207,9 +207,11 @@ export class MongoResearchFindService {
   async getResearchParticipations(param: {
     filterQuery?: FilterQuery<ResearchParticipationDocument>;
     selectQuery?: Partial<Record<keyof ResearchParticipation, boolean>>;
+    limit?: number;
   }) {
     return await this.ResearchParticipation.find(param.filterQuery)
       .select(param.selectQuery)
+      .limit(param.limit)
       .lean();
   }
 
@@ -268,7 +270,13 @@ export class MongoResearchFindService {
         confirmed: true, // 승인되었으며
         hidden: false, // 숨겼거나
         blocked: false, // 차단되지 않은 리서치 중
-        pulledupAt: { $gt: param.pulledupAt }, // 주어진 pulledupAt 시기보다 더 나중에 끌올된 리서치
+        pulledupAt: { $gt: param.pulledupAt }, // 주어진 pulledupAt 시기보다 더 나중에 끌올된 리서치 중에서
+        // v1.1.19) 마감되지 않은 리서치들
+        closed: false,
+        $or: [
+          { deadline: { $eq: "" } },
+          { deadline: { $gt: getCurrentISOTime() } },
+        ],
       },
     });
   }

@@ -86,21 +86,24 @@ type ResearchFoam = {
 };
 
 /**
- * @AppSync
- * 리서치 관련 상수 타입
+ * 서버에서 동기화하는 리서치 관련 상수 타입
  * @author 현웅
  */
 type ResearchConstant = {
-  RESEARCH_PULLUP_CREDIT: number;
-  forms: ResearchForm[];
-  researchTypes: EnumValueWithName[];
-  researchPurposes: EnumValueWithName[];
-  researchCategories: EnumValueWithName[];
+  RESEARCH_PULLUP_CREDIT: number; // 리서치 끌올에 필요한 크레딧
+  forms: ResearchForm[]; // 리서치에서 허용하는 폼
+  researchTypes: EnumValueWithName[]; // 리서치 타입(유형)
+  researchPurposes: EnumValueWithName[]; // 리서치 진행 목적
+  researchCategories: EnumValueWithName[]; // 리서치 카테고리
 
   /** @deprecated #DELETE-AT-YEAR-END */
   foamDatas: ResearchFoam[];
 };
 
+/**
+ * 앱에서 사용되는 리서치 상수 중, 서버와 동기화되는 부분입니다.
+ * @author 현웅
+ */
 export const appResearchConstant: ResearchConstant = {
   RESEARCH_PULLUP_CREDIT: RESEARCH_PULLUP_CREDIT,
   forms: [

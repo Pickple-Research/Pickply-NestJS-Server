@@ -211,7 +211,7 @@ export class AdminResearchPatchController {
   @Roles(UserType.ADMIN)
   @Patch("close")
   async closeResearch(@Body() body: { researchId: string }) {
-    await this.researchUpdateService.closeResearch({
+    return await this.researchUpdateService.closeResearch({
       userId: "",
       researchId: body.researchId,
       skipValidation: true,
@@ -309,7 +309,7 @@ export class AdminResearchPatchController {
    * @author 현웅
    */
   @Roles(UserType.ADMIN)
-  @Patch("participations/invalid")
+  @Patch("participations/invalidate")
   async invalidateResearchParticipations(
     @Body() body: { researchId: string; userIds: string[] },
   ) {
