@@ -18,9 +18,10 @@ import {
   AdminVotePatchController,
 } from "src/Controller";
 import { FirebaseModule } from "src/Firebase";
-import { AdminUpdateService, ResearchUpdateService } from "src/Service";
+import { AdminUpdateService, ResearchUpdateService, UserFindService } from "src/Service";
 import { AuthModule } from "./auth.module";
 import { UserModule } from "./user.module";
+
 import {
   MongoUserModule,
   MongoResearchModule,
@@ -47,7 +48,7 @@ import {
     AdminVoteGetController,
     AdminVotePatchController,
   ],
-  providers: [AdminUpdateService, ResearchUpdateService],
+  providers: [AdminUpdateService, ResearchUpdateService, UserFindService],
   imports: [
     FirebaseModule,
     AuthModule,
@@ -58,4 +59,4 @@ import {
     MongoNoticeModule,
   ],
 })
-export class AdminModule {}
+export class AdminModule { }
