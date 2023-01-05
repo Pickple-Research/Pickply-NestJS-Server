@@ -1,4 +1,4 @@
-import { Controller, Inject, Body, Patch } from "@nestjs/common";
+import { Controller, Inject, Body, Patch, Param } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
 import { Roles } from "src/Security/Metadata";
@@ -29,7 +29,7 @@ export class AdminResearchPatchController {
 
     @InjectConnection(MONGODB_RESEARCH_CONNECTION)
     private readonly researchConnection: Connection,
-  ) {}
+  ) { }
 
   @Inject()
   private readonly userCreateService: UserCreateService;
@@ -39,6 +39,43 @@ export class AdminResearchPatchController {
   private readonly mongoResearchUpdateService: MongoResearchUpdateService;
   @Inject()
   private readonly mongoResearchDeleteService: MongoResearchDeleteService;
+
+
+
+  /**
+   * 리서치를 수정합니다.
+   * @author 승원
+   * 
+   * 
+   */
+  @Roles(UserType.ADMIN)
+  @Patch(":researchId")
+  async updateResearch(
+    @Param("researchId") researchId: string,
+    @Body() body: Partial<Research>,
+  ) {
+    const updatedResearch =
+      await this.mongoResearchUpdateService.updateResearchById({
+        researchId: researchId,
+        updateQuery: { $set: { ...body } },
+      });
+
+    console.log(updatedResearch)
+    //* 업데이트하는 내용 중 검수 완료가 포함된 경우
+    // if (body.research.confirmed === true) {
+    //   const notification: Notification = {
+    //     userId: updatedResearch.authorId,
+    //     type: "RESEARCH_CONFIRM",
+    //     title: "작성하신 게시물의 검수가 완료되었습니다!",
+    //     content: "리서치를 통해 픽플러분들과 소통해보세요",
+    //     detail: updatedResearch.title,
+    //     createdAt: getCurrentISOTime(),
+    //     researchId: updatedResearch._id.toString(),
+    //   };
+    //   await this.userCreateService.makeNotification({ notification });
+    // }
+    return updatedResearch;
+  }
 
   /**
    * 리서치 정보를 수정합니다.
