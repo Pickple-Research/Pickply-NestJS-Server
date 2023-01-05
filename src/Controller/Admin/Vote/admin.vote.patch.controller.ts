@@ -1,4 +1,4 @@
-import { Controller, Inject, Body, Patch } from "@nestjs/common";
+import { Controller, Inject, Body, Patch, Param, } from "@nestjs/common";
 import { Roles } from "src/Security/Metadata";
 import { MongoVoteUpdateService } from "src/Mongo";
 import {
@@ -6,6 +6,11 @@ import {
   CommentBlockBodyDto,
   ReplyBlockBodyDto,
 } from "src/Dto";
+
+import {
+  VoteDocument,
+} from "src/Schema";
+
 import { UserType } from "src/Object/Enum";
 
 /**
@@ -14,10 +19,29 @@ import { UserType } from "src/Object/Enum";
  */
 @Controller("admin/votes")
 export class AdminVotePatchController {
-  constructor() {}
+  constructor() { }
 
   @Inject()
   private readonly mongoVoteUpdateService: MongoVoteUpdateService;
+
+  /**
+   * 투표를 수정합니다.
+   * @author 승원
+   * @param body
+   * @param voteId
+   *
+   */
+
+  @Roles(UserType.ADMIN)
+  @Patch(":voteId")
+  async updateVote(@Body() body: Partial<VoteDocument>, @Param("voteId") voteId: string) {
+
+    return await this.mongoVoteUpdateService.updateVote({
+      voteId,
+      updateQuery: { $set: { ...body } },
+    })
+
+  }
 
   /**
    * 투표를 블락처리합니다.
