@@ -18,8 +18,6 @@ export class AdminResearchGetController {
   private readonly mongoResearchFindService: MongoResearchFindService;
   @Inject()
   private readonly mongoResearchStandardizeService: MongoResearchStandardizeService;
-  @Inject()
-  private readonly mongoResearchFindService: MongoResearchFindService;
 
   /**
    * 
@@ -79,9 +77,9 @@ export class AdminResearchGetController {
       const hour = Math.floor(
         (new Date(lastParticipation.createdAt).getTime() -
           new Date(researchInfo.createdAt).getTime()) /
-          1000 /
-          60 /
-          60,
+        1000 /
+        60 /
+        60,
       );
 
       datas.push({
