@@ -12,9 +12,7 @@ import { UserFindService } from "src/Service";
  */
 @Controller("admin/users")
 export class AdminUserGetController {
-  constructor(
-    // private readonly userFindService: UserFindService
-  ) { }
+  constructor() {}
 
   @Inject() private readonly mongoUserFindService: MongoUserFindService;
   @Inject() private readonly mongoUserStatService: MongoUserStatService;
@@ -23,14 +21,12 @@ export class AdminUserGetController {
   /**
    * 회원 기본 정보를 모두 가져옵니다.
    * @author 승원
-   * 
+   *
    * 유저의 기본 정보와 특성 정보를 DB에서
    *  가져와서 합친 후 반환합니다.
-   * 
+   *
    * @return 유저의 기본 정보와 특성 정보가 합쳐진 배열
    */
-
-
   @Roles(UserType.ADMIN)
   @Get("")
   async getUsers() {
@@ -39,31 +35,6 @@ export class AdminUserGetController {
     //const usersAndProperties = await this.mongoUserFindService.getUsersAndProperties({});
 
     return encrypt(users);
-  }
-
-
-  @Roles(UserType.ADMIN)
-  @Get(":userId")
-  async getUserInfo(@Param("userId") userId: string) {
-    const getUserInfo = await this.mongoUserFindService.getUserInfoById(userId);
-
-    const getUserActivities = await this.userFindService.getUserActivities({
-      userId
-    })
-
-    const user = await Promise.all([
-      getUserInfo,
-      getUserActivities
-
-    ]).then(([userInfo, userActivities]) => {
-      // console.log(userInfo)
-      return {
-        ...userInfo,
-        userActivities
-      }
-    }
-    )
-    return encrypt(user);
   }
 
   /**
@@ -90,5 +61,30 @@ export class AdminUserGetController {
       },
       selectQuery: { email: true, nickname: true, credit: true },
     });
+  }
+
+  /**
+   *
+   * @author 승원
+   */
+  @Roles(UserType.ADMIN)
+  @Get(":userId")
+  async getUserInfo(@Param("userId") userId: string) {
+    const getUserInfo = await this.mongoUserFindService.getUserInfoById(userId);
+
+    const getUserActivities = await this.userFindService.getUserActivities({
+      userId,
+    });
+
+    const user = await Promise.all([getUserInfo, getUserActivities]).then(
+      ([userInfo, userActivities]) => {
+        // console.log(userInfo)
+        return {
+          ...userInfo,
+          userActivities,
+        };
+      },
+    );
+    return encrypt(user);
   }
 }
