@@ -70,6 +70,32 @@ const moaFormCompleteDetector = `
    }
  `;
 
+const tallyFormCompleteDetector = `
+    const openedSection = document.querySelector('main > section')
+    if(openedSection === null) {
+      window.ReactNativeWebView.postMessage('formClosed');
+    }
+    //* 탈리폼은 Single Page Application 으로 구성되어있어 URL 변경이 일어나지 않습니다.
+    //* 따라서 DOM 이 변경되는 것을 감지하여 그 때마다 폼이 제출되었는지를 확인합니다.
+    const observer = new MutationObserver(mutations => {
+      //* 탈리폼은 진행 중일 때 section 이 form 을 직계자손으로 갖습니다.
+      //* 따라서 form 이 없다면 폼이 제출된 상태입니다.
+      const form = document.querySelector('section > form')
+      if (form === null) {
+        window.ReactNativeWebView.postMessage('formSubmitted');
+      }
+      //* 그러나 'Thank you' page 를 사용하는 경우, form 이 유지된 상태에서 폼이 완료됩니다.
+      //* 이 경우엔 작성자가 설정한 페이지의 총 갯수가 현재 페이지와 같은지 확인합니다.
+      //* 분기에 따라 마지막 페이지가 끝이 아닐 수도 있지만.. 기도해야합니다.
+      const progress = document.querySelector('section > form > progress')
+      if (progress.max === progress.value) {
+        window.ReactNativeWebView.postMessage('formSubmitted');
+      }
+    })
+    const section = document.querySelector('section')
+    observer.observe(section, { subtree: true, childList: true })
+ `;
+
 type ResearchForm = {
   formName: string;
   baseURLs: string[];
@@ -125,6 +151,12 @@ export const appResearchConstant: ResearchConstant = {
       injectedJS: moaFormCompleteDetector,
       closedURLs: ["/closed", "/not_found"],
     },
+    {
+      formName: "탈리폼",
+      baseURLs: ["https://tally.so/r"],
+      injectedJS: tallyFormCompleteDetector,
+      closedURLs: [],
+    },
   ],
   researchTypes: [],
   researchPurposes: [],
@@ -149,6 +181,12 @@ export const appResearchConstant: ResearchConstant = {
       baseURLs: ["https://moaform.com", "https://surveyl.ink"],
       injectedJS: moaFormCompleteDetector,
       closedURLs: ["/closed", "/not_found"],
+    },
+    {
+      foamName: "탈리폼",
+      baseURLs: ["https://tally.so/r"],
+      injectedJS: tallyFormCompleteDetector,
+      closedURLs: [],
     },
   ],
 };
