@@ -50,6 +50,7 @@ export class AdminUserPostController {
       detail?: string;
       imageUrl?: string;
       notificationType?: string;
+      saveNotification?: boolean;
     },
   ) {
     //* fcmToken 을 직접 지정하는 경우
@@ -99,45 +100,49 @@ export class AdminUserPostController {
       });
 
     notificationSettings.forEach((notificationSetting) => {
-      pushAlarms.push({
-        token: notificationSetting.fcmToken,
-        notification: {
-          // "추가 크레딧 지급" / "리서치 참여에 대한 크레딧이 정상 지급되었습니다."
-          title: body.title,
-          // "리서치 참여에 대한 누락 크레딧이 지급되었어요." / "불편함을 끼쳐드려 죄송합니다. 기다려주셔서 감사합니다."
-          body: body.body,
-          imageUrl: body.imageUrl,
-        },
-        data: {
-          notificationId: "",
-          type: AlarmType.WIN_EXTRA_CREDIT,
-          detail: body.detail ? body.detail : "",
-          researchId: body.researchId ? body.researchId : "",
-          voteId: body.voteId ? body.voteId : "",
-        },
-      });
+      if (notificationSetting.fcmToken) {
+        pushAlarms.push({
+          token: notificationSetting.fcmToken,
+          notification: {
+            // "추가 크레딧 지급" / "리서치 참여에 대한 크레딧이 정상 지급되었습니다."
+            title: body.title,
+            // "리서치 참여에 대한 누락 크레딧이 지급되었어요." / "불편함을 끼쳐드려 죄송합니다. 기다려주셔서 감사합니다."
+            body: body.body,
+            imageUrl: body.imageUrl,
+          },
+          data: {
+            notificationId: "",
+            type: AlarmType.WIN_EXTRA_CREDIT,
+            detail: body.detail ? body.detail : "",
+            researchId: body.researchId ? body.researchId : "",
+            voteId: body.voteId ? body.voteId : "",
+          },
+        });
+      }
     });
 
     await this.firebaseService.sendMultiplePushAlarm(pushAlarms);
 
-    const currentISOTime = getCurrentISOTime();
-    const notifications: Notification[] = [];
-    userIds.forEach((userId) => {
-      notifications.push({
-        userId,
-        // WIN_EXTRA_CREDIT
-        type: body.notificationType ? body.notificationType : "ETC",
-        title: body.title,
-        content: body.body,
-        detail: body.detail ? body.detail : "",
-        createdAt: currentISOTime,
-        researchId: body.researchId,
-        voteId: body.voteId,
+    if (body.saveNotification === true) {
+      const currentISOTime = getCurrentISOTime();
+      const notifications: Notification[] = [];
+      userIds.forEach((userId) => {
+        notifications.push({
+          userId,
+          // WIN_EXTRA_CREDIT
+          type: body.notificationType ? body.notificationType : "ETC",
+          title: body.title,
+          content: body.body,
+          detail: body.detail ? body.detail : "",
+          createdAt: currentISOTime,
+          researchId: body.researchId,
+          voteId: body.voteId,
+        });
       });
-    });
 
-    for (const notification of notifications) {
-      await this.mongoUserCreateService.createNotification({ notification });
+      for (const notification of notifications) {
+        await this.mongoUserCreateService.createNotification({ notification });
+      }
     }
   }
 

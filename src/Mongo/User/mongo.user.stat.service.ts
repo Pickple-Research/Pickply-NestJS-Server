@@ -53,7 +53,15 @@ export class MongoUserStatService {
   ) {}
 
   async getStat() {
-    return await this.getGenderRatio();
+    return await this.getTeens();
+  }
+
+  async getTeens() {
+    return await this.UserProperty.find({
+      birthday: { $gte: new Date("2003-01-08").toISOString() },
+    })
+      .select({ birthday: true })
+      .lean();
   }
 
   /**

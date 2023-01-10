@@ -24,6 +24,9 @@ export class ResearchComment {
   @Prop({ required: true }) // 댓글 내용
   content: string;
 
+  @Prop({ default: false }) // 숨김 여부
+  hidden?: string;
+
   @Prop({ default: false }) // 블락 여부
   blocked?: boolean;
 
